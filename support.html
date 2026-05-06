@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — Waterfall Advanced | TCViz</title>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #222; line-height: 1.7; }
+    h1 { font-size: 28px; color: #1a5276; } h2 { font-size: 18px; margin-top: 32px; color: #2471a3; }
+    a { color: #2471a3; } code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+    footer { margin-top: 60px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 16px; }
+    .badge { display: inline-block; background: #2980b9; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; vertical-align: middle; }
+    .badge-finance { background: #1a5276; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { border: 1px solid #ddd; padding: 8px 12px; }
+    th { background: #eaf4fb; }
+  </style>
+</head>
+<body>
+  <h1>Support — Waterfall Advanced</h1>
+  <p>Published by <strong>TCViz</strong> &nbsp;|&nbsp; <a href="mailto:tino@tcviz.com">tino@tcviz.com</a></p>
+
+  <h2>Quick Start</h2>
+  <ol>
+    <li>Add the visual to your Power BI report from Microsoft AppSource.</li>
+    <li>Drag a <strong>Category</strong> column (bar labels) into the Category role.</li>
+    <li>Drag a numeric <strong>Value</strong> measure into the Value role.</li>
+    <li>Optionally connect <strong>Bar Type</strong> (column with values: <code>total</code>, <code>subtotal</code>, <code>delta</code>) and <strong>Sort Order</strong> (numeric column) for full control.</li>
+  </ol>
+
+  <h2>Data Roles</h2>
+  <table>
+    <tr><th>Role</th><th>Type</th><th>Required</th><th>Description</th></tr>
+    <tr><td>Category</td><td>Column (text)</td><td>✅</td><td>Bar labels</td></tr>
+    <tr><td>Value</td><td>Measure</td><td>✅</td><td>Bar values (positive = gain, negative = loss)</td></tr>
+    <tr><td>Target</td><td>Measure</td><td>❌</td><td>Target value shown as dashed line on totals</td></tr>
+    <tr><td>Bar Type</td><td>Measure (text)</td><td>❌</td><td>Values: <code>total</code>, <code>subtotal</code>, <code>delta</code>. Auto-detected if not connected.</td></tr>
+    <tr><td>Sort Order</td><td>Measure (numeric)</td><td>❌</td><td>Controls bar order. Use a numeric column set to "Do not summarize".</td></tr>
+  </table>
+
+  <h2>Tier Features</h2>
+  <table>
+    <tr><th>Feature</th><th>Free</th><th><span class="badge">Pro</span></th><th><span class="badge badge-finance">Finance</span></th></tr>
+    <tr><td>Max bars</td><td>8</td><td>Unlimited</td><td>Unlimited</td></tr>
+    <tr><td>Subtotals</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Target lines</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Anomaly detection</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Summary cards</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Cross-filtering</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Number formatting</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>AI executive narratives</td><td>❌</td><td>❌</td><td>✅</td></tr>
+  </table>
+
+  <h2>Bar Type Auto-detection</h2>
+  <p>If you don't connect the Bar Type role, the visual automatically treats the <strong>first and last rows</strong> as totals and all middle rows as deltas. For full control (including subtotals), connect a text column with values <code>total</code>, <code>subtotal</code>, or <code>delta</code>.</p>
+
+  <h2>AI Narratives Setup (Finance)</h2>
+  <ol>
+    <li>Get an API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> (Claude) or <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> (GPT).</li>
+    <li>In Power BI, open the Format pane → <strong>AI Narratives (Finance)</strong>.</li>
+    <li>Select your AI provider, paste your API key, and choose the narrative language.</li>
+    <li>Click the <strong>✦ Generate narrative</strong> button in the visual.</li>
+  </ol>
+  <p><em>Note: AI narratives require Power BI Service (online). The feature is not available in Power BI Desktop due to browser security restrictions on external API calls.</em></p>
+
+  <h2>FAQ</h2>
+  <p><strong>Bars appear in the wrong order.</strong><br>Connect a numeric column to the Sort Order role. In the data model, set that column to "Do not summarize".</p>
+  <p><strong>Totals and subtotals show as 0.</strong><br>Make sure the Bar Type column contains exactly <code>total</code>, <code>subtotal</code>, or <code>delta</code> (lowercase). Check for trailing spaces.</p>
+  <p><strong>I upgraded to Pro but bars are still limited.</strong><br>Sign out of Power BI and sign back in to refresh your license status.</p>
+  <p><strong>AI narrative shows "Failed to fetch".</strong><br>AI narratives only work in Power BI Service (online), not in Power BI Desktop. Upload your report to app.powerbi.com.</p>
+
+  <h2>Contact</h2>
+  <p>Email: <a href="mailto:tino@tcviz.com">tino@tcviz.com</a><br>
+  GitHub: <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank">github.com/tinocallarisa-web/waterfall-advanced-powerbi</a></p>
+
+  <footer>
+    &copy; 2025 TCViz. &nbsp;|&nbsp;
+    <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
+    <a href="terms.html">Terms of Use</a>
+  </footer>
+</body>
+</html>
