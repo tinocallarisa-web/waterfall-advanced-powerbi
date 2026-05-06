@@ -1,0 +1,9 @@
+node_modules/
+.tmp/
+dist/
+webpack.statistics.*.html
+*.pbix
+*.docx
+icon_300x300.png
+appsource_listing.md
+test-data.csv
