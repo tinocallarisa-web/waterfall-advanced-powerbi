@@ -1,0 +1,19 @@
+{
+  "locale": "de-DE",
+  "values": {
+    "initialTotal": "Anfangswert",
+    "finalTotal": "Endwert",
+    "variance": "Abweichung %",
+    "biggestGain": "Größter Gewinn",
+    "biggestLoss": "Größter Verlust",
+    "base": "Basis",
+    "vsBase": "vs Basis",
+    "varianceVal": "Abweichung",
+    "pctVsBase": "% vs Basis",
+    "target": "Ziel",
+    "targetGap": "Zielabweichung",
+    "type": "Typ",
+    "landingTitle": "Waterfall Advanced",
+    "landingHint": "Verbinden Sie Kategorie und Wert für das Wasserfall-Diagramm"
+  }
+}

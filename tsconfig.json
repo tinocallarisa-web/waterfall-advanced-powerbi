@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target":                 "ES6",
+    "module":                 "commonjs",
+    "lib":                    ["ES6", "DOM"],
+    "strict":                 true,
+    "noImplicitAny":          true,
+    "sourceMap":              true,
+    "outDir":                 "./dist",
+    "typeRoots":              ["./node_modules/@types"],
+    "experimentalDecorators": true,
+    "skipLibCheck":           true,
+    "strictNullChecks":       false
+  },
+  "files": [
+    "./src/visual.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

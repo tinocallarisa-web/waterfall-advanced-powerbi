@@ -1,0 +1,321 @@
+{
+  "dataRoles": [
+    {
+      "displayName": "Categoría",
+      "name": "category",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Valor",
+      "name": "measure",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Target (opcional)",
+      "name": "target",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Tipo de barra",
+      "name": "barType",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Orden",
+      "name": "sortOrder",
+      "kind": "Grouping"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "categorical": {
+        "categories": {
+          "select": [
+            {
+              "for": {
+                "in": "category"
+              }
+            },
+            {
+              "for": {
+                "in": "sortOrder"
+              }
+            }
+          ],
+          "dataReductionAlgorithm": {
+            "top": {}
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "bind": {
+                "to": "measure"
+              }
+            },
+            {
+              "bind": {
+                "to": "target"
+              }
+            },
+            {
+              "bind": {
+                "to": "barType"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "colorSettings": {
+      "displayName": "Colors",
+      "properties": {
+        "positiveColor": {
+          "displayName": "Increase color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "negativeColor": {
+          "displayName": "Decrease color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "totalColor": {
+          "displayName": "Total / subtotal color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "targetColor": {
+          "displayName": "Target line color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "labelSettings": {
+      "displayName": "Labels",
+      "properties": {
+        "showLabels": {
+          "displayName": "Show labels",
+          "type": {
+            "bool": true
+          }
+        },
+        "labelMode": {
+          "displayName": "Label mode",
+          "type": {
+            "enumeration": [
+              {
+                "value": "abs",
+                "displayName": "Absolute"
+              },
+              {
+                "value": "rel",
+                "displayName": "Relative %"
+              },
+              {
+                "value": "both",
+                "displayName": "Both"
+              }
+            ]
+          }
+        },
+        "fontSize": {
+          "displayName": "Font size",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "numberFormat": {
+      "displayName": "Number format",
+      "properties": {
+        "currencySymbol": {
+          "displayName": "Currency symbol",
+          "type": {
+            "enumeration": [
+              {
+                "value": "",
+                "displayName": "None"
+              },
+              {
+                "value": "€",
+                "displayName": "€ Euro"
+              },
+              {
+                "value": "$",
+                "displayName": "$ Dollar"
+              },
+              {
+                "value": "£",
+                "displayName": "£ Pound"
+              },
+              {
+                "value": "¥",
+                "displayName": "¥ Yen"
+              }
+            ]
+          }
+        },
+        "symbolPosition": {
+          "displayName": "Symbol position",
+          "type": {
+            "enumeration": [
+              {
+                "value": "prefix",
+                "displayName": "Prefix"
+              },
+              {
+                "value": "suffix",
+                "displayName": "Suffix"
+              }
+            ]
+          }
+        },
+        "scaleMode": {
+          "displayName": "Scale",
+          "type": {
+            "enumeration": [
+              {
+                "value": "auto",
+                "displayName": "Auto"
+              },
+              {
+                "value": "none",
+                "displayName": "None"
+              },
+              {
+                "value": "k",
+                "displayName": "Thousands (k)"
+              },
+              {
+                "value": "M",
+                "displayName": "Millions (M)"
+              }
+            ]
+          }
+        },
+        "decimals": {
+          "displayName": "Decimals",
+          "type": {
+            "numeric": true
+          }
+        },
+        "thousandsSep": {
+          "displayName": "Thousands separator",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "chartSettings": {
+      "displayName": "Chart",
+      "properties": {
+        "showConnectors": {
+          "displayName": "Connector lines",
+          "type": {
+            "bool": true
+          }
+        },
+        "showSubtotals": {
+          "displayName": "Show subtotals",
+          "type": {
+            "bool": true
+          }
+        },
+        "showTarget": {
+          "displayName": "Show target",
+          "type": {
+            "bool": true
+          }
+        },
+        "showVarianceCards": {
+          "displayName": "Summary cards",
+          "type": {
+            "bool": true
+          }
+        },
+        "sortBars": {
+          "displayName": "Sort by impact",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "aiSettings": {
+      "displayName": "AI Narratives (Finance)",
+      "properties": {
+        "aiProvider": {
+          "displayName": "AI Provider",
+          "type": {
+            "enumeration": [
+              {
+                "value": "anthropic",
+                "displayName": "Anthropic (Claude)"
+              },
+              {
+                "value": "openai",
+                "displayName": "OpenAI (GPT)"
+              }
+            ]
+          }
+        },
+        "apiKey": {
+          "displayName": "API Key",
+          "type": {
+            "text": true
+          }
+        },
+        "aiLanguage": {
+          "displayName": "Narrative language",
+          "type": {
+            "enumeration": [
+              {
+                "value": "en",
+                "displayName": "English"
+              },
+              {
+                "value": "es",
+                "displayName": "Spanish"
+              },
+              {
+                "value": "fr",
+                "displayName": "French"
+              },
+              {
+                "value": "de",
+                "displayName": "German"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "privileges": []
+}

@@ -1,0 +1,19 @@
+{
+  "locale": "fr-FR",
+  "values": {
+    "initialTotal": "Total initial",
+    "finalTotal": "Total final",
+    "variance": "Variation %",
+    "biggestGain": "Plus grande hausse",
+    "biggestLoss": "Plus grande baisse",
+    "base": "base",
+    "vsBase": "vs base",
+    "varianceVal": "Variation",
+    "pctVsBase": "% vs base",
+    "target": "Cible",
+    "targetGap": "Écart cible",
+    "type": "Type",
+    "landingTitle": "Waterfall Advanced",
+    "landingHint": "Connectez Catégorie et Valeur pour afficher le waterfall"
+  }
+}

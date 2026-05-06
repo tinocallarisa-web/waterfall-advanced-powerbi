@@ -1,0 +1,14 @@
+Orden,Categoria,Valor,Target,TipoBarra
+1,Ventas 2023,1200000,1300000,total
+2,Nuevos Clientes,320000,,delta
+3,Upsell,185000,,delta
+4,Precio Medio,97000,,delta
+5,Churn,-143000,,delta
+6,Descuentos,-89000,,delta
+7,Devoluciones,-54000,,delta
+8,Subtotal Comercial,1516000,,subtotal
+9,Eficiencia Ops,210000,,delta
+10,Automatización,134000,,delta
+11,Costes Logística,-178000,,delta
+12,Costes Personal,-223000,,delta
+13,Ventas 2024,1459000,1500000,total
