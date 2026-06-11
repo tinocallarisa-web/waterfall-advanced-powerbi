@@ -16,15 +16,18 @@ export interface ClickEventData {
 }
 
 interface RenderOptions {
-    container:    HTMLElement;
-    bars:         ComputedBar[];
-    summary:      WaterfallSummary;
-    settings:     VisualFormattingSettingsModel;
-    selectionIds: (powerbi.visuals.ISelectionId | null)[];
-    selectedIdx:  number | null;
-    width:        number;
-    height:       number;
-    onBarClick:   (data: ClickEventData) => void;
+    container:     HTMLElement;
+    bars:          ComputedBar[];
+    summary:       WaterfallSummary;
+    settings:      VisualFormattingSettingsModel;
+    selectionIds:  (powerbi.visuals.ISelectionId | null)[];
+    selectedIdx:   number | null;
+    width:         number;
+    height:        number;
+    onBarClick:    (data: ClickEventData) => void;
+    onContextMenu: (data: ClickEventData) => void;
+    onBarHover:    (data: ClickEventData) => void;
+    onBarLeave:    () => void;
 }
 
 export class WaterfallRenderer {
@@ -50,7 +53,8 @@ export class WaterfallRenderer {
             this.container.removeChild(this.container.firstChild);
         }
 
-        const { bars, summary, settings, selectionIds, selectedIdx, width, height, onBarClick } = opts;
+        const { bars, summary, settings, selectionIds, selectedIdx, width, height,
+                onBarClick, onContextMenu, onBarHover, onBarLeave } = opts;
         if (bars.length === 0) { this.renderEmpty(); return; }
 
         const fmt = new NumberFormatter(settings);
@@ -122,9 +126,10 @@ export class WaterfallRenderer {
             const fill = (bar.barType === "total" || bar.barType === "subtotal")
                 ? colors.total : bar.value >= 0 ? colors.pos : colors.neg;
 
-            const isSelected  = selectedIdx === null || selectedIdx === i;
-            const baseOpacity = bar.barType === "subtotal" && !ch.showSubtotals.value ? 0.3 : 1;
-            const opacity     = isSelected ? baseOpacity : baseOpacity * 0.3;
+            const isSelected    = selectedIdx === null || selectedIdx === i;
+            const isHighlighted = bar.isHighlighted !== false;
+            const baseOpacity   = bar.barType === "subtotal" && !ch.showSubtotals.value ? 0.3 : 1;
+            const opacity       = (!isSelected || !isHighlighted) ? baseOpacity * 0.25 : baseOpacity;
 
             const rect = this.el("rect") as SVGRectElement;
             rect.setAttribute("x", String(x)); rect.setAttribute("y", String(yTop));
@@ -132,11 +137,23 @@ export class WaterfallRenderer {
             rect.setAttribute("rx", "3"); rect.setAttribute("fill", fill);
             rect.setAttribute("opacity", String(opacity));
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
+
             rect.addEventListener("mouseenter", () => rect.setAttribute("opacity", "0.72"));
-            rect.addEventListener("mouseleave", () => rect.setAttribute("opacity", String(opacity)));
+            rect.addEventListener("mouseleave", () => {
+                rect.setAttribute("opacity", String(opacity));
+                onBarLeave();
+            });
+            rect.addEventListener("mousemove", (ev: MouseEvent) =>
+                onBarHover({ bar, index: i, clientX: ev.clientX, clientY: ev.clientY,
+                    selectionId: selectionIds[i] ?? null }));
             rect.addEventListener("click", (ev: MouseEvent) =>
                 onBarClick({ bar, index: i, clientX: ev.clientX, clientY: ev.clientY,
                     selectionId: selectionIds[i] ?? null }));
+            rect.addEventListener("contextmenu", (ev: MouseEvent) => {
+                ev.preventDefault();
+                onContextMenu({ bar, index: i, clientX: ev.clientX, clientY: ev.clientY,
+                    selectionId: selectionIds[i] ?? null });
+            });
             this.svg.appendChild(rect);
 
             if (summary.anomalies.find(a => a.label === bar.label)) {
@@ -183,56 +200,34 @@ export class WaterfallRenderer {
 
     private renderVarianceCards(summary: WaterfallSummary, colors: Record<string, string>,
                                 fmt: NumberFormatter): void {
-        const fallbacks: Record<string, string> = {
-            initialTotal: "Initial total",
-            finalTotal:   "Final total",
-            variance:     "Variance %",
-            biggestGain:  "Biggest gain",
-            biggestLoss:  "Biggest loss",
-            base:         "base",
-            vsBase:       "vs base"
-        };
         const g = (key: string) => {
+            const fallbacks: Record<string, string> = {
+                initialTotal: "Initial total", finalTotal: "Final total",
+                variance: "Variance %", biggestGain: "Biggest gain",
+                biggestLoss: "Biggest loss", base: "base", vsBase: "vs base"
+            };
             const loc = this.loc.getDisplayName(key);
             return (loc && loc !== key) ? loc : (fallbacks[key] ?? key);
         };
+
         const row = document.createElement("div");
         row.style.cssText = "display:flex;gap:6px;padding:6px 0 0;flex-wrap:wrap;box-sizing:border-box";
 
-        const varPct = (summary.totalDeltaRel >= 0 ? "+" : "") +
-            summary.totalDeltaRel.toFixed(1) + "%";
+        const varPct = (summary.totalDeltaRel >= 0 ? "+" : "") + summary.totalDeltaRel.toFixed(1) + "%";
 
         const cards: { label: string; value: string; sub: string; subColor: string }[] = [
-            {
-                label:    g("initialTotal"),
-                value:    fmt.format(summary.initialValue),
-                sub:      g("base"),
-                subColor: "#888"
-            },
-            {
-                label:    g("finalTotal"),
-                value:    fmt.format(summary.finalValue),
-                sub:      (summary.totalDelta >= 0 ? "▲ " : "▼ ") + fmt.format(Math.abs(summary.totalDelta)),
-                subColor: summary.totalDelta >= 0 ? colors.pos : colors.neg
-            },
-            {
-                label:    g("variance"),
-                value:    varPct,
-                sub:      fmt.formatDelta(summary.totalDelta),
-                subColor: summary.totalDelta >= 0 ? colors.pos : colors.neg
-            },
-            {
-                label:    g("biggestGain"),
-                value:    summary.biggestGain ? summary.biggestGain.label.replace(/\\n|\n/g, " ") : "—",
-                sub:      summary.biggestGain ? fmt.formatDelta(summary.biggestGain.value) : "",
-                subColor: colors.pos
-            },
-            {
-                label:    g("biggestLoss"),
-                value:    summary.biggestLoss ? summary.biggestLoss.label.replace(/\\n|\n/g, " ") : "—",
-                sub:      summary.biggestLoss ? fmt.formatDelta(summary.biggestLoss.value) : "",
-                subColor: colors.neg
-            }
+            { label: g("initialTotal"), value: fmt.format(summary.initialValue), sub: g("base"), subColor: "#888" },
+            { label: g("finalTotal"), value: fmt.format(summary.finalValue),
+              sub: (summary.totalDelta >= 0 ? "▲ " : "▼ ") + fmt.format(Math.abs(summary.totalDelta)),
+              subColor: summary.totalDelta >= 0 ? colors.pos : colors.neg },
+            { label: g("variance"), value: varPct, sub: fmt.formatDelta(summary.totalDelta),
+              subColor: summary.totalDelta >= 0 ? colors.pos : colors.neg },
+            { label: g("biggestGain"),
+              value: summary.biggestGain ? summary.biggestGain.label.replace(/\\n|\n/g, " ") : "—",
+              sub: summary.biggestGain ? fmt.formatDelta(summary.biggestGain.value) : "", subColor: colors.pos },
+            { label: g("biggestLoss"),
+              value: summary.biggestLoss ? summary.biggestLoss.label.replace(/\\n|\n/g, " ") : "—",
+              sub: summary.biggestLoss ? fmt.formatDelta(summary.biggestLoss.value) : "", subColor: colors.neg }
         ];
 
         cards.forEach(c => {
@@ -266,7 +261,7 @@ export class WaterfallRenderer {
     private renderEmpty(): void {
         const p = document.createElement("p");
         p.style.cssText = "font-size:12px;color:#888;padding:20px;margin:0";
-        p.textContent   = "Conecta una categoría y una medida para ver el waterfall.";
+        p.textContent   = "Connect a category and a value measure to render the waterfall.";
         this.container.appendChild(p);
     }
 

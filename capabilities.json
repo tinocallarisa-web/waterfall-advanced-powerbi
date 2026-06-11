@@ -317,5 +317,9 @@
       }
     }
   },
-  "privileges": []
+  "privileges": [],
+  "supportsHighlight": true,
+  "supportsSynchronizingFilterState": true,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true
 }

@@ -9,17 +9,13 @@ export interface WaterfallBar {
     target?:        number;
     barType:        BarType;
     sortOrder?:     number;
-    isHighlighted?: boolean;
+    isHighlighted?: boolean;  // true cuando viene filtro entrante de otro visual
+    hasHighlight?:  boolean;  // true si hay algún highlight activo en el dataView
 }
 
 /**
  * Mapea dataView CATEGORICAL a WaterfallBar[].
- *
- * categories → "category"  (Grouping, for/in)
- *              "sortOrder" (Grouping, for/in) — sin SUM, valor nativo
- * values     → "measure"  (Measure)
- *              "target"   (Measure, opcional)
- *              "barType"  (Measure — texto, Power BI lo pasa tal cual)
+ * Maneja highlights entrantes de otros visuals (Filter-in).
  */
 export function mapDataView(dataView: DataView): WaterfallBar[] {
     const categorical = dataView?.categorical;
@@ -30,43 +26,52 @@ export function mapDataView(dataView: DataView): WaterfallBar[] {
         ? Array.from(categorical.values)
         : [];
 
-    // Groupings en categories
     const catCol       = categories.find(c => c.source?.roles?.["category"]);
     const sortOrderCol = categories.find(c => c.source?.roles?.["sortOrder"]);
-
-    // Measures en values
-    const measureCol = valCols.find(v => v.source?.roles?.["measure"]);
-    const targetCol  = valCols.find(v => v.source?.roles?.["target"]);
-    const barTypeCol = valCols.find(v => v.source?.roles?.["barType"]);
+    const measureCol   = valCols.find(v => v.source?.roles?.["measure"]);
+    const targetCol    = valCols.find(v => v.source?.roles?.["target"]);
+    const barTypeCol   = valCols.find(v => v.source?.roles?.["barType"]);
 
     if (!catCol || !measureCol) return [];
 
     const n = catCol.values.length;
 
+    // Detectar si hay highlights activos — Power BI los envía en measureCol.highlights
+    const highlights    = measureCol.highlights;
+    const hasHighlight  = highlights != null && highlights.some(h => h != null);
+
     let bars: WaterfallBar[] = Array.from({ length: n }, (_, i): WaterfallBar => {
         const label     = String(catCol.values[i]     ?? `Item ${i + 1}`);
-        const value     = Number(measureCol.values[i] ?? 0);
-        const target    = targetCol?.values[i] != null
-            ? Number(targetCol.values[i]) : undefined;
         const sortOrder = sortOrderCol?.values[i] != null
             ? Number(sortOrderCol.values[i]) : i;
         const typeRaw   = barTypeCol?.values[i] != null
             ? String(barTypeCol.values[i]).toLowerCase().trim() : "";
+
+        // Si hay highlight activo, usar el valor highlight; si no, el valor normal
+        const rawValue      = measureCol.values[i];
+        const highlightValue = highlights?.[i];
+        const value         = hasHighlight
+            ? (highlightValue != null ? Number(highlightValue) : 0)
+            : Number(rawValue ?? 0);
+
+        // isHighlighted: true si esta barra tiene highlight o no hay ninguno activo
+        const isHighlighted = !hasHighlight || highlightValue != null;
+
+        const target = targetCol?.values[i] != null
+            ? Number(targetCol.values[i]) : undefined;
 
         let barType: BarType;
         if      (typeRaw === "total")    barType = "total";
         else if (typeRaw === "subtotal") barType = "subtotal";
         else                             barType = "delta";
 
-        return { label, value, target, barType, sortOrder };
+        return { label, value, target, barType, sortOrder, isHighlighted, hasHighlight };
     });
 
-    // Ordenar por sortOrder si está conectado
     if (sortOrderCol) {
         bars = bars.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
     }
 
-    // Auto-detección de totales si no hay barType conectado
     if (!barTypeCol) {
         bars[0].barType               = "total";
         bars[bars.length - 1].barType = "total";
