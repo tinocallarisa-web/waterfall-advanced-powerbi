@@ -4,7 +4,7 @@
     "displayName":     "Waterfall Advanced",
     "guid":            "WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc",
     "visualClassName": "Visual",
-    "version":         "1.0.1.0",
+    "version":         "1.0.3.0",
     "description":     "Professional waterfall chart with subtotals, target lines, anomaly detection and AI narratives. Free up to 8 bars. Pro and Finance tiers available.",
     "supportUrl":      "https://tcviz.com/support",
     "gitHubUrl":       ""
