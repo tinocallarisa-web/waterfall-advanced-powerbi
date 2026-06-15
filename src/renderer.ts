@@ -88,6 +88,12 @@ export class WaterfallRenderer {
         const xOf  = (i: number) => this.PAD_LEFT + i * (barW + gap);
 
         this.svg = this.makeSVG(width, svgH);
+        // Context menu on empty space
+        this.svg.addEventListener("contextmenu", (ev: MouseEvent) => {
+            ev.preventDefault();
+            onContextMenu({ bar: null as any, index: -1,
+                clientX: ev.clientX, clientY: ev.clientY, selectionId: null });
+        });
         this.container.appendChild(this.svg);
 
         const defs = this.el("defs") as SVGDefsElement;
