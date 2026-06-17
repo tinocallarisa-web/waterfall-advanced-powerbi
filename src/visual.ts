@@ -59,6 +59,20 @@ export class Visual implements IVisual {
             if (this.lastOptions) this.render(this.lastOptions);
         });
 
+        // FIX: listener de contextmenu en el container estable (no se destruye en cada render)
+        this.container.addEventListener("contextmenu", (event: MouseEvent) => {
+            event.preventDefault();
+            const target = event.target as Element;
+            const barIndex = target?.getAttribute?.("data-bar-index");
+            const selId = barIndex != null
+                ? this.selectionIds[Number(barIndex)] ?? {}
+                : {};
+            this.selectionManager.showContextMenu(selId, {
+                x: event.clientX,
+                y: event.clientY
+            });
+        });
+
         this.showLandingPage();
     }
 
@@ -119,7 +133,6 @@ export class Visual implements IVisual {
                 width,
                 height,
                 onBarClick:    (data) => this.handleBarClick(data),
-                onContextMenu: (data) => this.handleContextMenu(data),
                 onBarHover:    (data) => this.handleBarHover(data),
                 onBarLeave:    ()     => this.host.tooltipService.hide({ immediately: false, isTouchEvent: false })
             });
@@ -196,17 +209,7 @@ export class Visual implements IVisual {
 
     // ── Context menu ─────────────────────────────────────────────────────────
 
-    private handleContextMenu(data: ClickEventData): void {
-        const { clientX, clientY, selectionId } = data;
-        const rect = this.container.getBoundingClientRect();
-
-        (this.host as any).contextMenuService.show({
-            dataItems:   [],
-            identities:  selectionId ? [selectionId] : [],
-            coordinates: [clientX - rect.left, clientY - rect.top],
-            isTouchEvent: false
-        });
-    }
+    // Context menu ahora se maneja en el constructor sobre this.container (ver arriba)
 
     // ── AI Narrative ─────────────────────────────────────────────────────────
 

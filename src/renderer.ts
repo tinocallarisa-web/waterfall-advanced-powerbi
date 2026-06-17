@@ -25,7 +25,6 @@ interface RenderOptions {
     width:         number;
     height:        number;
     onBarClick:    (data: ClickEventData) => void;
-    onContextMenu: (data: ClickEventData) => void;
     onBarHover:    (data: ClickEventData) => void;
     onBarLeave:    () => void;
 }
@@ -54,7 +53,7 @@ export class WaterfallRenderer {
         }
 
         const { bars, summary, settings, selectionIds, selectedIdx, width, height,
-                onBarClick, onContextMenu, onBarHover, onBarLeave } = opts;
+                onBarClick, onBarHover, onBarLeave } = opts;
         if (bars.length === 0) { this.renderEmpty(); return; }
 
         const fmt = new NumberFormatter(settings);
@@ -88,12 +87,6 @@ export class WaterfallRenderer {
         const xOf  = (i: number) => this.PAD_LEFT + i * (barW + gap);
 
         this.svg = this.makeSVG(width, svgH);
-        // Context menu on empty space
-        this.svg.addEventListener("contextmenu", (ev: MouseEvent) => {
-            ev.preventDefault();
-            onContextMenu({ bar: null as any, index: -1,
-                clientX: ev.clientX, clientY: ev.clientY, selectionId: null });
-        });
         this.container.appendChild(this.svg);
 
         const defs = this.el("defs") as SVGDefsElement;
@@ -142,6 +135,7 @@ export class WaterfallRenderer {
             rect.setAttribute("width", String(barW)); rect.setAttribute("height", String(bh));
             rect.setAttribute("rx", "3"); rect.setAttribute("fill", fill);
             rect.setAttribute("opacity", String(opacity));
+            rect.setAttribute("data-bar-index", String(i));
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
 
             rect.addEventListener("mouseenter", () => rect.setAttribute("opacity", "0.72"));
@@ -155,11 +149,6 @@ export class WaterfallRenderer {
             rect.addEventListener("click", (ev: MouseEvent) =>
                 onBarClick({ bar, index: i, clientX: ev.clientX, clientY: ev.clientY,
                     selectionId: selectionIds[i] ?? null }));
-            rect.addEventListener("contextmenu", (ev: MouseEvent) => {
-                ev.preventDefault();
-                onContextMenu({ bar, index: i, clientX: ev.clientX, clientY: ev.clientY,
-                    selectionId: selectionIds[i] ?? null });
-            });
             this.svg.appendChild(rect);
 
             if (summary.anomalies.find(a => a.label === bar.label)) {
