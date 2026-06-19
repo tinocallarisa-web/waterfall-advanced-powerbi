@@ -38,6 +38,7 @@ export class Visual implements IVisual {
     private selectionIds: (powerbi.visuals.ISelectionId | null)[] = [];
     private selectedIdx:  number | null = null;
     private lastOptions:  VisualUpdateOptions | null = null;
+    private pendingOptions: VisualUpdateOptions | null = null;
     private debounceId:   ReturnType<typeof setTimeout> | null = null;
 
     constructor(options: VisualConstructorOptions) {
@@ -77,8 +78,12 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions): void {
+        // FIX: renderingStarted SIEMPRE se llama de inmediato, 1:1 con cada update()
+        this.host.eventService.renderingStarted(options);
+
         if (!options.dataViews?.[0]) {
             this.showLandingPage();
+            this.host.eventService.renderingFinished(options);
             return;
         }
 
@@ -92,23 +97,45 @@ export class Visual implements IVisual {
         const isResize     = (type & VisualUpdateType.Resize) !== 0;
         const isFormatting = (type & VisualUpdateType.Style)  !== 0;
 
-        if (!isData && !isResize && !isFormatting) return;
+        if (!isData && !isResize && !isFormatting) {
+            this.host.eventService.renderingFinished(options);
+            return;
+        }
 
         this.lastOptions = options;
-        if (this.debounceId) clearTimeout(this.debounceId);
-        this.debounceId = setTimeout(() => this.render(options), 300);
+
+        // FIX: si había un render pendiente por debounce, lo marcamos como finished
+        // (no failed — fue intencionalmente superseded, no un error)
+        if (this.debounceId) {
+            clearTimeout(this.debounceId);
+            if (this.pendingOptions) {
+                this.host.eventService.renderingFinished(this.pendingOptions);
+            }
+        }
+
+        this.pendingOptions = options;
+        this.debounceId = setTimeout(() => {
+            this.pendingOptions = null;
+            this.render(options);
+        }, 300);
     }
 
     private render(options: VisualUpdateOptions): void {
         const dataView = options.dataViews?.[0];
-        if (!dataView) { this.showLandingPage(); return; }
+        if (!dataView) {
+            this.showLandingPage();
+            this.host.eventService.renderingFinished(options);
+            return;
+        }
 
         try {
-            this.host.eventService.renderingStarted(options);
-
             const settings  = this.formattingSettings;
             let rawBars: WaterfallBar[] = mapDataView(dataView);
-            if (rawBars.length === 0) { this.showLandingPage(); return; }
+            if (rawBars.length === 0) {
+                this.showLandingPage();
+                this.host.eventService.renderingFinished(options);
+                return;
+            }
 
             if (settings.chartSettings.sortBars.value) rawBars = sortByImpact(rawBars);
 
