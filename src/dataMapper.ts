@@ -11,6 +11,9 @@ export interface WaterfallBar {
     sortOrder?:     number;
     isHighlighted?: boolean;  // true cuando viene filtro entrante de otro visual
     hasHighlight?:  boolean;  // true si hay algún highlight activo en el dataView
+    tooltipItems?: { displayName: string; value: string }[];
+    conditionalColor?: string;
+    sourceIndex?:   number;   // índice original en el dataView; undefined = sin identidad propia (p.ej. barra "Otros")
 }
 
 /**
@@ -31,6 +34,8 @@ export function mapDataView(dataView: DataView): WaterfallBar[] {
     const measureCol   = valCols.find(v => v.source?.roles?.["measure"]);
     const targetCol    = valCols.find(v => v.source?.roles?.["target"]);
     const barTypeCol   = valCols.find(v => v.source?.roles?.["barType"]);
+    const tooltipCols  = valCols.filter(v => v.source?.roles?.["tooltips"]);
+    const colorCol     = valCols.find(v => v.source?.roles?.["colorBy"]);
 
     if (!catCol || !measureCol) return [];
 
@@ -59,13 +64,31 @@ export function mapDataView(dataView: DataView): WaterfallBar[] {
 
         const target = targetCol?.values[i] != null
             ? Number(targetCol.values[i]) : undefined;
+        const tooltipItems = tooltipCols.map(column => ({
+            displayName: column.source.displayName || column.source.queryName || "Value",
+            value: String(column.values[i] ?? "")
+        }));
+        // Dos vias para el color por barra, y el orden importa:
+        //
+        //   1. El pozo "Color (DAX)": el autor ha calculado el color en el
+        //      modelo. Es intencion explicita y manda.
+        //   2. El boton fx sobre "Increase color": Power BI resuelve la regla por
+        //      categoria y devuelve el color en categories[0].objects[i].
+        //
+        // La regla fx es mas facil de usar y no necesita DAX, que es justo la
+        // casilla donde la competencia declara carencia.
+        const fxColor = (catCol.objects?.[i] as any)
+            ?.colorSettings?.positiveColor?.solid?.color;
+        const conditionalColor = colorCol?.values[i] != null
+            ? String(colorCol.values[i]).trim()
+            : (typeof fxColor === "string" ? fxColor : undefined);
 
         let barType: BarType;
         if      (typeRaw === "total")    barType = "total";
         else if (typeRaw === "subtotal") barType = "subtotal";
         else                             barType = "delta";
 
-        return { label, value, target, barType, sortOrder, isHighlighted, hasHighlight };
+        return { label, value, target, barType, sortOrder, isHighlighted, hasHighlight, tooltipItems, conditionalColor, sourceIndex: i };
     });
 
     if (sortOrderCol) {
@@ -92,4 +115,40 @@ export function sortByImpact(bars: WaterfallBar[]): WaterfallBar[] {
         b.barType === "delta" ? sortedDeltas.shift()! : b
     );
     return [first, ...sortedMiddle, last];
+}
+
+/**
+ * Limita las barras delta visibles a las `maxCategories` de mayor impacto absoluto,
+ * agrupando el resto en una barra "Otros" para no perder el total acumulado.
+ */
+export function applyTopN(bars: WaterfallBar[], maxCategories: number, otherLabel: string): WaterfallBar[] {
+    if (maxCategories <= 0 || bars.length < 3) return bars;
+
+    const first  = bars[0];
+    const last   = bars[bars.length - 1];
+    const middle = bars.slice(1, bars.length - 1);
+    const deltas = middle.filter(b => b.barType === "delta");
+    const nonDeltas = middle.filter(b => b.barType !== "delta");
+
+    if (deltas.length <= maxCategories) return bars;
+
+    const ranked  = [...deltas].sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+    const kept    = new Set(ranked.slice(0, maxCategories));
+    const dropped = deltas.filter(b => !kept.has(b));
+
+    const otherValue = dropped.reduce((sum, b) => sum + b.value, 0);
+    const otherBar: WaterfallBar = {
+        label: otherLabel,
+        value: otherValue,
+        barType: "delta",
+        sortOrder: Math.max(...dropped.map(b => b.sortOrder ?? 0)),
+        isHighlighted: true,
+        hasHighlight: false,
+        tooltipItems: [{ displayName: "Grouped items", value: String(dropped.length) }]
+    };
+
+    const keptMiddle = middle.filter(b => b.barType !== "delta" || kept.has(b));
+    const merged = [...keptMiddle, otherBar].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+    return [first, ...merged, last];
 }

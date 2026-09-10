@@ -10,13 +10,23 @@ import ILocalizationManager      = powerbi.extensibility.ILocalizationManager;
 import VisualUpdateType          = powerbi.VisualUpdateType;
 
 import { VisualFormattingSettingsModel }            from "./settings";
-import { mapDataView, sortByImpact, WaterfallBar }  from "./dataMapper";
+import { mapDataView, sortByImpact, applyTopN, WaterfallBar }  from "./dataMapper";
 import { computeBars, computeSummary, ComputedBar, WaterfallSummary } from "./waterfallEngine";
 import { WaterfallRenderer, ClickEventData }         from "./renderer";
 import { NumberFormatter }                           from "./formatter";
-import { getLicenseState, LicenseState }             from "./licenseManager";
+import { getLicenseState, LicenseState, LicenseNotifier, FREE_STATE } from "./licenseManager";
 import { LicenseOverlay }                            from "./licenseOverlay";
-import { generateNarrative }                         from "./aiNarrative";
+
+/**
+ * Sello de compilacion. Vacio en produccion; build-test.js lo rellena con la
+ * fecha y hora en las builds de prueba.
+ *
+ * Existe porque las builds de test comparten guid y numero de version entre
+ * recompilaciones, asi que Power BI Desktop puede seguir sirviendo la que
+ * importaste hace media hora sin que nada lo indique. Dos veces hemos perseguido
+ * un fallo que ya estaba corregido en el paquete que no estaba cargado.
+ */
+const BUILD_MARKER = "";
 
 export class Visual implements IVisual {
 
@@ -28,15 +38,16 @@ export class Visual implements IVisual {
     private formattingSettings:    VisualFormattingSettingsModel;
     private formattingSettingsSvc: FormattingSettingsService;
 
-    private license: LicenseState = {
-        tier: "free", isLicensed: false,
-        maxBars: 8, hasAI: false, serviceUnavailable: false
-    };
+    // Una sola fuente para el limite. resolved queda en false hasta que la
+    // licencia responde: es lo que impide notificar nada en el primer pintado,
+    // cuando todavia no se sabe si el usuario ha pagado.
+    private license: LicenseState = { ...FREE_STATE, resolved: false };
+    private notifier: LicenseNotifier | null = null;
 
     private lastComputed: ComputedBar[]        = [];
     private lastSummary:  WaterfallSummary | null = null;
     private selectionIds: (powerbi.visuals.ISelectionId | null)[] = [];
-    private selectedIdx:  number | null = null;
+    private selectedIndices: Set<number> = new Set<number>();
     private lastOptions:  VisualUpdateOptions | null = null;
     private pendingOptions: VisualUpdateOptions | null = null;
     private debounceId:   ReturnType<typeof setTimeout> | null = null;
@@ -49,14 +60,20 @@ export class Visual implements IVisual {
         this.container.style.cssText =
             "width:100%;height:100%;overflow:hidden;box-sizing:border-box;" +
             "padding:4px 8px;position:relative";
+        this.container.style.pointerEvents = this.host.hostCapabilities.allowInteractions === false
+            ? "none" : "auto";
 
         this.formattingSettingsSvc = new FormattingSettingsService();
         this.formattingSettings    = new VisualFormattingSettingsModel();
         this.selectionManager      = this.host.createSelectionManager();
         this.renderer              = new WaterfallRenderer(this.container, this.localization);
 
+        this.notifier = new LicenseNotifier(this.host);
         getLicenseState(this.host).then((state: LicenseState) => {
             this.license = state;
+            // Repintar es el punto: la licencia resuelve despues del primer
+            // render, asi que sin esto un cliente que ha pagado se queda con el
+            // tier gratuito hasta que Power BI vuelva a llamar a update().
             if (this.lastOptions) this.render(this.lastOptions);
         });
 
@@ -83,6 +100,7 @@ export class Visual implements IVisual {
 
         if (!options.dataViews?.[0]) {
             this.showLandingPage();
+            this.renderBuildMarker();
             this.host.eventService.renderingFinished(options);
             return;
         }
@@ -139,6 +157,26 @@ export class Visual implements IVisual {
 
             if (settings.chartSettings.sortBars.value) rawBars = sortByImpact(rawBars);
 
+            const otherLabel  = settings.chartSettings.otherLabel.value || "Others";
+            const driversInData = rawBars.filter(b => b.barType === "delta").length;
+
+            // El limite del tier gratuito AGRUPA, no recorta.
+            //
+            // Recortar deja un bridge que no cuadra: la ultima barra ya no es la
+            // suma de las anteriores, y un lector que no sepa que hay un limite
+            // ve un grafico simplemente mal. Agrupando el resto en "Others" el
+            // puente sigue cerrando y las cifras siguen siendo correctas; lo que
+            // se pierde es granularidad, que es una razon legitima para pagar.
+            const userMax = settings.chartSettings.maxCategories.value;
+            const freeMax = this.license.isLicensed ? 0 : this.license.maxBars;
+            const effectiveMax = userMax > 0 && freeMax > 0 ? Math.min(userMax, freeMax)
+                               : userMax > 0 ? userMax : freeMax;
+
+            const groupedByTier = freeMax > 0 && driversInData > freeMax;
+            if (effectiveMax > 0) {
+                rawBars = applyTopN(rawBars, effectiveMax, otherLabel);
+            }
+
             const totalBars      = rawBars.length;
             const computed       = computeBars(rawBars);
             const summary        = computeSummary(computed);
@@ -156,7 +194,11 @@ export class Visual implements IVisual {
                 summary,
                 settings,
                 selectionIds:  this.selectionIds,
-                selectedIdx:   this.selectedIdx,
+                selectedIndices: this.selectedIndices,
+                isLicensed:    this.license.isLicensed,
+                highContrast: this.host.colorPalette.isHighContrast,
+                contrastForeground: this.host.colorPalette.foreground.value,
+                contrastBackground: this.host.colorPalette.background.value,
                 width,
                 height,
                 onBarClick:    (data) => this.handleBarClick(data),
@@ -164,11 +206,29 @@ export class Visual implements IVisual {
                 onBarLeave:    ()     => this.host.tooltipService.hide({ immediately: false, isTouchEvent: false })
             });
 
-            if (this.license.tier === "free" && totalBars > this.license.maxBars) {
-                LicenseOverlay.applyBarLimit(this.container, totalBars, this.license);
-            }
+            // La nota dice cuantos drivers se han agrupado, que es informacion
+            // sobre el grafico; la ruta de compra la pone Power BI con su propia
+            // notificacion.
+            LicenseOverlay.renderGroupingNote(this.container, driversInData, this.license, groupedByTier, otherLabel);
+            // Ajustes de pago que el usuario ha tocado de verdad. Se leen de
+            // metadata.objects, que solo contiene lo que se ha fijado
+            // explicitamente: asi el aviso no salta en un informe que nadie ha
+            // configurado.
+            const setObjects: any = options.dataViews?.[0]?.metadata?.objects;
+            const touchedPro: string[] = [];
+            const lbl = setObjects?.labelSettings;
+            if (lbl?.labelRotation !== undefined)   touchedPro.push("label angle");
+            if (lbl?.labelMaxChars !== undefined)   touchedPro.push("label truncation");
+            if (lbl?.hideOverlapping !== undefined) touchedPro.push("hiding labels that do not fit");
+            if (setObjects?.ibcs?.mode !== undefined) touchedPro.push("IBCS mode");
 
-            if (this.license.hasAI) this.renderAIButton(summary, computed);
+            const needsLicence = groupedByTier || touchedPro.length > 0;
+            this.notifier?.required(this.license, needsLicence);
+            if (touchedPro.length) {
+                this.notifier?.blocked(this.license, touchedPro.join(", "));
+            } else if (groupedByTier) {
+                this.notifier?.blocked(this.license, `${driversInData} individual drivers`);
+            }
 
             this.host.eventService.renderingFinished(options);
 
@@ -205,6 +265,7 @@ export class Visual implements IVisual {
             dataItems.push({ displayName: g("targetGap"), value: fmt.formatDelta(bar.top - bar.target) });
         }
         dataItems.push({ displayName: g("type"), value: bar.barType });
+        (bar.tooltipItems ?? []).forEach(item => dataItems.push(item));
 
         this.host.tooltipService.show({
             dataItems,
@@ -217,18 +278,30 @@ export class Visual implements IVisual {
     // ── Click (selection) ────────────────────────────────────────────────────
 
     private handleBarClick(data: ClickEventData): void {
-        const { index, selectionId } = data;
+        const { index, selectionId, multiSelect } = data;
 
-        if (this.license.tier === "free" && index >= this.license.maxBars) {
-            LicenseOverlay.renderUpgradeBanner(this.container, this.license);
+        if (!this.license.isLicensed && index >= this.license.maxBars) {
+            this.notifier?.blocked(this.license, "categories beyond the free limit");
             return;
         }
 
         if (selectionId) {
-            if (this.selectedIdx === index) {
-                this.selectedIdx = null; this.selectionManager.clear();
+            if (multiSelect) {
+                if (this.selectedIndices.has(index)) this.selectedIndices.delete(index);
+                else this.selectedIndices.add(index);
+            } else if (this.selectedIndices.size === 1 && this.selectedIndices.has(index)) {
+                // Click de nuevo sobre la única barra seleccionada -> deseleccionar
+                this.selectedIndices = new Set();
             } else {
-                this.selectedIdx = index; this.selectionManager.select(selectionId);
+                this.selectedIndices = new Set([index]);
+            }
+
+            if (this.selectedIndices.size === 0) {
+                this.selectionManager.clear();
+            } else if (multiSelect) {
+                this.selectionManager.select(selectionId, true);
+            } else {
+                this.selectionManager.select(selectionId, false);
             }
             if (this.lastOptions) this.render(this.lastOptions);
         }
@@ -238,100 +311,31 @@ export class Visual implements IVisual {
 
     // Context menu ahora se maneja en el constructor sobre this.container (ver arriba)
 
-    // ── AI Narrative ─────────────────────────────────────────────────────────
-
-    private renderAIButton(summary: WaterfallSummary, bars: ComputedBar[]): void {
-        const existing = this.container.querySelector(".wf-ai-btn");
-        if (existing) existing.remove();
-
-        const btn = document.createElement("button");
-        btn.className   = "wf-ai-btn";
-        btn.textContent = "✦ Generate narrative";
-        btn.style.cssText =
-            "position:absolute;top:6px;right:8px;background:linear-gradient(135deg,#5B4FCF,#378ADD);" +
-            "color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;" +
-            "font-family:Segoe UI,sans-serif;cursor:pointer;z-index:20;font-weight:500;" +
-            "box-shadow:0 1px 4px rgba(0,0,0,0.15);transition:opacity 0.15s";
-
-        btn.addEventListener("mouseenter", () => btn.style.opacity = "0.85");
-        btn.addEventListener("mouseleave", () => btn.style.opacity = "1");
-        btn.addEventListener("click", () => this.handleAIClick(btn));
-        this.container.appendChild(btn);
-    }
-
-    private async handleAIClick(btn: HTMLButtonElement): Promise<void> {
-        if (!this.lastSummary) return;
-        btn.textContent = "⏳ Generating...";
-        btn.style.opacity = "0.7";
-        btn.disabled = true;
-
-        const fmt    = new NumberFormatter(this.formattingSettings);
-        const result = await generateNarrative(this.lastComputed, this.lastSummary, this.formattingSettings, fmt);
-
-        btn.textContent = "✦ Generate narrative";
-        btn.style.opacity = "1";
-        btn.disabled = false;
-
-        this.showNarrativePanel(result.error ? `⚠ ${result.error}` : result.text, !!result.error);
-    }
-
-    private showNarrativePanel(text: string, isError: boolean): void {
-        const existing = this.container.querySelector(".wf-narrative-panel");
-        if (existing) existing.remove();
-
-        const cardsVisible  = this.formattingSettings.chartSettings.showVarianceCards.value;
-        const bottomOffset  = cardsVisible ? "82px" : "0";
-
-        const panel = document.createElement("div");
-        panel.className = "wf-narrative-panel";
-        panel.style.cssText =
-            `position:absolute;bottom:${bottomOffset};left:0;right:0;` +
-            "background:#fff;border-top:2px solid #378ADD;" +
-            "padding:10px 14px;font-family:Segoe UI,sans-serif;font-size:11px;" +
-            `line-height:1.6;color:${isError ? "#E24B4A" : "#252423"};` +
-            "box-shadow:0 -2px 8px rgba(0,0,0,0.08);z-index:15;" +
-            "max-height:28%;overflow-y:auto;box-sizing:border-box";
-
-        const header = document.createElement("div");
-        header.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:6px";
-        const title = document.createElement("span");
-        title.style.cssText = "font-size:9px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px";
-        title.textContent = "✦ AI Executive Narrative";
-        header.appendChild(title);
-        const closeBtn = document.createElement("button");
-        closeBtn.textContent = "✕";
-        closeBtn.style.cssText = "background:none;border:none;cursor:pointer;color:#888;font-size:12px;padding:0";
-        closeBtn.addEventListener("click", () => panel.remove());
-        header.appendChild(closeBtn);
-        panel.appendChild(header);
-
-        const content = document.createElement("p");
-        content.style.cssText = "margin:0";
-        content.textContent = text;
-        panel.appendChild(content);
-
-        if (!isError) {
-            const provider  = this.formattingSettings.aiSettings.aiProvider.value.value as string;
-            const badge     = document.createElement("div");
-            badge.style.cssText = "margin-top:6px;font-size:9px;color:#bbb;text-align:right";
-            badge.textContent   = `Generated by ${provider === "anthropic" ? "Claude (Anthropic)" : "GPT (OpenAI)"}`;
-            panel.appendChild(badge);
-        }
-
-        this.container.appendChild(panel);
-    }
-
     // ── Selection IDs ─────────────────────────────────────────────────────────
 
     private buildSelectionIds(dataView: powerbi.DataView, bars: ComputedBar[]):
             (powerbi.visuals.ISelectionId | null)[] {
         const catCol = dataView.categorical?.categories?.find(c => c.source?.roles?.["category"]);
         if (!catCol) return bars.map(() => null);
-        return bars.map((_, i) => {
+        return bars.map((bar) => {
+            if (bar.sourceIndex == null) return null;
             try {
-                return this.host.createSelectionIdBuilder().withCategory(catCol, i).createSelectionId();
+                return this.host.createSelectionIdBuilder().withCategory(catCol, bar.sourceIndex).createSelectionId();
             } catch { return null; }
         });
+    }
+
+    /** Sello de compilacion, solo en builds de prueba. */
+    private renderBuildMarker(): void {
+        if (!BUILD_MARKER) return;
+        this.container.querySelectorAll(".wf-build-marker").forEach(n => n.remove());
+        const m = document.createElement("div");
+        m.className = "wf-build-marker";
+        m.style.cssText =
+            "position:absolute;left:4px;bottom:2px;z-index:30;pointer-events:none;" +
+            "font:9px Segoe UI,sans-serif;color:#B0A0C0;opacity:.8";
+        m.textContent = "build " + BUILD_MARKER;
+        this.container.appendChild(m);
     }
 
     // ── Landing page ──────────────────────────────────────────────────────────
@@ -370,12 +374,17 @@ export class Visual implements IVisual {
             "Connect Category and Value to render the waterfall";
         wrapper.appendChild(hint);
 
-        if (this.license.tier === "free") {
-            const badge = document.createElement("div");
-            badge.style.cssText = "font-size:9px;background:#f0f0ee;border-radius:4px;padding:2px 8px;color:#888;font-family:Segoe UI,sans-serif;letter-spacing:.5px";
-            badge.textContent = "FREE · 8 bars max";
-            wrapper.appendChild(badge);
-        }
+        // Aqui no va ningun distintivo de tier.
+        //
+        // Decia "FREE - 8 bars max" y era el tercer sitio donde el limite estaba
+        // escrito a mano, asi que seguia diciendo 8 cuando el limite ya era 12.
+        // Pero el problema de fondo no era el numero: una pantalla de bienvenida
+        // tiene que decir que hacer -conectar Categoria y Valor-, no lo que al
+        // usuario le falta, y menos antes de que haya conectado un solo campo.
+        // Es UI de licencia propia en el peor momento posible.
+        //
+        // Cuando hay datos y el limite muerde de verdad, la nota de agrupacion lo
+        // dice con la cifra correcta, y la ruta de compra la pone Power BI.
 
         this.container.appendChild(wrapper);
     }

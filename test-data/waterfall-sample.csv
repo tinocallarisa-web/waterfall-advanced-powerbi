@@ -1,0 +1,13 @@
+Category,SortOrder,Value,Target,BarType,Region,Owner,Color
+Budget FY25,1,850000,,total,Global,Finance,
+Price effect,2,42000,,delta,EMEA,Sales,
+Volume effect,3,-18000,,delta,APAC,Sales,
+Mix effect,4,9500,,delta,EMEA,Sales,
+Discounting,5,-27000,,delta,NA,Sales,
+Revenue subtotal,6,,,subtotal,Global,Finance,
+Raw materials,7,-31000,,delta,APAC,Ops,#E24B4A
+Labor cost,8,-15500,,delta,NA,Ops,
+Freight,9,-8200,,delta,EMEA,Ops,
+Efficiency savings,10,21000,,delta,Global,Ops,#1D9E75
+One-off adjustment,11,-4300,,delta,NA,Finance,
+Actual FY25,12,818500,835000,total,Global,Finance,

@@ -1,0 +1,121 @@
+﻿Channel,Order,P&L Line,BarType,Amount,Target
+Retail Stores,1,Gross Revenue,total,4800000,4944000.0
+Retail Stores,2,Discounts,delta,-192000.0,-188160.0
+Retail Stores,3,Returns,delta,-72000.0,-70560.0
+Retail Stores,4,Net Revenue,subtotal,4536000.0,4672080.0
+Retail Stores,5,Cost of Goods,delta,-2358720.0,-2311545.6
+Retail Stores,6,Gross Profit,subtotal,2177280.0,2242598.4
+Retail Stores,7,Digital Marketing,delta,-87318.0,-85571.64
+Retail Stores,8,Trade Marketing,delta,-47628.0,-46675.44
+Retail Stores,9,Brand,delta,-23814.0,-23337.72
+Retail Stores,10,Sales Payroll,delta,-326592.0,-320060.16
+Retail Stores,11,Warehouse Payroll,delta,-217728.0,-213373.44
+Retail Stores,12,Admin Payroll,delta,-136080.0,-133358.4
+Retail Stores,13,Inbound Freight,delta,-39916.8,-39118.46
+Retail Stores,14,Last Mile,delta,-44906.4,-44008.27
+Retail Stores,15,Warehousing,delta,-14968.8,-14669.42
+Retail Stores,16,Rent & Facilities,delta,-281232.0,-275607.36
+Retail Stores,17,IT & Software,delta,-54432.0,-53343.36
+Retail Stores,18,Other Opex,delta,-127008.0,-124467.84
+Retail Stores,19,EBITDA,subtotal,775656.0,798925.68
+Retail Stores,20,Depreciation,delta,-136080.0,-133358.4
+Retail Stores,21,EBIT,subtotal,639576.0,658763.28
+Retail Stores,22,Financial Result,delta,-18144.0,-17781.12
+Retail Stores,23,Taxes,delta,-155358.0,-152250.84
+Retail Stores,24,Net Profit,total,466074.0,480056.22
+Online,1,Gross Revenue,total,3250000,3347500.0
+Online,2,Discounts,delta,-292500.0,-286650.0
+Online,3,Returns,delta,-243750.0,-238875.0
+Online,4,Net Revenue,subtotal,2713750.0,2795162.5
+Online,5,Cost of Goods,delta,-1166912.5,-1143574.25
+Online,6,Gross Profit,subtotal,1546837.5,1593242.62
+Online,7,Digital Marketing,delta,-208958.75,-204779.58
+Online,8,Trade Marketing,delta,-113977.5,-111697.95
+Online,9,Brand,delta,-56988.75,-55848.98
+Online,10,Sales Payroll,delta,-80761.2,-79145.98
+Online,11,Warehouse Payroll,delta,-53840.8,-52763.98
+Online,12,Admin Payroll,delta,-33650.5,-32977.49
+Online,13,Inbound Freight,delta,-92267.5,-90422.15
+Online,14,Last Mile,delta,-103800.94,-101724.92
+Online,15,Warehousing,delta,-34600.31,-33908.31
+Online,16,Rent & Facilities,delta,-16282.5,-15956.85
+Online,17,IT & Software,delta,-103122.5,-101060.05
+Online,18,Other Opex,delta,-59702.5,-58508.45
+Online,19,EBITDA,subtotal,588883.75,606550.26
+Online,20,Depreciation,delta,-48847.5,-47870.55
+Online,21,EBIT,subtotal,540036.25,556237.34
+Online,22,Financial Result,delta,-8141.25,-7978.43
+Online,23,Taxes,delta,-132973.75,-130314.27
+Online,24,Net Profit,total,398921.25,410888.89
+Wholesale,1,Gross Revenue,total,5600000,5768000.0
+Wholesale,2,Discounts,delta,-672000.0,-658560.0
+Wholesale,3,Returns,delta,-56000.0,-54880.0
+Wholesale,4,Net Revenue,subtotal,4872000.0,5018160.0
+Wholesale,5,Cost of Goods,delta,-3410400.0,-3342192.0
+Wholesale,6,Gross Profit,subtotal,1461600.0,1505448.0
+Wholesale,7,Digital Marketing,delta,-32155.2,-31512.1
+Wholesale,8,Trade Marketing,delta,-17539.2,-17188.42
+Wholesale,9,Brand,delta,-8769.6,-8594.21
+Wholesale,10,Sales Payroll,delta,-88865.28,-87087.97
+Wholesale,11,Warehouse Payroll,delta,-59243.52,-58058.65
+Wholesale,12,Admin Payroll,delta,-37027.2,-36286.66
+Wholesale,13,Inbound Freight,delta,-58464.0,-57294.72
+Wholesale,14,Last Mile,delta,-65772.0,-64456.56
+Wholesale,15,Warehousing,delta,-21924.0,-21485.52
+Wholesale,16,Rent & Facilities,delta,-38976.0,-38196.48
+Wholesale,17,IT & Software,delta,-29232.0,-28647.36
+Wholesale,18,Other Opex,delta,-68208.0,-66843.84
+Wholesale,19,EBITDA,subtotal,935424.0,963486.72
+Wholesale,20,Depreciation,delta,-48720.0,-47745.6
+Wholesale,21,EBIT,subtotal,886704.0,913305.12
+Wholesale,22,Financial Result,delta,-29232.0,-28647.36
+Wholesale,23,Taxes,delta,-214368.0,-210080.64
+Wholesale,24,Net Profit,total,643104.0,662397.12
+Partners,1,Gross Revenue,total,1450000,1493500.0
+Partners,2,Discounts,delta,-87000.0,-85260.0
+Partners,3,Returns,delta,-17400.0,-17052.0
+Partners,4,Net Revenue,subtotal,1345600.0,1385968.0
+Partners,5,Cost of Goods,delta,-753536.0,-738465.28
+Partners,6,Gross Profit,subtotal,592064.0,609825.92
+Partners,7,Digital Marketing,delta,-35523.84,-34813.36
+Partners,8,Trade Marketing,delta,-19376.64,-18989.11
+Partners,9,Brand,delta,-9688.32,-9494.55
+Partners,10,Sales Payroll,delta,-35523.84,-34813.36
+Partners,11,Warehouse Payroll,delta,-23682.56,-23208.91
+Partners,12,Admin Payroll,delta,-14801.6,-14505.57
+Partners,13,Inbound Freight,delta,-9688.32,-9494.55
+Partners,14,Last Mile,delta,-10899.36,-10681.37
+Partners,15,Warehousing,delta,-3633.12,-3560.46
+Partners,16,Rent & Facilities,delta,-5382.4,-5274.75
+Partners,17,IT & Software,delta,-20184.0,-19780.32
+Partners,18,Other Opex,delta,-26912.0,-26373.76
+Partners,19,EBITDA,subtotal,376768.0,388071.04
+Partners,20,Depreciation,delta,-10764.8,-10549.5
+Partners,21,EBIT,subtotal,366003.2,376983.3
+Partners,22,Financial Result,delta,-2691.2,-2637.38
+Partners,23,Taxes,delta,-90828.0,-89011.44
+Partners,24,Net Profit,total,272484.0,280658.52
+Direct Sales,1,Gross Revenue,total,920000,947600.0
+Direct Sales,2,Discounts,delta,-18400.0,-18032.0
+Direct Sales,3,Returns,delta,-4600.0,-4508.0
+Direct Sales,4,Net Revenue,subtotal,897000.0,923910.0
+Direct Sales,5,Cost of Goods,delta,-430560.0,-421948.8
+Direct Sales,6,Gross Profit,subtotal,466440.0,480433.2
+Direct Sales,7,Digital Marketing,delta,-10853.7,-10636.63
+Direct Sales,8,Trade Marketing,delta,-5920.2,-5801.8
+Direct Sales,9,Brand,delta,-2960.1,-2900.9
+Direct Sales,10,Sales Payroll,delta,-83959.2,-82280.02
+Direct Sales,11,Warehouse Payroll,delta,-55972.8,-54853.34
+Direct Sales,12,Admin Payroll,delta,-34983.0,-34283.34
+Direct Sales,13,Inbound Freight,delta,-4305.6,-4219.49
+Direct Sales,14,Last Mile,delta,-4843.8,-4746.92
+Direct Sales,15,Warehousing,delta,-1614.6,-1582.31
+Direct Sales,16,Rent & Facilities,delta,-8970.0,-8790.6
+Direct Sales,17,IT & Software,delta,-17940.0,-17581.2
+Direct Sales,18,Other Opex,delta,-23322.0,-22855.56
+Direct Sales,19,EBITDA,subtotal,210795.0,217118.85
+Direct Sales,20,Depreciation,delta,-10764.0,-10548.72
+Direct Sales,21,EBIT,subtotal,200031.0,206031.93
+Direct Sales,22,Financial Result,delta,-897.0,-879.06
+Direct Sales,23,Taxes,delta,-49783.5,-48787.83
+Direct Sales,24,Net Profit,total,149350.5,153831.02

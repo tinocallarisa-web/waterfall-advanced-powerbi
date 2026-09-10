@@ -24,6 +24,16 @@
       "displayName": "Orden",
       "name": "sortOrder",
       "kind": "Grouping"
+    },
+    {
+      "displayName": "Tooltips",
+      "name": "tooltips",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Color (DAX, opcional)",
+      "name": "colorBy",
+      "kind": "Measure"
     }
   ],
   "dataViewMappings": [
@@ -62,6 +72,16 @@
               "bind": {
                 "to": "barType"
               }
+            },
+            {
+              "bind": {
+                "to": "tooltips"
+              }
+            },
+            {
+              "bind": {
+                "to": "colorBy"
+              }
             }
           ]
         }
@@ -72,6 +92,18 @@
     "colorSettings": {
       "displayName": "Colors",
       "properties": {
+        "colorBlindSafe": {
+          "displayName": "Colour-blind safe palette",
+          "type": {
+            "bool": true
+          }
+        },
+        "patternOnDecrease": {
+          "displayName": "Hatch decreases",
+          "type": {
+            "bool": true
+          }
+        },
         "positiveColor": {
           "displayName": "Increase color",
           "type": {
@@ -79,6 +111,16 @@
               "solid": {
                 "color": true
               }
+            }
+          },
+          "description": "Fill color for increase bars. Supports rule-based conditional formatting (fx): the rule is resolved per category and overrides the increase/decrease colours for that bar.",
+          "rule": {
+            "inputRole": "value",
+            "output": {
+              "property": "positiveColor",
+              "selector": [
+                "category"
+              ]
             }
           }
         },
@@ -110,6 +152,38 @@
                 "color": true
               }
             }
+          }
+        },
+        "legendTextColor": {
+          "displayName": "Legend text color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "cardBackgroundAuto": {
+          "displayName": "Summary card background: auto (translucent)",
+          "type": {
+            "bool": true
+          }
+        },
+        "cardBackgroundColor": {
+          "displayName": "Summary card background (when not auto)",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "legendFontSize": {
+          "displayName": "Legend font size",
+          "type": {
+            "numeric": true
           }
         }
       }
@@ -146,6 +220,73 @@
           "displayName": "Font size",
           "type": {
             "numeric": true
+          }
+        },
+        "autoValueLabelColor": {
+          "displayName": "Value label color: match bar",
+          "type": {
+            "bool": true
+          }
+        },
+        "valueLabelColor": {
+          "displayName": "Value label color (when not matching bar)",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "categoryLabelColor": {
+          "displayName": "Category / axis label color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "categoryFontSize": {
+          "displayName": "Category label font size",
+          "type": {
+            "numeric": true
+          }
+        },
+        "labelRotation": {
+          "displayName": "Category label angle (Pro)",
+          "type": {
+            "enumeration": [
+              {
+                "value": "0",
+                "displayName": "Horizontal"
+              },
+              {
+                "value": "-30",
+                "displayName": "Tilted (-30°)"
+              },
+              {
+                "value": "-45",
+                "displayName": "Tilted (-45°)"
+              },
+              {
+                "value": "-90",
+                "displayName": "Vertical (-90°)"
+              }
+            ]
+          }
+        },
+        "labelMaxChars": {
+          "displayName": "Truncate category labels at (Pro)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "hideOverlapping": {
+          "displayName": "Hide labels that do not fit (Pro)",
+          "type": {
+            "bool": true
           }
         }
       }
@@ -264,62 +405,137 @@
           "type": {
             "bool": true
           }
-        }
-      }
-    },
-    "aiSettings": {
-      "displayName": "AI Narratives (Finance)",
-      "properties": {
-        "aiProvider": {
-          "displayName": "AI Provider",
+        },
+        "invertColorSemantics": {
+          "displayName": "Invert increase/decrease colors",
           "type": {
-            "enumeration": [
-              {
-                "value": "anthropic",
-                "displayName": "Anthropic (Claude)"
-              },
-              {
-                "value": "openai",
-                "displayName": "OpenAI (GPT)"
-              }
-            ]
+            "bool": true
           }
         },
-        "apiKey": {
-          "displayName": "API Key",
+        "maxCategories": {
+          "displayName": "Max drivers shown (0 = no limit)",
+          "type": {
+            "numeric": true
+          }
+        },
+        "otherLabel": {
+          "displayName": "\"Others\" bar label",
           "type": {
             "text": true
           }
         },
-        "aiLanguage": {
-          "displayName": "Narrative language",
+        "orientation": {
+          "displayName": "Orientation",
           "type": {
             "enumeration": [
               {
-                "value": "en",
-                "displayName": "English"
+                "value": "vertical",
+                "displayName": "Vertical"
               },
               {
-                "value": "es",
-                "displayName": "Spanish"
-              },
-              {
-                "value": "fr",
-                "displayName": "French"
-              },
-              {
-                "value": "de",
-                "displayName": "German"
+                "value": "horizontal",
+                "displayName": "Horizontal"
               }
             ]
+          }
+        },
+        "targetLabel": {
+          "displayName": "Target label",
+          "type": {
+            "text": true
+          }
+        },
+        "targetShowValue": {
+          "displayName": "Show target value",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "cardSettings": {
+      "displayName": "Summary Cards",
+      "properties": {
+        "show": {
+          "displayName": "Show summary cards",
+          "type": {
+            "bool": true
+          }
+        },
+        "labelFontSize": {
+          "displayName": "Caption font size",
+          "type": {
+            "numeric": true
+          }
+        },
+        "valueFontSize": {
+          "displayName": "Value font size",
+          "type": {
+            "numeric": true
+          }
+        },
+        "textColorAuto": {
+          "displayName": "Text colour: follow theme",
+          "type": {
+            "bool": true
+          }
+        },
+        "textColor": {
+          "displayName": "Text colour",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "backgroundAuto": {
+          "displayName": "Background: follow theme",
+          "type": {
+            "bool": true
+          }
+        },
+        "backgroundColor": {
+          "displayName": "Background",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "ibcs": {
+      "displayName": "IBCS",
+      "properties": {
+        "mode": {
+          "displayName": "IBCS mode (Pro)",
+          "type": {
+            "bool": true
           }
         }
       }
     }
   },
   "privileges": [],
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    }
+  },
+  "drilldown": {
+    "roles": [
+      "category"
+    ]
+  },
   "supportsHighlight": true,
   "supportsSynchronizingFilterState": true,
   "supportsLandingPage": true,
-  "supportsEmptyDataView": true
+  "supportsEmptyDataView": true,
+  "supportsKeyboardFocus": true,
+  "supportsMultiVisualSelection": true
 }

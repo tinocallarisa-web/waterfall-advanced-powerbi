@@ -1,0 +1,13 @@
+Category,SortOrder,Value,Target,BarType
+Opening operating profit,1,1200000,,total
+Expedited freight due to supplier delay,2,-22000,,delta
+Production yield loss from equipment maintenance,3,-15800,,delta
+Favorable currency translation on EUR contracts,4,18500,,delta
+Headcount reduction in distribution center,5,9200,,delta
+Increased raw material costs from tariff changes,6,-31500,,delta
+Marketing spend reallocation to digital channels,7,-6700,,delta
+Improved plant utilization after Q2 restructuring,8,24300,,delta
+One-time litigation settlement expense,9,-12000,,delta
+Vendor contract renegotiation savings,10,14100,,delta
+Warehouse automation efficiency gains,11,7600,,delta
+Closing operating profit,12,1185700,1250000,total
