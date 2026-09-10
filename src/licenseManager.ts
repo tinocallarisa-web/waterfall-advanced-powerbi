@@ -39,7 +39,13 @@ export interface LicenseState {
  * user holds, so accepting any active plan would unlock this visual for someone
  * who bought a different one.
  */
-const PLAN_PRO = "REPLACE-WITH-PARTNER-CENTER-PLAN-ID";
+const PLAN_PRO = "pro";
+
+// El plan gratuito. No se compara -solo nos importa el de pago- pero se deja
+// escrito porque explica por que hay que comparar el identificador en lugar de
+// mirar si el usuario tiene algun plan activo: quien instala la version gratuita
+// TAMBIEN tiene un plan, y esta activo.
+const PLAN_FREE = "free";   // eslint-disable-line @typescript-eslint/no-unused-vars
 
 // Un bridge de P&L real lleva de diez a veinte pasos. Con ocho, casi cualquier
 // caso principal acaba agrupado, y el tier gratuito parece corto justo donde mas
