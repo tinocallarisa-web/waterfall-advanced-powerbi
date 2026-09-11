@@ -1,0 +1,145 @@
+WATERFALL ADVANCED -- TIPS & HINTS (v1.1.0.0)
+=============================================
+
+A waterfall can be two very different things: a simple before-and-after picture, or a
+structured explanation of how a result was formed. This one is built for the second.
+The difference is in one field well -- Bar type -- and it is the first thing to get
+right.
+
+
+QUICK START
+-----------
+1. Drag your P&L line, driver or step into CATEGORY.
+2. Drag the amount into VALUE. Negative values fall, positive values rise.
+3. Drag a numeric sequence field into ORDER. Without it the bars follow the category
+   sort, which is almost never the order of a P&L.
+4. Drag your type column into BAR TYPE and set it to aggregate as FIRST, not Sum.
+
+THE SINGLE MOST COMMON MISTAKE: leaving Bar type as Sum. It is text in a measure well,
+so Power BI tries to add it up and nothing arrives. The chart then treats every row as
+a driver and the bridge never closes on the right figure.
+
+
+BAR TYPE: THE WHOLE POINT
+-------------------------
+- total ..... drawn from zero to the value ......... the opening and closing anchors
+- subtotal .. drawn from zero to the running total .. Net Revenue, Gross Profit, EBITDA
+- delta ..... floats from the running total ........ every driver: price, volume, payroll
+
+Anything else is read as delta. THE FIRST AND LAST ROWS ARE ALWAYS DRAWN AS TOTALS,
+whatever the column says: a bridge has to start and end somewhere.
+
+A P&L walk with no subtotals is a list of costs. With them it becomes a document a
+committee can read: revenue, what reduced it, where the margin stood, what consumed it,
+where the result landed.
+
+
+FIELD WELLS
+-----------
+- Category ................. Grouping  The line, driver or step. REQUIRED.
+- Value .................... Measure   The amount. REQUIRED.
+- Target (optional) ........ Measure   Goal or budget. Dashed line on the anchor bars.
+- Bar type ................. Measure   total / subtotal / delta. AGGREGATE AS FIRST.
+- Order .................... Grouping  Numeric field fixing the sequence of the bridge.
+- Tooltips ................. Measure   Extra measures on hover.
+- Colour (DAX, optional) ... Measure   A hex colour per row, calculated in the model.
+
+
+FORMAT PANE
+-----------
+- Colors ......... increase, decrease, total and target colours; legend colour and size;
+                   COLOUR-BLIND SAFE PALETTE and HATCHED DECREASES
+- Labels ......... show, mode, font size, value and category colours, totals and
+                   subtotals matching their bar colour, and the density controls (Pro):
+                   angle, truncation, hiding what does not fit
+- Number format .. currency symbol and position, scale, decimals, thousands separator
+- Chart .......... connectors, subtotals, target line with label and value, summary
+                   cards, sort by impact, invert colours, max drivers, "Others" label,
+                   orientation
+- Summary Cards .. show, caption and value font sizes, text and background colours
+- Data Table (Pro) position, running total and % of opening columns, background,
+                   separator, font size, width
+- IBCS (Pro) ..... standardised monochrome notation
+
+
+READING A BRIDGE THAT IS TOO WIDE
+---------------------------------
+Fifteen line items with long names and their amounts do not fit. A waterfall rarely
+fails because the arithmetic is wrong; it fails because it is unreadable.
+
+- SWITCH TO HORIZONTAL. Long labels -- "Rent & Facilities", "Warehouse Payroll" -- read
+  far better down the side than under a bar. Biggest single improvement, and it is free.
+- ANGLE THE LABELS (Pro) at -30, -45 or -90 degrees when vertical is the right layout.
+- TRUNCATE (Pro) at a character count. The cut falls on a word boundary and the full
+  name stays in the tooltip.
+- GROUP THE SMALL DRIVERS with Max drivers shown. The rest are summed into an "Others"
+  bar, so the bridge still closes on the same figure.
+
+
+ACCESSIBILITY, AND WHY IT IS FREE
+---------------------------------
+Around 8% of men cannot reliably separate red from green. A financial bridge is where
+mistaking a rise for a fall costs most.
+
+- COLOUR-BLIND SAFE PALETTE replaces the defaults with Okabe-Ito blue and orange, which
+  stay distinguishable under deuteranopia and protanopia.
+- HATCH DECREASES puts a diagonal pattern on the falling bars. WCAG 1.4.1 asks that
+  colour is not the only means of conveying information, and in a bridge up-versus-down
+  IS the information. With it on, the chart still reads in black and white -- which is
+  how half of these end up, printed in a committee pack.
+
+Both are in the free tier deliberately.
+
+
+THE DATA TABLE (Pro)
+--------------------
+A bridge answers WHY. A table answers HOW MUCH. In a committee those two questions
+arrive one after the other, and covering them used to mean putting a matrix beside the
+chart: another visual to filter, another to format, and the chance that the two
+disagree.
+
+The table shows every step with its amount, the running total and optionally each step
+as a percentage of the opening figure. It sits to the right or below, with its own
+background so it reads as a separate block.
+
+
+WHAT PRO ADDS
+-------------
+- The bridge: totals, subtotals, deltas, connectors  Free: Yes -- Pro: Yes
+- Orientation, drilldown, target line ............... Free: Yes -- Pro: Yes
+- Colour-blind safe palette, hatched decreases ...... Free: Yes -- Pro: Yes
+- Conditional formatting (fx), Colour (DAX) well .... Free: Yes -- Pro: Yes
+- Cross-filtering, multi-select, bookmarks, keyboard  Free: Yes -- Pro: Yes
+- Summary cards, number format, "Others" grouping ... Free: Yes -- Pro: Yes
+- INDIVIDUAL DRIVERS ................................ Free: 12  -- Pro: ALL
+- DATA TABLE ........................................ Free: No  -- Pro: YES
+- IBCS MODE ......................................... Free: No  -- Pro: YES
+- LABEL ANGLE, TRUNCATION, OVERLAP HANDLING ......... Free: No  -- Pro: YES
+
+Above twelve drivers the smallest are grouped into "Others". THE BRIDGE STILL CLOSES ON
+THE SAME FIGURE -- nothing is dropped, the detail is coarser. Twelve is the size of a
+standard P&L walk, so the free tier covers the main case rather than breaking on it.
+
+Every paid setting says (Pro) in the format pane and is never hidden. Turning one on
+without a licence leaves the free result on screen and Power BI shows its own
+notification with the link to obtain one -- and the setting is kept, so it applies the
+moment the licence is active.
+
+
+TROUBLESHOOTING
+---------------
+- Every bar floats, no totals -> Bar type is aggregating as Sum. Set it to First.
+- Bars in the wrong order -> nothing in Order, so they follow the category sort.
+- The closing bar is not the sum of the others -> check that exactly one row is your
+  opening total and that the deltas carry the right sign. Costs must be negative.
+- Labels cut off -> switch to horizontal, or angle them (Pro).
+- A driver is missing and there is an "Others" bar -> the free tier shows twelve
+  individual drivers; the note at the top right says how many were grouped.
+- The target line only appears on some bars -> by design, it is drawn on totals and
+  subtotals. A target on every cost line would be noise.
+
+
+PRIVACY
+-------
+All processing happens inside Power BI. The visual makes no network requests of any
+kind and stores nothing outside the report.

@@ -55,17 +55,10 @@ class ColorSettings extends FormattingSettingsCard {
         name: "legendTextColor", displayName: "Legend text color",
         value: { value: "#777777" }
     });
-    cardBackgroundAuto = new formattingSettings.ToggleSwitch({
-        name: "cardBackgroundAuto", displayName: "Summary card background: auto (translucent)", value: true
-    });
-    cardBackgroundColor = new formattingSettings.ColorPicker({
-        name: "cardBackgroundColor", displayName: "Summary card background (when not auto)",
-        value: { value: "#F5F5F3" }
-    });
     name        = "colorSettings";
     displayName = "Colors";
     slices      = [this.colorBlindSafe, this.patternOnDecrease, this.positiveColor, this.negativeColor, this.totalColor, this.targetColor,
-        this.legendFontSize, this.legendTextColor, this.cardBackgroundAuto, this.cardBackgroundColor];
+        this.legendFontSize, this.legendTextColor];
 }
 
 // ─── Label settings ───────────────────────────────────────────────────────────
@@ -96,6 +89,14 @@ class LabelSettings extends FormattingSettingsCard {
     valueLabelColor = new formattingSettings.ColorPicker({
         name: "valueLabelColor", displayName: "Value label color (when not matching bar)",
         value: { value: "#252423" }
+    });
+    // Totales y subtotales son los puntos de control del puente: el arranque,
+    // los cortes intermedios y el cierre. Darles a sus etiquetas de eje el color
+    // de su barra los separa de los drivers de un vistazo, que es como se lee un
+    // bridge -primero los anclajes, luego que paso entre medias-.
+    anchorLabelsMatchBar = new formattingSettings.ToggleSwitch({
+        name: "anchorLabelsMatchBar",
+        displayName: "Total / subtotal labels: match bar colour", value: false
     });
     categoryLabelColor = new formattingSettings.ColorPicker({
         name: "categoryLabelColor", displayName: "Category / axis label color",
@@ -135,7 +136,7 @@ class LabelSettings extends FormattingSettingsCard {
     name        = "labelSettings";
     displayName = "Labels";
     slices      = [this.showLabels, this.labelMode, this.fontSize,
-        this.autoValueLabelColor, this.valueLabelColor, this.categoryLabelColor, this.categoryFontSize,
+        this.autoValueLabelColor, this.valueLabelColor, this.anchorLabelsMatchBar, this.categoryLabelColor, this.categoryFontSize,
         this.labelRotation, this.labelMaxChars, this.hideOverlapping];
 }
 
@@ -261,21 +262,73 @@ class CardSettings extends FormattingSettingsCard {
         }
     });
     textColorAuto = new formattingSettings.ToggleSwitch({
-        name: "textColorAuto", displayName: "Text colour: follow theme", value: true
+        name: "textColorAuto", displayName: "Use the report theme text colour", value: true
     });
     textColor = new formattingSettings.ColorPicker({
-        name: "textColor", displayName: "Text colour", value: { value: "#252423" }
+        name: "textColor", displayName: "Custom text colour — turn the switch above off", value: { value: "#252423" }
     });
     backgroundAuto = new formattingSettings.ToggleSwitch({
-        name: "backgroundAuto", displayName: "Background: follow theme", value: true
+        name: "backgroundAuto", displayName: "Use the report theme background", value: true
     });
     backgroundColor = new formattingSettings.ColorPicker({
-        name: "backgroundColor", displayName: "Background", value: { value: "#F3F2F1" }
+        name: "backgroundColor", displayName: "Custom background — turn the switch above off", value: { value: "#F3F2F1" }
     });
     name        = "cardSettings";
     displayName = "Summary Cards";
     slices      = [this.show, this.labelFontSize, this.valueFontSize,
         this.textColorAuto, this.textColor, this.backgroundAuto, this.backgroundColor];
+}
+
+class TableSettings extends FormattingSettingsCard {
+    // El puente y las cifras exactas en un solo objeto. Un bridge responde "por
+    // que" y una tabla responde "cuanto", y en un comite se preguntan las dos
+    // cosas seguidas: sin esto hay que poner una matriz al lado, repetir el
+    // filtrado y confiar en que las dos cuenten lo mismo.
+    show = new formattingSettings.ToggleSwitch({
+        name: "show", displayName: "Show data table (Pro)", value: false
+    });
+    position = new formattingSettings.ItemDropdown({
+        name: "position", displayName: "Position",
+        items: [
+            { displayName: "Right",  value: "right"  },
+            { displayName: "Bottom", value: "bottom" }
+        ],
+        value: { displayName: "Right", value: "right" }
+    });
+    showRunning = new formattingSettings.ToggleSwitch({
+        name: "showRunning", displayName: "Running total column", value: true
+    });
+    showShare = new formattingSettings.ToggleSwitch({
+        name: "showShare", displayName: "% of opening column", value: false
+    });
+    backgroundAuto = new formattingSettings.ToggleSwitch({
+        name: "backgroundAuto", displayName: "Use the report theme background", value: true
+    });
+    backgroundColor = new formattingSettings.ColorPicker({
+        name: "backgroundColor", displayName: "Custom background — turn the switch above off", value: { value: "#F3F2F1" }
+    });
+    showBorder = new formattingSettings.ToggleSwitch({
+        name: "showBorder", displayName: "Separator line", value: true
+    });
+    fontSize = new formattingSettings.NumUpDown({
+        name: "fontSize", displayName: "Font size", value: 10,
+        options: {
+            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 7  },
+            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 18 }
+        }
+    });
+    widthPct = new formattingSettings.NumUpDown({
+        name: "widthPct", displayName: "Width / height %", value: 34,
+        options: {
+            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 20 },
+            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 60 }
+        }
+    });
+    name        = "tableSettings";
+    displayName = "Data Table";
+    slices      = [this.show, this.position, this.showRunning, this.showShare,
+        this.backgroundAuto, this.backgroundColor, this.showBorder,
+        this.fontSize, this.widthPct];
 }
 
 class IbcsSettings extends FormattingSettingsCard {
@@ -298,6 +351,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     numberFormat  = new NumberFormatSettings();
     chartSettings = new ChartSettings();
     cardSettings  = new CardSettings();
+    tableSettings = new TableSettings();
     ibcs          = new IbcsSettings();
     cards         = [
         this.colorSettings,
@@ -305,6 +359,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
         this.numberFormat,
         this.chartSettings,
         this.cardSettings,
+        this.tableSettings,
         this.ibcs
     ];
 }

@@ -1,39 +1,46 @@
 {
   "dataRoles": [
     {
-      "displayName": "Categoría",
+      "displayName": "Category",
       "name": "category",
-      "kind": "Grouping"
+      "kind": "Grouping",
+      "description": "The P&L line, driver or step. The field order, or the Order well, defines the bridge."
     },
     {
-      "displayName": "Valor",
+      "displayName": "Value",
       "name": "measure",
-      "kind": "Measure"
+      "kind": "Measure",
+      "description": "The amount for each step. Negative values fall, positive values rise."
     },
     {
-      "displayName": "Target (opcional)",
+      "displayName": "Target (optional)",
       "name": "target",
-      "kind": "Measure"
+      "kind": "Measure",
+      "description": "Goal or budget. Drawn as a dashed line on the anchor bars."
     },
     {
-      "displayName": "Tipo de barra",
+      "displayName": "Bar type",
       "name": "barType",
-      "kind": "Measure"
+      "kind": "Measure",
+      "description": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum."
     },
     {
-      "displayName": "Orden",
+      "displayName": "Order",
       "name": "sortOrder",
-      "kind": "Grouping"
+      "kind": "Grouping",
+      "description": "Numeric field that fixes the sequence of the bridge. Without it the bars follow the category sort."
     },
     {
       "displayName": "Tooltips",
       "name": "tooltips",
-      "kind": "Measure"
+      "kind": "Measure",
+      "description": "Extra measures shown on hover."
     },
     {
-      "displayName": "Color (DAX, opcional)",
+      "displayName": "Colour (DAX, optional)",
       "name": "colorBy",
-      "kind": "Measure"
+      "kind": "Measure",
+      "description": "A hex colour per row, calculated in the model. Overrides the increase/decrease colours and the fx rule."
     }
   ],
   "dataViewMappings": [
@@ -164,22 +171,6 @@
             }
           }
         },
-        "cardBackgroundAuto": {
-          "displayName": "Summary card background: auto (translucent)",
-          "type": {
-            "bool": true
-          }
-        },
-        "cardBackgroundColor": {
-          "displayName": "Summary card background (when not auto)",
-          "type": {
-            "fill": {
-              "solid": {
-                "color": true
-              }
-            }
-          }
-        },
         "legendFontSize": {
           "displayName": "Legend font size",
           "type": {
@@ -285,6 +276,12 @@
         },
         "hideOverlapping": {
           "displayName": "Hide labels that do not fit (Pro)",
+          "type": {
+            "bool": true
+          }
+        },
+        "anchorLabelsMatchBar": {
+          "displayName": "Total / subtotal labels: match bar colour",
           "type": {
             "bool": true
           }
@@ -475,13 +472,13 @@
           }
         },
         "textColorAuto": {
-          "displayName": "Text colour: follow theme",
+          "displayName": "Use the report theme text colour",
           "type": {
             "bool": true
           }
         },
         "textColor": {
-          "displayName": "Text colour",
+          "displayName": "Custom text colour — turn the switch above off",
           "type": {
             "fill": {
               "solid": {
@@ -491,13 +488,13 @@
           }
         },
         "backgroundAuto": {
-          "displayName": "Background: follow theme",
+          "displayName": "Use the report theme background",
           "type": {
             "bool": true
           }
         },
         "backgroundColor": {
-          "displayName": "Background",
+          "displayName": "Custom background — turn the switch above off",
           "type": {
             "fill": {
               "solid": {
@@ -515,6 +512,78 @@
           "displayName": "IBCS mode (Pro)",
           "type": {
             "bool": true
+          }
+        }
+      }
+    },
+    "tableSettings": {
+      "displayName": "Data Table",
+      "properties": {
+        "show": {
+          "displayName": "Show data table (Pro)",
+          "type": {
+            "bool": true
+          }
+        },
+        "position": {
+          "displayName": "Position",
+          "type": {
+            "enumeration": [
+              {
+                "value": "right",
+                "displayName": "Right"
+              },
+              {
+                "value": "bottom",
+                "displayName": "Bottom"
+              }
+            ]
+          }
+        },
+        "showRunning": {
+          "displayName": "Running total column",
+          "type": {
+            "bool": true
+          }
+        },
+        "showShare": {
+          "displayName": "% of opening column",
+          "type": {
+            "bool": true
+          }
+        },
+        "backgroundAuto": {
+          "displayName": "Use the report theme background",
+          "type": {
+            "bool": true
+          }
+        },
+        "backgroundColor": {
+          "displayName": "Custom background — turn the switch above off",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "showBorder": {
+          "displayName": "Separator line",
+          "type": {
+            "bool": true
+          }
+        },
+        "fontSize": {
+          "displayName": "Font size",
+          "type": {
+            "numeric": true
+          }
+        },
+        "widthPct": {
+          "displayName": "Width / height %",
+          "type": {
+            "numeric": true
           }
         }
       }

@@ -99,17 +99,36 @@ export class WaterfallRenderer {
         // de Chart para no romper informes guardados: si cualquiera de los dos
         // esta apagado, las tarjetas no se pintan.
         const showCards  = ch.showVarianceCards.value && settings.cardSettings.show.value;
-        const svgH       = showCards ? height - this.CARD_H : height;
         const horizontal = ch.orientation.value.value === "horizontal";
+
+        // Tabla de datos (Pro). Reserva su parte antes de calcular el lienzo: si
+        // se anadiera despues, el SVG ya estaria dimensionado y la tabla lo
+        // empujaria fuera del visual.
+        const ts        = settings.tableSettings;
+        const showTable = isLicensed && ts.show.value;
+        const tablePct  = showTable ? Math.min(60, Math.max(20, ts.widthPct.value)) / 100 : 0;
+        const tableRight = showTable && ts.position.value.value === "right";
+
+        const chartW = tableRight ? Math.round(width * (1 - tablePct)) : width;
+        const bodyH  = showCards ? height - this.CARD_H : height;
+        const svgH   = showTable && !tableRight
+            ? Math.round(bodyH * (1 - tablePct)) : bodyH;
+
+        // Fila que contiene grafico y tabla cuando la tabla va a la derecha.
+        const body = document.createElement("div");
+        body.style.cssText = tableRight
+            ? `display:flex;gap:8px;width:100%;height:${bodyH}px;box-sizing:border-box`
+            : `display:block;width:100%`;
+        this.container.appendChild(body);
 
         this.scrollWrap = document.createElement("div");
         this.scrollWrap.style.cssText = horizontal
-            ? `overflow-y:auto;overflow-x:hidden;width:100%;height:${svgH}px;`
-            : `overflow-x:auto;overflow-y:hidden;width:100%;height:${svgH}px;`;
+            ? `overflow-y:auto;overflow-x:hidden;width:${chartW}px;height:${svgH}px;flex:0 0 auto`
+            : `overflow-x:auto;overflow-y:hidden;width:${chartW}px;height:${svgH}px;flex:0 0 auto`;
 
-        this.svg = this.makeSVG(width, svgH);
+        this.svg = this.makeSVG(chartW, svgH);
         this.scrollWrap.appendChild(this.svg);
-        this.container.appendChild(this.scrollWrap);
+        body.appendChild(this.scrollWrap);
         this.renderLegend(colors, highContrast ? contrastForeground : cs.legendTextColor.value.value,
             cs.legendFontSize.value);
 
@@ -127,12 +146,19 @@ export class WaterfallRenderer {
 
         if (horizontal) {
             this.renderHorizontal(bars, summary, ch, ls, colors, fmt, selectionIds, selectedIndices,
-                highContrast, contrastForeground, width, svgH, onBarClick, onBarHover, onBarLeave,
+                highContrast, contrastForeground, chartW, svgH, onBarClick, onBarHover, onBarLeave,
                 cs.patternOnDecrease.value, isLicensed);
         } else {
             this.renderVertical(bars, summary, ch, ls, colors, fmt, selectionIds, selectedIndices,
-                highContrast, contrastForeground, width, svgH, onBarClick, onBarHover, onBarLeave,
+                highContrast, contrastForeground, chartW, svgH, onBarClick, onBarHover, onBarLeave,
                 cs.patternOnDecrease.value, isLicensed);
+        }
+
+        if (showTable) {
+            this.renderDataTable(body, bars, summary, fmt, ts, colors,
+                tableRight, tableRight ? Math.round(width * tablePct) : 0,
+                tableRight ? bodyH : Math.round(bodyH * tablePct),
+                highContrast ? contrastForeground : ls.categoryLabelColor.value.value);
         }
 
         if (showCards) this.renderVarianceCards(summary, colors, fmt, ls, cs, settings.cardSettings);
@@ -295,6 +321,11 @@ export class WaterfallRenderer {
                 this.text(x + barW / 2, yTop - 5, label, ls.fontSize.value, labelColor, "middle", "500");
             }
 
+            // Color de la etiqueta de eje: el de la barra cuando es un anclaje.
+            // En alto contraste no se toca, que ahi manda el tema del sistema.
+            const catColor = (ls.anchorLabelsMatchBar.value && !highContrast &&
+                              (bar.barType === "total" || bar.barType === "subtotal"))
+                ? colors.total : ls.categoryLabelColor.value.value;
             const rot      = rotDeg;
             const maxChars = isLicensed ? (ls.labelMaxChars.value ?? 0) : 0;
             // Rotada, la etiqueta ya no compite por el ancho de la barra.
@@ -304,7 +335,7 @@ export class WaterfallRenderer {
                 const anchor = rot ? "end" : "middle";
                 this.truncate(bar.label, maxChars).split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
-                        line, ls.categoryFontSize.value, ls.categoryLabelColor.value.value,
+                        line, ls.categoryFontSize.value, catColor,
                         anchor, "400", rot);
                 });
             }
@@ -467,7 +498,10 @@ export class WaterfallRenderer {
             const cap       = userMax > 0 ? Math.min(userMax, fitsChars) : fitsChars;
             const catLabel  = this.truncate(
                 bar.label.split(/\\n|\n/).join(" "), cap);
-            this.text(PAD_LEFT_H - 8, y + barH / 2 + 4, catLabel, ls.categoryFontSize.value, ls.categoryLabelColor.value.value, "end");
+            const catColorH = (ls.anchorLabelsMatchBar.value && !highContrast &&
+                               (bar.barType === "total" || bar.barType === "subtotal"))
+                ? colors.total : ls.categoryLabelColor.value.value;
+            this.text(PAD_LEFT_H - 8, y + barH / 2 + 4, catLabel, ls.categoryFontSize.value, catColorH, "end");
         });
     }
 
@@ -510,6 +544,115 @@ export class WaterfallRenderer {
         });
     }
 
+    /**
+     * Tabla de datos junto al puente.
+     *
+     * Un waterfall responde "por que" y una tabla responde "cuanto". En un comite
+     * se preguntan las dos cosas seguidas, y hasta ahora eso obligaba a poner una
+     * matriz al lado: otro visual que filtrar, otro que formatear, y la
+     * posibilidad de que los dos no cuenten lo mismo.
+     *
+     * Se construye con createElement y textContent, nunca con innerHTML: las
+     * etiquetas vienen del modelo del usuario.
+     */
+    private renderDataTable(
+            parent: HTMLElement, bars: ComputedBar[], summary: WaterfallSummary,
+            fmt: NumberFormatter, ts: VisualFormattingSettingsModel["tableSettings"],
+            colors: Record<string, string>, toTheRight: boolean,
+            w: number, h: number, textColor: string): void {
+
+        const fs = ts.fontSize.value;
+
+        // Fondo propio para que la tabla se lea como un bloque aparte y no
+        // flotando sobre el grafico. En automatico va un tinte neutro que
+        // funciona sobre fondo claro y oscuro, porque el visual hereda el tema
+        // del informe y no sabemos cual es.
+        const bg = ts.backgroundAuto.value
+            ? "rgba(128,128,128,0.10)" : ts.backgroundColor.value.value;
+        // El separador va del lado por el que la tabla toca el grafico.
+        const border = ts.showBorder.value
+            ? (toTheRight ? "border-left:1px solid rgba(128,128,128,0.35);"
+                          : "border-top:1px solid rgba(128,128,128,0.35);")
+            : "";
+
+        const wrap = document.createElement("div");
+        wrap.className = "wf-data-table";
+        wrap.style.cssText = (toTheRight
+            ? `flex:1 1 auto;width:${w}px;height:${h}px;overflow:auto;box-sizing:border-box;padding:4px 8px;`
+            : `width:100%;height:${h}px;overflow:auto;box-sizing:border-box;padding:6px 8px 4px;`)
+            + `background:${bg};border-radius:6px;${border}`;
+
+        const table = document.createElement("table");
+        table.style.cssText =
+            `border-collapse:collapse;width:100%;font:${fs}px Segoe UI,sans-serif;color:${textColor}`;
+
+        const num = (el: HTMLElement) => {
+            el.style.textAlign = "right";
+            el.style.whiteSpace = "nowrap";
+            el.style.paddingLeft = "10px";
+        };
+
+        const head = document.createElement("tr");
+        const cols = [""].concat(["Value"],
+            ts.showRunning.value ? ["Running"] : [],
+            ts.showShare.value ? ["% open"] : []);
+        cols.forEach((label, i) => {
+            const th = document.createElement("th");
+            th.textContent = label;
+            th.style.cssText =
+                `text-align:${i ? "right" : "left"};font-weight:600;opacity:.7;` +
+                `padding:2px 0 4px;border-bottom:1px solid currentColor;` +
+                `position:sticky;top:0;background:${bg}`;
+            if (i) num(th);
+            head.appendChild(th);
+        });
+        table.appendChild(head);
+
+        const opening = summary.initialValue || 0;
+
+        bars.forEach(bar => {
+            const tr = document.createElement("tr");
+            const anchor = bar.barType === "total" || bar.barType === "subtotal";
+
+            const name = document.createElement("td");
+            name.textContent = bar.label.split(/\\n|\n/).join(" ");
+            name.style.cssText =
+                `padding:2px 0;${anchor ? "font-weight:600;" : ""}` +
+                `max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
+            name.title = bar.label;          // el nombre completo, al pasar el raton
+            tr.appendChild(name);
+
+            const val = document.createElement("td");
+            val.textContent = fmt.format(bar.value);
+            num(val);
+            val.style.padding = "2px 0";
+            if (anchor) val.style.fontWeight = "600";
+            // Los drivers llevan el color de su signo; los anclajes no, porque un
+            // total negativo es un resultado, no una caida.
+            else val.style.color = bar.value >= 0 ? colors.pos : colors.neg;
+            tr.appendChild(val);
+
+            if (ts.showRunning.value) {
+                const run = document.createElement("td");
+                run.textContent = fmt.format(bar.running);
+                num(run); run.style.padding = "2px 0"; run.style.opacity = ".8";
+                tr.appendChild(run);
+            }
+            if (ts.showShare.value) {
+                const sh = document.createElement("td");
+                sh.textContent = opening ? (bar.value / opening * 100).toFixed(1) + "%" : "—";
+                num(sh); sh.style.padding = "2px 0"; sh.style.opacity = ".8";
+                tr.appendChild(sh);
+            }
+
+            if (anchor) tr.style.borderTop = "1px solid currentColor";
+            table.appendChild(tr);
+        });
+
+        wrap.appendChild(table);
+        parent.appendChild(wrap);
+    }
+
     private renderVarianceCards(summary: WaterfallSummary, colors: Record<string, string>,
                                 fmt: NumberFormatter, ls: VisualFormattingSettingsModel["labelSettings"],
                                 cs: VisualFormattingSettingsModel["colorSettings"],
@@ -518,7 +661,7 @@ export class WaterfallRenderer {
             ? cd.textColor.value.value : ls.categoryLabelColor.value.value;
         const cardBg = cd && !cd.backgroundAuto.value
             ? cd.backgroundColor.value.value
-            : cs.cardBackgroundAuto.value ? "rgba(128,128,128,0.15)" : cs.cardBackgroundColor.value.value;
+            : "rgba(128,128,128,0.15)";
         const labelFs = cd ? cd.labelFontSize.value : 9;
         const valueFs = cd ? cd.valueFontSize.value : 13;
         const g = (key: string) => {

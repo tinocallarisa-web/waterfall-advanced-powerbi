@@ -126,10 +126,18 @@ export class LicenseNotifier {
     constructor(private host: powerbi.extensibility.visual.IVisualHost) {}
 
     /** The user reached for something the free tier does not do. */
-    public blocked(state: LicenseState, feature: string): void {
+    /**
+     * @param feature  texto que ve el usuario
+     * @param key      huella para no repetir. Incluye los VALORES de los ajustes,
+     *                 no solo cuales son: Power BI llama a update() muchas veces
+     *                 por razones ajenas al usuario, asi que hace falta una
+     *                 huella; pero si solo mira que ajustes hay tocados, cambiar
+     *                 uno de ellos a otro valor no vuelve a avisar.
+     */
+    public blocked(state: LicenseState, feature: string, key = feature): void {
         if (!this.actionable(state)) return;
-        if (feature === this.lastBlocked) return;
-        this.lastBlocked = feature;
+        if (key === this.lastBlocked) return;
+        this.lastBlocked = key;
         try {
             (this.host as any).licenseManager?.notifyFeatureBlocked(feature);
         } catch { /* older host */ }

@@ -1,0 +1,44 @@
+Waterfall Advanced 1.1.0.0. Full notes: CERTIFICATION-NOTES.md in the repo.
+
+EXTERNAL CALLS REMOVED
+Previous versions had AI narratives calling api.anthropic.com and api.openai.com. A
+certified visual may not access external services; the CSP blocked them, so it never worked
+published. Code, format card and capabilities object are gone. privileges stays []. No
+fetch, XHR or WebSocket anywhere in src/.
+
+LICENSING REWRITTEN
+The old code called getAvailabilityStatusForServicePlan(), not part of
+IVisualLicenseManager: it threw, the catch swallowed it, and the fallback read
+window.location.hostname === "localhost", so every published user resolved to Free whatever
+they had bought. Now getAvailableServicePlans(), comparing spIdentifier against the Pro
+plan - essential here, since the offer publishes a free plan too, so "holds an active plan"
+is true for free users. Warning accepted alongside Active. isLicenseUnsupportedEnv and
+isLicenseInfoAvailable honoured. The chart repaints when the licence resolves.
+
+NO LICENSING UI OF OUR OWN
+The padlock overlay, the upgrade banner linking to the generic storefront and the
+"FREE - 8 bars max" landing badge are removed. notifyFeatureBlocked and
+notifyLicenseRequired carry the purchase path, fired from metadata.objects, which holds
+only what the user set - so nothing fires on an untouched report.
+
+DATA
+Only the categorical dataView (Category, Value, Target, Bar type, Order, Tooltips, Colour).
+No local file access. Nothing persisted outside the .pbix beyond formatting props.
+
+TIERS
+Free: the whole bridge - totals, subtotals, deltas, connectors, both orientations,
+drilldown, target line, conditional formatting, colour-blind safe palette, hatched
+decreases, summary cards, cross-filtering, bookmarks, keyboard, high contrast. Twelve
+drivers individually; above that the smallest are grouped into an "Others" bar and the
+bridge still closes on the same figure, so the free result is correct, not partial. No
+watermark anywhere.
+Pro: all drivers, data table, IBCS mode, label density controls.
+
+TEST
+Category = P&L line, Value = amount, Bar type = total/subtotal/delta aggregated as FIRST,
+Order = sequence. Without a licence turn on IBCS mode or the data table: the free result
+stays and Power BI raises its notification; remove it and it clears.
+
+URLs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/ + privacy.html,
+terms.html, support.html - Repo github.com/tinocallarisa-web/waterfall-advanced-powerbi
+(certification)

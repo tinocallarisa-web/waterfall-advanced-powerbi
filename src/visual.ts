@@ -68,6 +68,18 @@ export class Visual implements IVisual {
         this.selectionManager      = this.host.createSelectionManager();
         this.renderer              = new WaterfallRenderer(this.container, this.localization);
 
+        // Bookmarks. Power BI llama aqui cuando un marcador -o el panel de
+        // seleccion, o un boton de "borrar filtros"- restaura una seleccion desde
+        // fuera del visual. Sin esto, aplicar un bookmark filtraba el informe
+        // pero el waterfall seguia con las barras marcadas de antes: el grafico
+        // y el filtro contando cosas distintas, que es peor que no soportar
+        // bookmarks.
+        this.selectionManager.registerOnSelectCallback(
+            (ids: powerbi.extensibility.ISelectionId[]) => {
+                this.selectedIndices = this.indicesFromSelection(ids);
+                if (this.lastOptions) this.render(this.lastOptions);
+            });
+
         this.notifier = new LicenseNotifier(this.host);
         getLicenseState(this.host).then((state: LicenseState) => {
             this.license = state;
@@ -215,19 +227,36 @@ export class Visual implements IVisual {
             // explicitamente: asi el aviso no salta en un informe que nadie ha
             // configurado.
             const setObjects: any = options.dataViews?.[0]?.metadata?.objects;
-            const touchedPro: string[] = [];
             const lbl = setObjects?.labelSettings;
-            if (lbl?.labelRotation !== undefined)   touchedPro.push("label angle");
-            if (lbl?.labelMaxChars !== undefined)   touchedPro.push("label truncation");
-            if (lbl?.hideOverlapping !== undefined) touchedPro.push("hiding labels that do not fit");
-            if (setObjects?.ibcs?.mode !== undefined) touchedPro.push("IBCS mode");
 
-            const needsLicence = groupedByTier || touchedPro.length > 0;
+            // Nombre + valor de cada ajuste de pago que el usuario ha fijado.
+            //
+            // El valor forma parte de la huella a proposito: sin el, cambiar el
+            // angulo de -30 a -45 deja el conjunto igual -"label angle"- y el
+            // aviso no volvia a salir. Desde fuera se lee como que el visual ha
+            // dejado de responder.
+            const touched: { label: string; key: string }[] = [];
+            const add = (v: any, label: string) => {
+                if (v !== undefined) touched.push({ label, key: `${label}=${JSON.stringify(v)}` });
+            };
+            add(lbl?.labelRotation,            "label angle");
+            add(lbl?.labelMaxChars,            "label truncation");
+            add(lbl?.hideOverlapping,          "hiding labels that do not fit");
+            add(setObjects?.ibcs?.mode,        "IBCS mode");
+            add(setObjects?.tableSettings?.show, "the data table");
+
+            const needsLicence = groupedByTier || touched.length > 0;
             this.notifier?.required(this.license, needsLicence);
-            if (touchedPro.length) {
-                this.notifier?.blocked(this.license, touchedPro.join(", "));
+            if (touched.length) {
+                this.notifier?.blocked(
+                    this.license,
+                    touched.map(t => t.label).join(", "),
+                    touched.map(t => t.key).sort().join("|"));
             } else if (groupedByTier) {
-                this.notifier?.blocked(this.license, `${driversInData} individual drivers`);
+                this.notifier?.blocked(
+                    this.license,
+                    `${driversInData} individual drivers`,
+                    `grouped:${driversInData}`);
             }
 
             this.host.eventService.renderingFinished(options);
@@ -310,6 +339,26 @@ export class Visual implements IVisual {
     // ── Context menu ─────────────────────────────────────────────────────────
 
     // Context menu ahora se maneja en el constructor sobre this.container (ver arriba)
+
+    /**
+     * Traduce los selection IDs que devuelve Power BI a indices de barra.
+     *
+     * Se comparan con equals() y no por identidad: los que llegan de un bookmark
+     * son objetos reconstruidos, no los mismos que emitio el visual, asi que un
+     * === no encontraria ninguno y toda seleccion restaurada se leeria como
+     * vacia.
+     */
+    private indicesFromSelection(ids: powerbi.extensibility.ISelectionId[]): Set<number> {
+        const out = new Set<number>();
+        if (!ids?.length) return out;
+        this.selectionIds.forEach((sid, i) => {
+            if (!sid) return;
+            const match = ids.some(id =>
+                (sid as any).equals ? (sid as any).equals(id) : sid === id);
+            if (match) out.add(i);
+        });
+        return out;
+    }
 
     // ── Selection IDs ─────────────────────────────────────────────────────────
 
