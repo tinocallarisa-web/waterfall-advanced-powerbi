@@ -65,8 +65,9 @@ formatted separately.
 IN THE REPORT
 
 Cross-filtering with multi-select, cross-highlighting, bookmarks, report page tooltips,
-right-click context menu, keyboard navigation and high contrast. Interface strings in
-English, Spanish, French and German.
+right-click context menu, keyboard navigation and high contrast. The chart labels and
+summary cards follow the Power BI language setting in English, Spanish, French and
+German; the format pane is in English.
 
 PRIVACY
 
