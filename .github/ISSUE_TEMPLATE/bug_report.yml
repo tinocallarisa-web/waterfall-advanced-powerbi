@@ -1,0 +1,95 @@
+name: Bug report
+description: Something in Waterfall Advanced does not work as documented
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: the [support page](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html)
+        covers the questions that come up most, including bar types aggregating as
+        *Sum* instead of *First*, the "Others" bar on the free tier, and Pro
+        features that appear inert until the licence resolves.
+
+        For anything about billing or your licence, email support@tcviz.com
+        instead — a public issue is not the place for tenant details.
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Which tier are you on?
+      options:
+        - Free
+        - Pro
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where does it happen?
+      options:
+        - Power BI Desktop
+        - Power BI Service (app.powerbi.com)
+        - Both
+        - Export to PDF or PowerPoint
+        - Embedded / Publish to Web
+    validations:
+      required: true
+  - type: input
+    id: visual-version
+    attributes:
+      label: Visual version
+      description: Power BI Desktop shows it in the visual's information panel, or see the format pane footer.
+      placeholder: "1.1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: desktop-version
+    attributes:
+      label: Power BI Desktop version
+      description: Help → About. Leave blank if this only happens in the Service.
+      placeholder: "2.140.1454.0 (September 2026)"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, what you expected, what happened instead.
+      placeholder: |
+        1. Added Category = P&L line, Value = Amount, Bar type = Type
+        2. Turned on Show subtotals
+        3. Expected Gross Profit drawn from zero; it floated from the running total
+    validations:
+      required: true
+  - type: textarea
+    id: data-shape
+    attributes:
+      label: Shape of the data
+      description: |
+        This is the field that resolves most reports. How many rows reach the
+        visual, the range of the values, which wells are connected, how Bar type
+        is aggregated (First or Sum), and whether Order is set to "Do not
+        summarize". A small sample table is ideal; do not paste confidential
+        figures — rename the lines and round the numbers.
+      placeholder: |
+        14 rows. Values from -420,000 to 1,250,000.
+        Wells: Category, Value, Bar type (First), Order (Do not summarize).
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Relevant format pane settings
+      description: Orientation, label mode, data table, IBCS mode, anything you changed from the default.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag images in. A picture of the wrong bridge is worth three paragraphs.
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser console output
+      description: |
+        In the Service, F12 → Console. In Desktop there is no console, so leave
+        this blank. Paste the text, not a screenshot.
+      render: text

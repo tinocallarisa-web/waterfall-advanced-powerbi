@@ -136,7 +136,7 @@ actual, which is the other half of the audience.
 | Privacy policy | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/privacy.html |
 | Terms of use | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html |
 | Repository (certification branch) | https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification |
-| Demo video | https://www.youtube.com/watch?v=deKjCfa4_M8 |
+| Demo video | https://www.youtube.com/watch?v=zDxpsXMD3WM |
 
 **The repository slug is `waterfall-advanced-powerbi`** — not `Waterfall`, which is only
 the local folder name.
@@ -161,4 +161,6 @@ has been stopped and the code no longer recognises it.
 - [ ] Version 1.1.0.0 is above the published 1.0.8.0
 - [ ] Screenshots updated — the current ones predate the data table, which is the feature
       that shows best in a thumbnail
-- [ ] Next video should show the data table; the current one still walks the 1.0.x chart
+- [x] Video re-recorded for 1.1.0.0 (2026-09-12): https://youtu.be/zDxpsXMD3WM — replaces
+      the 1.0.x walkthrough. Update the video URL in the offer; the old one is still live on
+      YouTube, so an un-updated field does not 404 and nothing warns you.

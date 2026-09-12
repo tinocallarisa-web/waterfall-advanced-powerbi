@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog — Waterfall Advanced | TCViz</title>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 24px; color: #3D3929; line-height: 1.7; background: #FAF9F5; }
+    h1 { font-size: 28px; color: #B05730; margin-bottom: 4px; }
+    h2 { font-size: 21px; margin-top: 44px; color: #C96442; border-bottom: 1px solid #DAD9D4; padding-bottom: 6px; }
+    h2 .date { font-size: 13px; font-weight: 400; color: #83827D; margin-left: 8px; }
+    h3.kind { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 8px; color: #535146; }
+    h3.kind-fixed { color: #B05730; }
+    h3.kind-added { color: #4B7A4E; }
+    h3.kind-removed { color: #83827D; }
+    a { color: #B05730; }
+    code { background: #EDE9DE; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+    ul { padding-left: 22px; }
+    li { margin-bottom: 10px; }
+    footer { margin-top: 60px; font-size: 12px; color: #83827D; border-top: 1px solid #DAD9D4; padding-top: 16px; }
+    .meta { font-size: 14px; color: #535146; }
+  </style>
+</head>
+<body>
+  <h1>Changelog — Waterfall Advanced</h1>
+  <p class="meta">Current version <strong>1.1.0.0</strong> &nbsp;|&nbsp;
+    <a href="support.html">Support</a> &nbsp;|&nbsp;
+    <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank" rel="noopener">GitHub</a> &nbsp;|&nbsp;
+    <a href="https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced" target="_blank" rel="noopener">AppSource</a></p>
+
+  <p>All notable changes to this project are documented here. Format follows <a href="https://keepachangelog.com/en/1.0.0/" target="_blank" rel="noopener">Keep a Changelog</a>.</p>
+  <h2 id="v1.1.0.0">1.1.0.0 <span class="date">2026-09-10</span></h2>
+  <h3 class="kind kind-fixed">Fixed</h3>
+  <ul>
+  <li><strong>The licence could never be granted.</strong> <code>licenseManager</code> called <code>getAvailabilityStatusForServicePlan()</code>, which is not part of the API — <code>IVisualLicenseManager</code> has exactly four methods: <code>getAvailableServicePlans</code>, <code>notifyLicenseRequired</code>, <code>notifyFeatureBlocked</code> and <code>clearLicenseNotification</code>. The call threw, the <code>catch</code> swallowed it, and the fallback decided the tier from <code>window.location.hostname === "localhost"</code> — true while developing, false everywhere else. <strong>Every published user resolved to the free tier, whatever they had paid.</strong> It worked perfectly in local development, which is why it survived.</li>
+  </ul>
+  <p>The check now compares the plan identifier against this visual's Pro plan. That matters more here than elsewhere: the offer publishes a free plan as well as a paid one, so "does the user hold an active plan?" is true for free users too.</p>
+  <ul>
+  <li><strong>A licence in its payment grace period was treated as absent.</strong> <code>Warning</code> is accepted alongside <code>Active</code>, so a paying customer no longer loses features while a billing problem is resolved.</li>
+  </ul>
+  <ul>
+  <li><strong>Publish to Web, embedding and PDF export asked a paying customer to buy.</strong> <code>isLicenseUnsupportedEnv</code> and <code>isLicenseInfoAvailable</code> are honoured: the free experience renders there, and nobody is prompted to buy what they may own.</li>
+  </ul>
+  <ul>
+  <li><strong>Rotated category labels fell outside the canvas.</strong> The bottom margin reserved the height of a line of text. A label at −45° extends downwards by its *width* times the sine of the angle, so rotating pushed the labels off the chart and Power BI clipped them — the opposite of what rotating is for.</li>
+  </ul>
+  <ul>
+  <li><strong>Category labels touched the left edge in horizontal orientation.</strong> The margin was computed at a fixed 6px per character and capped at 160px, which falls short at larger font sizes. It now follows the real font size, allows up to 45% of the width, and reserves a gutter so the longest label never sits against the frame.</li>
+  </ul>
+  <h3 class="kind kind-added">Added</h3>
+  <ul>
+  <li><strong>Colour-blind safe palette.</strong> Okabe-Ito blue and orange, which stay distinguishable under deuteranopia and protanopia — where the default green and red do not. It affects around 8% of men, and a financial bridge is where mistaking a rise for a fall costs most. <strong>Free</strong>, deliberately: accessibility behind a paywall is indefensible.</li>
+  </ul>
+  <ul>
+  <li><strong>Hatched decreases.</strong> WCAG 1.4.1 requires that colour is not the only means of conveying information. In a bridge, up versus down *is* the information. With the hatch on, a decrease still reads in black and white, in print, and with colour blindness. Applied only to negative <code>delta</code> bars — a negative total is a result, not a fall. <strong>Free.</strong></li>
+  </ul>
+  <ul>
+  <li><strong>Conditional formatting on bar colour (<code>fx</code>).</strong> The native rule dialog, resolved per category. It coexists with the *Color (DAX)* field well, which still wins when populated.</li>
+  </ul>
+  <ul>
+  <li><strong>Summary Cards section</strong> in the format pane: show, caption and value font sizes, text colour and background, each with a "follow the theme" switch. These controls previously lived split between *Chart* and *Colors*.</li>
+  </ul>
+  <ul>
+  <li><strong>Configurable legend font size</strong>, with the swatch and spacing following it. They were fixed at 78px, so raising the size made the labels overlap.</li>
+  </ul>
+  <ul>
+  <li><strong>Label density controls (Pro):</strong> category label angle (0°, −30°, −45°, −90°), truncation at a chosen number of characters, cutting on a word boundary, and hiding labels that do not fit. Automatic truncation to the available margin stays free — that is correctness, not a feature.</li>
+  </ul>
+  <ul>
+  <li><strong>IBCS mode (Pro).</strong> Monochrome notation: neutral charcoal for totals and subtotals, mid grey for increases and near-black for decreases, with the emphasis on the negative deviation, which is what a bridge is read for.</li>
+  </ul>
+  <h3 class="kind kind-changed">Changed</h3>
+  <ul>
+  <li><strong>The free limit groups instead of truncating, and rises from 8 to 12 drivers.</strong> Truncating left a bridge that does not balance: the closing bar was no longer the sum of what preceded it, and a reader who did not know a limit existed simply saw a wrong chart. The smaller drivers are now grouped into "Others", so the bridge still closes on the same figure and the numbers stay correct — what is lost is granularity, which is a legitimate reason to pay. Twelve is the size of a standard P&amp;L walk, so the free tier covers the main case rather than breaking on it.</li>
+  </ul>
+  <ul>
+  <li><strong>The target line says what it is.</strong> It read <code>▸ tgt</code>, which nobody outside this codebase understands, and carried no figure — so it showed that a target existed but not whether it was met. The label is now configurable, defaults to "Target", optionally carries the value, and moves to the other side of the line rather than falling off the canvas.</li>
+  </ul>
+  <ul>
+  <li><strong><code>allowInteractions</code> is honoured</strong> before selecting, clearing and opening the context menu.</li>
+  </ul>
+  <h3 class="kind kind-removed">Removed</h3>
+  <ul>
+  <li><strong>AI narratives, and with them the Finance tier.</strong> The feature called <code>api.anthropic.com</code> and <code>api.openai.com</code> directly from the visual. A certified Power BI visual may not access external services, and declaring the <code>WebAccess</code> privilege — the only way to make those calls work — forfeits certification. The calls were therefore blocked by the sandbox CSP in every published report: the feature could not work as shipped. It also stored the user's API key as a formatting property, which travels inside the <code>.pbix</code> in clear text to anyone who receives the file.</li>
+  </ul>
+  <ul>
+  <li><strong>The licence overlay drawn inside the chart</strong> — a white rectangle with a padlock over the bars beyond the free limit, and an upgrade banner linking to the generic AppSource storefront. It was licensing UI of the visual's own, which Microsoft's guidance advises against, it behaved as a watermark on the free tier, and the link was a dead end. Power BI's own notifications replace it, and a neutral note states how many drivers are grouped.</li>
+  </ul>
+  <h3 class="kind kind-documentation">Documentation</h3>
+  <ul>
+  <li><strong><code>support.html</code>, <code>privacy.html</code> and <code>terms.html</code> were still the 1.0.x pages.</strong> Support documented an "AI Narratives Setup (Finance)" section with instructions for pasting an Anthropic or OpenAI API key; the privacy policy described sending chart data to those providers; the terms sold a Finance tier at $49/user/month and capped the free tier at 8 bars. All three are live pages of an offer where none of that exists any more, and the real free limit is twelve. Rewritten against <code>capabilities.json</code> and <code>settings.ts</code>: the seven actual field wells, the real Free/Pro split, a format pane reference by card, and the keyboard support as it is implemented — Tab, Enter, Space and Ctrl, with no arrow-key navigation, which the page no longer implies.</li>
+  <li><strong><code>changelog.html</code></strong>, generated from this file by <code>scripts/gen-changelog.js</code> and served from the repo root. A changelog that is not served is not a release-activity signal for anything that crawls the offer.</li>
+  <li><strong>A search box on <code>support.html</code></strong> — no dependencies, <code>aria-live</code> for the count, Escape to clear, and it only hides sections that are already in the HTML, so the page reads complete if the script fails to load.</li>
+  <li><strong>Issue templates</strong> in <code>.github/ISSUE_TEMPLATE/</code> as YAML forms, with a bug report that asks for the shape of the data — the field that resolves most reports — and contact links to the support page, the video and the changelog.</li>
+  <li><strong>A <code>LICENSE</code> file.</strong> The repository is public so Microsoft can review the source; that is not a grant of rights to the code, and until now nothing said so.</li>
+  <li><strong>The demo video was re-recorded for 1.1.0.0</strong> and the new URL propagated to the README, the AppSource listing copy, both certification notes, the support page and the product page on tcviz.com. The 1.0.x walkthrough predated the data table.</li>
+  <li><strong><code>docs/infographic.html</code></strong> — the 1366 × 768 listing image, with an overflow warning outside the captured element.</li>
+  <li>The package <code>description</code> no longer advertises AI narratives or a Finance tier. It is what Power BI Desktop shows in the visual's information panel.</li>
+  </ul>
+  <h2 id="v1.0.8.0">1.0.8.0 <span class="date">2026-08-20</span></h2>
+  <p>Published to AppSource. Multi-selection, high-contrast palette support and renderer rework.</p>
+  <p>&gt; The source of this release was never committed: the repository stopped at &gt; 1.0.6.0 while 1.0.8.0 was live. Restored in 1.1.0.0.</p>
+  <h2 id="v1.0.7.0">1.0.7.0 <span class="date">2026-08</span></h2>
+  <p>Not committed at the time. See the note above.</p>
+  <h2 id="v1.0.6.0">1.0.6.0 <span class="date">2026-08</span></h2>
+  <p>Rendering events fixed for the 1:1 ratio; sample file hints added.</p>
+  <h2 id="v1.0.5.0">1.0.5.0 <span class="date">2026-08</span></h2>
+  <p>Context menu listener moved to the stable container element.</p>
+  <h2 id="v1.0.4.0">1.0.4.0 <span class="date">2026-07</span></h2>
+  <p>Context menu on bars and empty space; <code>supportsContextMenu</code> removed.</p>
+
+  <footer>
+    Generated from CHANGELOG.md by scripts/gen-changelog.js — do not edit this file by hand.<br />
+    &copy; 2026 TCViz. &nbsp;|&nbsp;
+    <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
+    <a href="terms.html">Terms of Use</a>
+  </footer>
+</body>
+</html>

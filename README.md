@@ -11,8 +11,8 @@ P&L walk a committee can read.
 [![License](https://img.shields.io/badge/license-Commercial-orange)](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html)
 
 📖 **[Documentation & Support](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html)** ·
-🎬 **[Video walkthrough](https://www.youtube.com/watch?v=deKjCfa4_M8)** ·
-📝 **[Changelog](./CHANGELOG.md)** ·
+🎬 **[Video walkthrough](https://www.youtube.com/watch?v=zDxpsXMD3WM)** ·
+📝 **[Changelog](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html)** ·
 💡 **[Tips & Hints](./TIPS-AND-HINTS.md)**
 
 ---

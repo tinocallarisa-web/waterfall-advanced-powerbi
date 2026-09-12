@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and support
+    url: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html
+    about: Field wells, format pane reference, accessibility and the questions that come up most.
+  - name: Video walkthrough
+    url: https://www.youtube.com/watch?v=zDxpsXMD3WM
+    about: Building a P&L bridge from scratch, including the data table and IBCS mode.
+  - name: Changelog
+    url: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html
+    about: What changed in each version. Check here before reporting a bug that may already be fixed.
+  - name: Licensing, billing and tenant questions
+    url: mailto:support@tcviz.com
+    about: Anything involving your subscription or tenant. Email, not a public issue.
+  - name: All TCViz visuals
+    url: https://tcviz.com
+    about: The rest of the portfolio.

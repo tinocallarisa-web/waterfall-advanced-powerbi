@@ -1,0 +1,53 @@
+name: Feature request
+description: Something a financial bridge needs and this visual cannot do
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most useful requests describe the report you are trying to produce,
+        not the control you imagine. A bridge that has to reconcile two budget
+        versions is a problem statement; "add a second target line" is one
+        possible answer to it, and maybe not the best one.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to produce?
+      description: The report, the audience, and what about it does not work today.
+      placeholder: |
+        A monthly EBITDA bridge for the board pack. Two of the checkpoints need
+        to show last year's figure next to this year's, and today the target line
+        only lands on the anchor bars.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the visual?
+      options:
+        - Bar types, subtotals and the bridge itself
+        - Labels and number formatting
+        - Target lines and variance
+        - Data table
+        - Summary cards
+        - Colours, themes, IBCS
+        - Accessibility and keyboard
+        - Drilldown, filtering, bookmarks
+        - Localisation
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: How are you working around it now?
+      description: |
+        A DAX measure, a matrix beside the chart, an export to Excel — whatever it
+        is. It tells us how much the gap costs, and sometimes the workaround is
+        better than the feature.
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind (optional)
+      description: If you already know the control or behaviour you want, describe it here.

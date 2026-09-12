@@ -1,0 +1,36 @@
+Waterfall Advanced — Power BI custom visual
+Copyright (c) 2026 TCViz. All rights reserved.
+
+PROPRIETARY AND COMMERCIAL. This is not open source software.
+
+This repository is published so that Microsoft can review the source of what is
+distributed through AppSource, and so that users of the visual can read how it
+works, what it does with their data and what changed in each version. Publishing
+it grants no licence to the code.
+
+You MAY:
+
+  - read, inspect and audit this source code;
+  - build it locally for the purpose of evaluating or verifying the published
+    visual;
+  - quote short excerpts when reporting a bug or discussing the visual.
+
+You MAY NOT, without prior written permission from TCViz:
+
+  - redistribute this code or any derivative of it, in source or compiled form;
+  - publish a visual derived from it, to AppSource or anywhere else;
+  - incorporate it into another product, commercial or free;
+  - remove, bypass or alter the licence verification, or distribute a build in
+    which it has been removed, bypassed or altered.
+
+USE OF THE VISUAL is governed by the Terms of Use, not by this file:
+https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Questions about licensing: support@tcviz.com

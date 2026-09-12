@@ -1,0 +1,117 @@
+================================================================================
+YOUTUBE — Waterfall Advanced v1.1.0.0
+Video: https://www.youtube.com/watch?v=zDxpsXMD3WM
+================================================================================
+
+IMPORTANT — the chapter timestamps below are PLACEHOLDERS. Watch the upload once
+and replace them with the real times. YouTube only renders chapters if the first
+one is 0:00, there are at least three, and each lasts 10 seconds or more. A wrong
+timestamp is worse than no chapters: the viewer clicks and lands mid-sentence.
+
+
+--------------------------------------------------------------------------------
+DESCRIPTION (paste into the YouTube description field)
+--------------------------------------------------------------------------------
+
+Power BI's built-in waterfall handles category movement. It does not handle a
+bridge: an opening anchor, the drivers that explain the movement, the intermediate
+checkpoints a finance reader expects, and a closing total. Without those, a P&L
+walk is a row of floating bars and the reader has to reconstruct the story
+themselves.
+
+Waterfall Advanced adds the one thing that changes that — semantic control over
+what each bar means. Mark a row as a total, a subtotal or a driver, and the chart
+draws the bridge your finance team already has in their heads.
+
+CHAPTERS
+0:00 The problem with the built-in waterfall
+0:00 Totals, subtotals and drivers — bar types from your model
+0:00 Intermediate checkpoints: Net Revenue, Gross Profit, EBITDA
+0:00 Target line and automatic anomaly flags
+0:00 Summary cards: opening, closing, variance, biggest gain and loss
+0:00 Horizontal layout and hierarchical drilldown
+0:00 Colour-blind safe palette and hatched decreases
+0:00 The data table: the numbers beside the chart (Pro)
+0:00 IBCS monochrome mode (Pro)
+0:00 Free vs Pro, and how the free limit groups into "Others"
+
+WHAT IT DOES
+• Totals, subtotals and drivers as distinct bar types, driven by a column in your
+  model — not guessed from position
+• Intermediate checkpoints drawn from zero, so a reader sees where the margin
+  stood before the next block of costs
+• Horizontal or vertical, because line-item names read better down the side
+• Hierarchical drilldown: start at region, open into country or product without
+  leaving the bridge
+• A target line on the anchor bars, with its own label and figure
+• Drivers beyond two standard deviations from the mean flagged automatically
+• Summary cards: opening, closing, variance %, biggest gain, biggest loss
+• Conditional formatting on bar colour through the native fx dialog, or a hex
+  colour per row calculated in your model
+
+READABLE ON PURPOSE
+A colour-blind safe palette and hatched decreases, both in the free tier. Around
+8% of men cannot reliably separate red from green, and a bridge is where mistaking
+a rise for a fall costs most. With the hatch on, the chart still reads printed in
+black and white — which is how half of these end up, in a committee pack.
+
+IN THE REPORT
+Cross-filtering with multi-select, cross-highlighting, bookmarks, report page
+tooltips, right-click context menu, keyboard navigation and high contrast.
+Interface strings in English, Spanish, French and German.
+
+PRIVACY
+No network calls of any kind: no telemetry, no analytics, no CDN, no endpoints.
+All calculation and rendering happens inside Power BI, on your machine or your
+tenant.
+
+FREE AND PRO
+The free tier is the whole bridge: totals, subtotals, drivers, connectors, both
+orientations, drilldown, the target line, conditional formatting, the accessible
+palette, summary cards, cross-filtering, bookmarks, keyboard and high contrast —
+with twelve individual drivers, the size of a standard P&L walk. Above twelve the
+smallest drivers are grouped into an "Others" bar: the bridge still closes on the
+same figure, the detail is coarser, nothing is lost.
+
+Pro adds every driver individually, the data table, IBCS mode and the label
+density controls. 30-day free trial on AppSource.
+
+LINKS
+Get it on AppSource: https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced
+Documentation and support: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html
+Changelog: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html
+GitHub: https://github.com/tinocallarisa-web/waterfall-advanced-powerbi
+All TCViz visuals: https://tcviz.com
+
+#PowerBI #DataVisualization #FinancialReporting #WaterfallChart #FPandA #BusinessIntelligence #IBCS
+
+
+--------------------------------------------------------------------------------
+SHORT VERSION (for Shorts, LinkedIn or an embed caption — under 500 characters)
+--------------------------------------------------------------------------------
+
+Power BI's waterfall shows category movement. It does not draw a bridge. Waterfall
+Advanced lets you mark each row as a total, a subtotal or a driver, so a P&L walk
+gets its opening anchor, its checkpoints — Gross Profit, EBITDA — and a closing
+total. Colour-blind safe palette and hatched decreases. Free up to twelve drivers;
+Pro adds unlimited drivers, a data table and IBCS mode.
+
+
+--------------------------------------------------------------------------------
+FIVE ALTERNATIVE TITLES
+--------------------------------------------------------------------------------
+
+1. Build a real P&L bridge in Power BI — Waterfall Advanced
+2. Power BI's waterfall can't do subtotals. This one can.
+3. EBITDA bridge in Power BI, with checkpoints and a data table
+4. Waterfall Advanced for Power BI — totals, subtotals and drivers
+5. Stop rebuilding the P&L walk in Excel — Waterfall Advanced for Power BI
+
+
+--------------------------------------------------------------------------------
+PINNED COMMENT (optional)
+--------------------------------------------------------------------------------
+
+Free tier covers the whole bridge up to twelve drivers — above that the smallest
+are grouped into "Others" so the total still closes correctly. Questions or a bug?
+support@tcviz.com or the GitHub issues link above.

@@ -104,9 +104,25 @@ the developer's machine. Restored in this release, and the gap is recorded in
 | Privacy Policy | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/privacy.html |
 | Terms of Use | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html |
 | Support | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html |
-| Demo video | https://www.youtube.com/watch?v=deKjCfa4_M8 |
+| Changelog | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html |
+| Demo video | https://www.youtube.com/watch?v=zDxpsXMD3WM |
 
-All three pages verified with a real request: HTTP 200.
+All four pages are served from the repository root by GitHub Pages. The privacy,
+terms and support pages were rewritten for 1.1.0.0 and `changelog.html` is new, so
+**request all four in a browser after the push and before submitting** — Pages takes
+minutes to deploy and a cached fetch will report 200 on a page that is not live yet.
+The URLs themselves are unchanged from 1.0.8.0.
+
+### What changed in the documentation for 1.1.0.0
+
+The three published pages still described 1.0.x: the support page documented an AI
+narrative feature with instructions for pasting an Anthropic or OpenAI API key, the
+privacy policy described sending aggregated chart data to those providers, and the
+terms sold a Finance tier and capped the free tier at 8 bars. None of that exists in
+this build. All three were rewritten against `capabilities.json` and
+`src/settings.ts`, so the documented field wells, tier split and keyboard behaviour
+now match the code — including the absence of arrow-key navigation, which the support
+page states plainly rather than implying.
 
 ## Data access & privacy
 

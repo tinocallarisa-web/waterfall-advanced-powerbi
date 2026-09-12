@@ -16,14 +16,14 @@ is true for free users. Warning accepted alongside Active. isLicenseUnsupportedE
 isLicenseInfoAvailable honoured. The chart repaints when the licence resolves.
 
 NO LICENSING UI OF OUR OWN
-The padlock overlay, the upgrade banner linking to the generic storefront and the
+The padlock overlay, the upgrade banner and the
 "FREE - 8 bars max" landing badge are removed. notifyFeatureBlocked and
 notifyLicenseRequired carry the purchase path, fired from metadata.objects, which holds
 only what the user set - so nothing fires on an untouched report.
 
 DATA
 Only the categorical dataView (Category, Value, Target, Bar type, Order, Tooltips, Colour).
-No local file access. Nothing persisted outside the .pbix beyond formatting props.
+No local file access. Nothing persisted beyond formatting props in the .pbix.
 
 TIERS
 Free: the whole bridge - totals, subtotals, deltas, connectors, both orientations,
@@ -41,4 +41,4 @@ stays and Power BI raises its notification; remove it and it clears.
 
 URLs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/ + privacy.html,
 terms.html, support.html - Repo github.com/tinocallarisa-web/waterfall-advanced-powerbi
-(certification)
+(certification) - Video https://youtu.be/zDxpsXMD3WM

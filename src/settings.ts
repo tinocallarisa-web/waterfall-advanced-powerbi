@@ -241,8 +241,6 @@ class ChartSettings extends FormattingSettingsCard {
         this.sortBars, this.invertColorSemantics, this.maxCategories, this.otherLabel, this.orientation];
 }
 
-// ─── AI Narrative settings (Finance tier only) ────────────────────────────────
-
 class CardSettings extends FormattingSettingsCard {
     show = new formattingSettings.ToggleSwitch({
         name: "show", displayName: "Show summary cards", value: true

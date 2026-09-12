@@ -112,6 +112,37 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   link was a dead end. Power BI's own notifications replace it, and a neutral note
   states how many drivers are grouped.
 
+### Documentation
+
+- **`support.html`, `privacy.html` and `terms.html` were still the 1.0.x pages.**
+  Support documented an "AI Narratives Setup (Finance)" section with instructions
+  for pasting an Anthropic or OpenAI API key; the privacy policy described sending
+  chart data to those providers; the terms sold a Finance tier at $49/user/month
+  and capped the free tier at 8 bars. All three are live pages of an offer where
+  none of that exists any more, and the real free limit is twelve. Rewritten
+  against `capabilities.json` and `settings.ts`: the seven actual field wells, the
+  real Free/Pro split, a format pane reference by card, and the keyboard support as
+  it is implemented — Tab, Enter, Space and Ctrl, with no arrow-key navigation,
+  which the page no longer implies.
+- **`changelog.html`**, generated from this file by `scripts/gen-changelog.js` and
+  served from the repo root. A changelog that is not served is not a release-activity
+  signal for anything that crawls the offer.
+- **A search box on `support.html`** — no dependencies, `aria-live` for the count,
+  Escape to clear, and it only hides sections that are already in the HTML, so the
+  page reads complete if the script fails to load.
+- **Issue templates** in `.github/ISSUE_TEMPLATE/` as YAML forms, with a bug report
+  that asks for the shape of the data — the field that resolves most reports — and
+  contact links to the support page, the video and the changelog.
+- **A `LICENSE` file.** The repository is public so Microsoft can review the source;
+  that is not a grant of rights to the code, and until now nothing said so.
+- **The demo video was re-recorded for 1.1.0.0** and the new URL propagated to the
+  README, the AppSource listing copy, both certification notes, the support page and
+  the product page on tcviz.com. The 1.0.x walkthrough predated the data table.
+- **`docs/infographic.html`** — the 1366 × 768 listing image, with an overflow
+  warning outside the captured element.
+- The package `description` no longer advertises AI narratives or a Finance tier.
+  It is what Power BI Desktop shows in the visual's information panel.
+
 ---
 
 ## [1.0.8.0] — 2026-08-20

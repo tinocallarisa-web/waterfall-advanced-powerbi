@@ -1,0 +1,42 @@
+================================================================================
+YOUTUBE TAGS — Waterfall Advanced v1.1.0.0
+================================================================================
+
+YouTube caps the tag field at 500 characters INCLUDING the commas. The block
+below is 388. Paste it as one line.
+
+--------------------------------------------------------------------------------
+
+power bi,power bi waterfall,waterfall chart,bridge chart,power bi bridge chart,p&l bridge,ebitda bridge,variance analysis,power bi custom visual,power bi visuals,financial reporting,fp&a,management reporting,budget vs actual,power bi finance,data visualization,business intelligence,ibcs,waterfall advanced,tcviz,power bi tutorial,subtotals,drill down,colour blind safe,power bi appsource
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+Deliberately left out, and why:
+
+
+
+
+
+- "certified" / "power bi certified": 1.0.8.0 carried the badge, but 1.1.0.0 has
+
+
+  not been submitted yet. Only Partner Center says what is published, so the
+
+
+  claim is unverified — add it once 1.1.0.0 is certified.
+
+
+- "free power bi visual": the visual has a paid tier; the phrase attracts the
+
+
+  wrong viewer and the bounce hurts more than the impressions help.
+
+
+- "ai narrative", "chatgpt", "claude": removed in 1.1.0.0. Tagging a feature the
+
+
+  visual no longer has is the fastest way to earn a dislike.

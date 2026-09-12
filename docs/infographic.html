@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Waterfall Advanced — Infographic | TCViz</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/tabler-icons.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#FAF9F5;  --bg2:#EDE9DE;  --bd:#F5F3ED;  --line:#DAD9D4;
+    --t1:#3D3929;  --t2:#535146;   --t3:#83827D;
+    --acc:#C96442; --accd:#B05730; --acc2:#9C87F5; --acc2l:#DBD3F0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #888; font-family: 'Segoe UI', system-ui, sans-serif; color: var(--t1); }
+
+  /* 1366 x 768 EXACTOS. Lo pide Microsoft para la imagen de la ficha, y hay que
+     fijar tambien la altura: si se deja al contenido, el PNG sale con la altura
+     que quede la maqueta y no mide 1366x768. */
+  #infographic {
+    width: 1366px; height: 768px; overflow: hidden;
+    background: var(--bg); padding: 16px 20px;
+    display: grid; grid-template-rows: 82px 92px 1fr 92px 150px 30px; gap: 9px;
+  }
+
+  .row { min-height: 0; }
+
+  /* ── 1. Header ───────────────────────────────────────────────────── */
+  .header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; }
+  .header h1 { font-size: 31px; margin: 0 0 2px; letter-spacing: -0.5px; }
+  .header h1 em { font-style: normal; color: var(--accd); }
+  .header p { margin: 0; font-size: 14px; color: var(--t2); }
+
+  /* ── 2. Use cases ────────────────────────────────────────────────── */
+  .uses { display: grid; grid-template-columns: 26px 1fr 300px; gap: 14px; align-items: center;
+          background: var(--bd); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .vlabel { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10px; font-weight: 700;
+            letter-spacing: 2.5px; color: var(--t3); text-align: center; }
+  .use-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .use { text-align: center; font-size: 10.5px; color: var(--t2); line-height: 1.25; }
+  .use i { display: block; font-size: 21px; color: var(--accd); margin-bottom: 3px; }
+  .callout { background: var(--acc); color: #fff; border-radius: 8px; padding: 9px 12px;
+             font-size: 12px; line-height: 1.4; }
+  .callout strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* ── 3. Body: Free | centre | Pro ────────────────────────────────── */
+  .body { display: grid; grid-template-columns: 1fr 200px 1fr; gap: 14px; }
+  .tier { border: 2px solid var(--acc); border-radius: 10px; padding: 12px 16px; background: #fff; }
+  .tier.pro { border-color: var(--acc2); }
+  .tier h2 { margin: 0 0 2px; font-size: 17px; color: var(--accd); display: flex; align-items: baseline; gap: 8px; }
+  .tier.pro h2 { color: #6B53C7; }
+  .tier h2 span { font-size: 11px; font-weight: 600; color: var(--t3); letter-spacing: 0.5px; }
+  .tier .lead { margin: 0 0 8px; font-size: 11.5px; color: var(--t2); line-height: 1.35; }
+  .tier ul { margin: 0; padding: 0; list-style: none; }
+  .tier li { font-size: 11.5px; color: var(--t1); line-height: 1.5; padding-left: 17px; position: relative; }
+  .tier li::before { content: "\ea5e"; font-family: 'tabler-icons'; position: absolute; left: 0;
+                     color: var(--acc); font-size: 12px; }
+  .tier.pro li::before { color: var(--acc2); }
+
+  .centre { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; }
+  .circle { width: 112px; height: 112px; border-radius: 50%; border: 3px solid var(--acc);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #fff; flex-shrink: 0; }
+  .circle .n { font-size: 34px; font-weight: 700; color: var(--accd); line-height: 1; }
+  .circle .l { font-size: 9.5px; color: var(--t3); letter-spacing: 1px; margin-top: 3px; text-align: center; }
+  .pill { width: 100%; background: var(--bd); border: 1px solid var(--line); border-radius: 7px;
+          padding: 5px 9px; font-size: 10.5px; color: var(--t2); display: flex; justify-content: space-between; gap: 6px; }
+  .pill b { color: var(--t1); }
+
+  /* ── 4. Workflow ─────────────────────────────────────────────────── */
+  .flow { display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+  .steps { display: flex; align-items: stretch; gap: 0; }
+  .step { flex: 1; background: var(--bd); border: 1px solid var(--line); border-radius: 8px;
+          padding: 6px 8px; text-align: center; }
+  .step .k { font-size: 9px; font-weight: 700; color: var(--acc2); letter-spacing: 1px; }
+  .step .v { font-size: 11px; color: var(--t1); line-height: 1.25; margin-top: 1px; }
+  .arrow { display: flex; align-items: center; color: var(--line); font-size: 15px; padding: 0 3px; }
+  .tagline { text-align: center; font-size: 11px; font-style: italic; color: var(--t3); }
+
+  /* ── 5. Bottom grid ──────────────────────────────────────────────── */
+  .bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .panel { background: var(--bd); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .panel h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); }
+  .panel ul { margin: 0; padding-left: 15px; }
+  .panel li { font-size: 11px; color: var(--t2); line-height: 1.45; margin-bottom: 2px; }
+  .panel table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  .panel td { padding: 1.5px 0; color: var(--t2); vertical-align: top; }
+  .panel td.c { color: var(--t1); font-weight: 600; width: 94px; }
+
+  /* ── 6. Footer ───────────────────────────────────────────────────── */
+  .footer { display: flex; align-items: center; justify-content: space-between;
+            border-top: 1px solid var(--line); padding-top: 5px; }
+  .footer .links { font-size: 10.5px; color: var(--t3); }
+  .footer .links b { color: var(--t2); font-weight: 600; }
+
+  /* Controles y avisos — FUERA de #infographic: html2canvas captura ese
+     elemento, y cualquier cosa dentro acabaria dibujada en el PNG que se sube a
+     Partner Center. */
+  .tools { width: 1366px; margin: 14px auto 40px; display: flex; align-items: center; gap: 14px; }
+  .tools button { font: 600 14px 'Segoe UI', system-ui, sans-serif; padding: 10px 20px;
+                  background: var(--accd); color: #fff; border: 0; border-radius: 7px; cursor: pointer; }
+  #warn { font: 13px 'Segoe UI', system-ui, sans-serif; color: #fff; background: #8B2C2C;
+          padding: 8px 14px; border-radius: 6px; display: none; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    body { background: #fff; }
+    .tools { display: none; }
+    #infographic { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div id="infographic">
+
+  <!-- 1. HEADER -->
+  <div class="row header">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 828 362" width="160" height="70">
+      <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#B05730"/>
+        <stop offset="0.55" stop-color="#C96442"/>
+        <stop offset="1" stop-color="#9C87F5"/>
+      </linearGradient></defs>
+      <g transform="translate(40,46)">
+        <rect x="22" y="20" width="150" height="150" rx="30" fill="none" stroke="url(#g)" stroke-width="11"/>
+        <g fill="url(#g)">
+          <rect x="42" y="110" width="20" height="58" rx="5"/>
+          <rect x="70" y="86" width="20" height="82" rx="5"/>
+          <rect x="98" y="62" width="20" height="106" rx="5"/>
+          <rect x="126" y="38" width="20" height="130" rx="5"/>
+        </g>
+      </g>
+      <text x="258" y="246" font-family="Poppins,sans-serif" font-weight="700" font-size="196" letter-spacing="-4">
+        <tspan fill="url(#g)">tc</tspan><tspan fill="#3D3929">viz</tspan>
+      </text>
+      <text x="264" y="306" font-family="Poppins,sans-serif" font-weight="500" font-size="31" letter-spacing="6.5" fill="#83827D">VISUALS TO POWER BI</text>
+    </svg>
+
+    <div>
+      <h1>Waterfall Advanced — the <em>bridge</em> Power BI does not draw</h1>
+      <p>Mark a row as a total, a subtotal or a driver, and the chart draws the P&amp;L walk your finance team already has in their heads.</p>
+    </div>
+
+    <!-- Mini bridge ilustrativo -->
+    <svg viewBox="0 0 190 100" width="190" height="100" role="img" aria-label="Bridge chart with an opening total, drivers, a checkpoint and a closing total">
+      <line x1="0" y1="88" x2="190" y2="88" stroke="#DAD9D4" stroke-width="1"/>
+      <rect x="4"   y="40" width="20" height="48" rx="2" fill="#83827D"/>
+      <rect x="30"  y="28" width="20" height="12" rx="2" fill="#C96442"/>
+      <rect x="56"  y="22" width="20" height="6"  rx="2" fill="#C96442"/>
+      <rect x="82"  y="22" width="20" height="14" rx="2" fill="#9C87F5"/>
+      <rect x="108" y="30" width="20" height="58" rx="2" fill="#83827D"/>
+      <rect x="134" y="30" width="20" height="10" rx="2" fill="#9C87F5"/>
+      <rect x="160" y="40" width="20" height="48" rx="2" fill="#83827D"/>
+      <g stroke="#B05730" stroke-width="1" stroke-dasharray="3 2">
+        <line x1="24" y1="40" x2="30" y2="40"/><line x1="50" y1="28" x2="56" y2="28"/>
+        <line x1="76" y1="22" x2="82" y2="22"/><line x1="102" y1="36" x2="108" y2="36"/>
+        <line x1="128" y1="30" x2="134" y2="30"/><line x1="154" y1="40" x2="160" y2="40"/>
+      </g>
+      <line x1="104" y1="26" x2="186" y2="26" stroke="#3D3929" stroke-width="1" stroke-dasharray="5 3"/>
+    </svg>
+  </div>
+
+  <!-- 2. USE CASES -->
+  <div class="row uses">
+    <div class="vlabel">USE CASES</div>
+    <div class="use-grid">
+      <div class="use"><i class="ti ti-report-money"></i>P&amp;L walk,<br />actual vs budget</div>
+      <div class="use"><i class="ti ti-chart-arrows-vertical"></i>EBITDA<br />bridge</div>
+      <div class="use"><i class="ti ti-cash-banknote"></i>Cash flow<br />movement</div>
+      <div class="use"><i class="ti ti-shopping-cart"></i>Revenue:<br />price, mix, volume</div>
+      <div class="use"><i class="ti ti-users-group"></i>Headcount<br />and payroll</div>
+      <div class="use"><i class="ti ti-building-warehouse"></i>Cost base<br />by driver</div>
+      <div class="use"><i class="ti ti-presentation"></i>Board and<br />committee packs</div>
+    </div>
+    <div class="callout">
+      <strong>Why the built-in one will not do</strong>
+      It shows category movement. It has no subtotal: a checkpoint like Gross
+      Profit floats instead of standing on zero, and the walk stops reconciling.
+    </div>
+  </div>
+
+  <!-- 3. BODY -->
+  <div class="row body">
+    <div class="tier">
+      <h2>Free <span>NO PURCHASE, NO WATERMARK</span></h2>
+      <p class="lead">The whole bridge, up to twelve individual drivers — the size of a standard P&amp;L walk.</p>
+      <ul>
+        <li>Totals, subtotals and drivers, from a column in your model</li>
+        <li>Checkpoints drawn from zero: Net Revenue, Gross Profit, EBITDA</li>
+        <li>Horizontal or vertical, plus hierarchical drilldown</li>
+        <li>Target line on the anchor bars, with its own label and figure</li>
+        <li>Drivers beyond two standard deviations flagged automatically</li>
+        <li>Summary cards: opening, closing, variance %, biggest gain and loss</li>
+        <li>Colour-blind safe palette and hatched decreases</li>
+        <li>Conditional formatting on bar colour, native fx or a DAX hex</li>
+        <li>Cross-filtering, bookmarks, keyboard, high contrast, tooltips</li>
+      </ul>
+    </div>
+
+    <div class="centre">
+      <div class="circle">
+        <div class="n">12</div>
+        <div class="l">FREE DRIVERS<br />BEFORE "OTHERS"</div>
+      </div>
+      <div class="pill"><span>Network calls</span><b>zero</b></div>
+      <div class="pill"><span>Languages</span><b>EN ES FR DE</b></div>
+      <div class="pill"><span>Data roles</span><b>7</b></div>
+      <div class="pill"><span>Free result</span><b>reconciles</b></div>
+    </div>
+
+    <div class="tier pro">
+      <h2>Pro <span>30-DAY TRIAL ON APPSOURCE</span></h2>
+      <p class="lead">Depth of analysis, not a rescue from an incomplete chart. The free bridge is already correct.</p>
+      <ul>
+        <li><b>Every driver individually</b>, however long the walk</li>
+        <li><b>The data table</b>, beside or below the chart: each step with its
+            amount, the running total and its share of the opening figure</li>
+        <li><b>IBCS monochrome notation</b>, with the emphasis on deviation, for
+            standards-based reporting across companies</li>
+        <li><b>Label density controls</b>: angle at −30°, −45° or −90°,
+            truncation at N characters, and hiding labels that do not fit</li>
+      </ul>
+      <p class="lead" style="margin-top:8px">Above twelve drivers the free tier groups the
+        smallest into one "Others" bar. The bridge still closes on the same figure —
+        the detail is coarser, no number is wrong.</p>
+    </div>
+  </div>
+
+  <!-- 4. WORKFLOW -->
+  <div class="row flow">
+    <div class="steps">
+      <div class="step"><div class="k">1 · CATEGORY</div><div class="v">The P&amp;L line or driver name</div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">2 · VALUE</div><div class="v">The amount, signed</div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">3 · BAR TYPE</div><div class="v">total · subtotal · delta, as <i>First</i></div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">4 · ORDER</div><div class="v">Fix the sequence of the walk</div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">5 · TARGET</div><div class="v">Dashed line on the anchors</div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">6 · FORMAT</div><div class="v">Labels, palette, cards</div></div>
+      <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      <div class="step"><div class="k">7 · READ IT</div><div class="v">A walk a committee can follow</div></div>
+    </div>
+    <div class="tagline">Two wells give you a chart. The third gives you a bridge.</div>
+  </div>
+
+  <!-- 5. BOTTOM GRID -->
+  <div class="row bottom">
+    <div class="panel">
+      <h3>Key benefits</h3>
+      <ul>
+        <li><b>It reconciles.</b> Subtotals stand on zero, so the closing bar is the sum of what came before it.</li>
+        <li><b>It survives print.</b> Hatched decreases read in black and white, in the pack that gets photocopied.</li>
+        <li><b>It stays inside Power BI.</b> No telemetry, no endpoints, no CDN — nothing leaves the tenant.</li>
+        <li><b>The free tier is correct, not partial.</b> Grouping beats cropping: a cropped bridge is a wrong bridge.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Tips</h3>
+      <ul>
+        <li>Set <b>Bar type</b> to aggregate as <i>First</i>. As <i>Sum</i> it returns blank and every bar becomes a driver.</li>
+        <li>Set the <b>Order</b> column to "Do not summarize", or the walk sorts alphabetically.</li>
+        <li>Go <b>horizontal</b> when line-item names are long — they read better down the side than rotated.</li>
+        <li>Turn the <b>hatch</b> on even with colour: it is the only cue that survives a greyscale printer.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Format pane</h3>
+      <table>
+        <tr><td class="c">Colors</td><td>Palette, hatch, increase / decrease / total / target, legend</td></tr>
+        <tr><td class="c">Labels</td><td>Mode, size, colours · angle, truncation, overlap (Pro)</td></tr>
+        <tr><td class="c">Number format</td><td>Currency, scale, decimals, separator</td></tr>
+        <tr><td class="c">Chart</td><td>Connectors, subtotals, target, orientation, "Others"</td></tr>
+        <tr><td class="c">Summary Cards</td><td>Five figures, sizes, theme or custom colours</td></tr>
+        <tr><td class="c">Data Table</td><td>Position, running total, % of opening (Pro)</td></tr>
+        <tr><td class="c">IBCS</td><td>Monochrome notation (Pro)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6. FOOTER -->
+  <div class="row footer">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 828 362" width="70" height="30">
+      <defs><linearGradient id="gf" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#B05730"/>
+        <stop offset="0.55" stop-color="#C96442"/>
+        <stop offset="1" stop-color="#9C87F5"/>
+      </linearGradient></defs>
+      <g transform="translate(40,46)">
+        <rect x="22" y="20" width="150" height="150" rx="30" fill="none" stroke="url(#gf)" stroke-width="11"/>
+        <g fill="url(#gf)">
+          <rect x="42" y="110" width="20" height="58" rx="5"/>
+          <rect x="70" y="86" width="20" height="82" rx="5"/>
+          <rect x="98" y="62" width="20" height="106" rx="5"/>
+          <rect x="126" y="38" width="20" height="130" rx="5"/>
+        </g>
+      </g>
+      <text x="258" y="246" font-family="Poppins,sans-serif" font-weight="700" font-size="196" letter-spacing="-4">
+        <tspan fill="url(#gf)">tc</tspan><tspan fill="#3D3929">viz</tspan>
+      </text>
+    </svg>
+    <div class="links">
+      <b>Video</b> youtu.be/zDxpsXMD3WM &nbsp;·&nbsp;
+      <b>Support</b> tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html &nbsp;·&nbsp;
+      <b>Privacy</b> /privacy.html &nbsp;·&nbsp;
+      <b>Terms</b> /terms.html &nbsp;·&nbsp;
+      <b>GitHub</b> github.com/tinocallarisa-web/waterfall-advanced-powerbi
+    </div>
+  </div>
+
+</div>
+
+<div class="tools">
+  <button id="dl">Download PNG (1366 × 768)</button>
+  <span id="warn"></span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+(function () {
+  var el = document.getElementById("infographic");
+
+  // overflow:hidden recorta lo que sobre SIN decir nada. Este aviso compara la
+  // altura real del contenido con los 768 fijos, y vive fuera de #infographic
+  // para no salir dibujado en el PNG.
+  function checkOverflow() {
+    var warn = document.getElementById("warn");
+    var over = el.scrollHeight - 768;
+    if (over > 1) {
+      warn.style.display = "inline-block";
+      warn.textContent = "Content overflows by " + over +
+        "px and is being cropped silently. Trim before exporting.";
+    } else {
+      warn.style.display = "none";
+    }
+  }
+
+  // Las fuentes web cambian la altura al cargar: comprobar antes miente.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(checkOverflow);
+  }
+  window.addEventListener("load", checkOverflow);
+
+  document.getElementById("dl").addEventListener("click", function () {
+    checkOverflow();
+    // width/height FIJOS. Con el.offsetHeight el PNG sale con la altura que haya
+    // quedado la maqueta y no mide 1366x768, que es lo que pide Microsoft.
+    html2canvas(el, { width: 1366, height: 768, scale: 1, backgroundColor: "#FAF9F5" })
+      .then(function (canvas) {
+        var a = document.createElement("a");
+        a.download = "waterfall-advanced-infographic-1366x768.png";
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+      });
+  });
+})();
+</script>
+</body>
+</html>

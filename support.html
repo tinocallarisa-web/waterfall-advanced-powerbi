@@ -5,78 +5,191 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Support — Waterfall Advanced | TCViz</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #222; line-height: 1.7; }
-    h1 { font-size: 28px; color: #1a5276; } h2 { font-size: 18px; margin-top: 32px; color: #2471a3; }
-    a { color: #2471a3; } code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
-    footer { margin-top: 60px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 16px; }
-    .badge { display: inline-block; background: #2980b9; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; vertical-align: middle; }
-    .badge-finance { background: #1a5276; }
-    table { border-collapse: collapse; width: 100%; font-size: 14px; }
-    th, td { border: 1px solid #ddd; padding: 8px 12px; }
-    th { background: #eaf4fb; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 24px; color: #3D3929; line-height: 1.7; background: #FAF9F5; }
+    h1 { font-size: 28px; color: #B05730; margin-bottom: 4px; }
+    h2 { font-size: 19px; margin-top: 36px; color: #C96442; border-bottom: 1px solid #DAD9D4; padding-bottom: 6px; }
+    h3 { font-size: 16px; margin-top: 24px; color: #535146; }
+    a { color: #B05730; }
+    code { background: #EDE9DE; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0; }
+    th, td { border: 1px solid #DAD9D4; padding: 8px 12px; text-align: left; vertical-align: top; }
+    th { background: #EDE9DE; }
+    .badge { display: inline-block; background: #9C87F5; color: #fff; padding: 1px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; vertical-align: middle; }
+    .search-wrap { margin: 24px 0 8px; }
+    #q { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1px solid #DAD9D4; border-radius: 6px; background: #fff; }
+    #count { font-size: 13px; color: #83827D; min-height: 20px; display: block; margin-top: 6px; }
+    .video { margin: 16px 0; padding: 14px 16px; background: #EDE9DE; border-left: 4px solid #C96442; border-radius: 4px; }
+    footer { margin-top: 60px; font-size: 12px; color: #83827D; border-top: 1px solid #DAD9D4; padding-top: 16px; }
+    .note { font-size: 14px; color: #535146; }
+    kbd { background: #EDE9DE; border: 1px solid #DAD9D4; border-radius: 3px; padding: 1px 5px; font-size: 12px; font-family: inherit; }
   </style>
 </head>
 <body>
   <h1>Support — Waterfall Advanced</h1>
-  <p>Published by <strong>TCViz</strong> &nbsp;|&nbsp; <a href="mailto:support@tcviz.com">support@tcviz.com</a></p>
+  <p>Published by <strong>TCViz</strong> &nbsp;|&nbsp; <a href="mailto:support@tcviz.com">support@tcviz.com</a> &nbsp;|&nbsp; version 1.1.0.0</p>
 
-  <h2>Quick Start</h2>
+  <div class="video">
+    🎬 <strong>Video walkthrough</strong> —
+    <a href="https://www.youtube.com/watch?v=zDxpsXMD3WM" target="_blank" rel="noopener">watch it on YouTube</a>.
+    Building a P&amp;L bridge from scratch: bar types, checkpoints, the target line, the data table and IBCS mode.
+  </div>
+
+  <div class="search-wrap">
+    <label for="q" class="note">Search this page</label>
+    <input id="q" type="search" placeholder="subtotal, target, licence, keyboard…" autocomplete="off" />
+    <span id="count" aria-live="polite"></span>
+  </div>
+
+  <h2>Quick start</h2>
   <ol>
-    <li>Add the visual to your Power BI report from Microsoft AppSource.</li>
-    <li>Drag a <strong>Category</strong> column (bar labels) into the Category role.</li>
-    <li>Drag a numeric <strong>Value</strong> measure into the Value role.</li>
-    <li>Optionally connect <strong>Bar Type</strong> (column with values: <code>total</code>, <code>subtotal</code>, <code>delta</code>) and <strong>Sort Order</strong> (numeric column) for full control.</li>
+    <li>Add the visual to your report from Microsoft AppSource.</li>
+    <li>Drag the P&amp;L line or driver name into <strong>Category</strong>.</li>
+    <li>Drag the amount into <strong>Value</strong>. Positive is an increase, negative a decrease.</li>
+    <li>Optionally add <strong>Bar type</strong> — a column holding <code>total</code>, <code>subtotal</code> or <code>delta</code> — so the chart knows which bars are anchors and which are drivers. Aggregate it as <em>First</em>, not <em>Sum</em>.</li>
+    <li>Optionally add <strong>Order</strong> to fix the sequence of the bridge.</li>
   </ol>
 
-  <h2>Data Roles</h2>
+  <h2>Field wells</h2>
   <table>
-    <tr><th>Role</th><th>Type</th><th>Required</th><th>Description</th></tr>
-    <tr><td>Category</td><td>Column (text)</td><td>✅</td><td>Bar labels</td></tr>
-    <tr><td>Value</td><td>Measure</td><td>✅</td><td>Bar values (positive = gain, negative = loss)</td></tr>
-    <tr><td>Target</td><td>Measure</td><td>❌</td><td>Target value shown as dashed line on totals</td></tr>
-    <tr><td>Bar Type</td><td>Measure (text)</td><td>❌</td><td>Values: <code>total</code>, <code>subtotal</code>, <code>delta</code>. Auto-detected if not connected.</td></tr>
-    <tr><td>Sort Order</td><td>Measure (numeric)</td><td>❌</td><td>Controls bar order. Use a numeric column set to "Do not summarize".</td></tr>
+    <tr><th>Well</th><th>Required</th><th>What it does</th></tr>
+    <tr><td>Category</td><td>Yes</td><td>Bar labels. Supports hierarchies and drilldown.</td></tr>
+    <tr><td>Value</td><td>Yes</td><td>Bar amounts. Positive increases, negative decreases.</td></tr>
+    <tr><td>Target (optional)</td><td>No</td><td>Drawn as a dashed line on the anchor bars, with its own label and figure.</td></tr>
+    <tr><td>Bar type</td><td>No</td><td><code>total</code>, <code>subtotal</code> or <code>delta</code>. Aggregate as <em>First</em>. Auto-detected if left empty.</td></tr>
+    <tr><td>Order</td><td>No</td><td>Sequence of the bars. Use a numeric column set to "Do not summarize".</td></tr>
+    <tr><td>Tooltips</td><td>No</td><td>Extra measures shown in the tooltip.</td></tr>
+    <tr><td>Colour (DAX, optional)</td><td>No</td><td>A hex colour per row calculated in your model, e.g. <code>"#C96442"</code>.</td></tr>
   </table>
 
-  <h2>Tier Features</h2>
+  <h2>Bar types and auto-detection</h2>
+  <p>Leave <strong>Bar type</strong> empty and the visual treats the <strong>first and last rows as totals</strong> and everything in between as drivers. That covers a simple opening-to-closing walk.</p>
+  <p>For a real P&amp;L you want checkpoints — Net Revenue, Gross Profit, EBITDA — so connect the well and mark those rows <code>subtotal</code>. A subtotal is drawn from zero, like a total, so a reader sees where the margin stood before the next block of costs. A <code>delta</code> floats from the running total.</p>
+
+  <h2>Free and Pro</h2>
   <table>
-    <tr><th>Feature</th><th>Free</th><th><span class="badge">Pro</span></th><th><span class="badge badge-finance">Finance</span></th></tr>
-    <tr><td>Max bars</td><td>8</td><td>Unlimited</td><td>Unlimited</td></tr>
-    <tr><td>Subtotals</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>Target lines</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>Anomaly detection</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>Summary cards</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>Cross-filtering</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>Number formatting</td><td>✅</td><td>✅</td><td>✅</td></tr>
-    <tr><td>AI executive narratives</td><td>❌</td><td>❌</td><td>✅</td></tr>
+    <tr><th>Feature</th><th>Free</th><th><span class="badge">Pro</span></th></tr>
+    <tr><td>Individual drivers</td><td>12</td><td>All</td></tr>
+    <tr><td>Totals, subtotals, drivers, connectors</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Horizontal and vertical orientation</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Hierarchical drilldown</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Target line</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Anomaly flags (beyond 2 standard deviations)</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Summary cards</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Colour-blind safe palette and hatched decreases</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Conditional formatting on bar colour</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Cross-filtering, bookmarks, keyboard, high contrast</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Data table beside or below the chart</td><td>—</td><td>Yes</td></tr>
+    <tr><td>IBCS monochrome mode</td><td>—</td><td>Yes</td></tr>
+    <tr><td>Label angle, truncation and overlap handling</td><td>—</td><td>Yes</td></tr>
   </table>
+  <p class="note"><strong>What happens above twelve drivers on the free tier:</strong> the smallest drivers are grouped into a single "Others" bar. The bridge still closes on exactly the same figure — the detail is coarser, no number is wrong and nothing is hidden. You can rename that bar in the Chart card.</p>
 
-  <h2>Bar Type Auto-detection</h2>
-  <p>If you don't connect the Bar Type role, the visual automatically treats the <strong>first and last rows</strong> as totals and all middle rows as deltas. For full control (including subtotals), connect a text column with values <code>total</code>, <code>subtotal</code>, or <code>delta</code>.</p>
+  <h2>Format pane</h2>
+  <h3>Colors</h3>
+  <p>Colour-blind safe palette, hatch decreases, increase / decrease / total / target colours, legend font size and colour.</p>
+  <h3>Labels</h3>
+  <p>Show labels, label mode (absolute, relative %, or both), font size, value label colour, category label colour and font size. <span class="badge">Pro</span> adds the category label angle (horizontal, −30°, −45°, −90°), truncation at N characters, and hiding labels that do not fit.</p>
+  <h3>Number format</h3>
+  <p>Currency symbol and position, scale (auto, none, thousands, millions), decimals, thousands separator. Format strings defined in your model are respected.</p>
+  <h3>Chart</h3>
+  <p>Connector lines, show subtotals, target label and value, summary cards, sort by impact, invert increase/decrease colours, max drivers shown, the "Others" label, and orientation.</p>
+  <h3>Summary Cards</h3>
+  <p>Opening, closing, variance %, biggest gain and biggest loss. Caption and value font sizes, and theme-aware or custom text and background colours.</p>
+  <h3>Data Table <span class="badge">Pro</span></h3>
+  <p>Position (right or bottom), running total column, % of opening column, separator line, font size, width or height share, and theme-aware or custom background.</p>
+  <h3>IBCS <span class="badge">Pro</span></h3>
+  <p>Monochrome notation with the emphasis on deviation, for standards-based financial reporting.</p>
 
-  <h2>AI Narratives Setup (Finance)</h2>
-  <ol>
-    <li>Get an API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> (Claude) or <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> (GPT).</li>
-    <li>In Power BI, open the Format pane → <strong>AI Narratives (Finance)</strong>.</li>
-    <li>Select your AI provider, paste your API key, and choose the narrative language.</li>
-    <li>Click the <strong>✦ Generate narrative</strong> button in the visual.</li>
-  </ol>
-  <p><em>Note: AI narratives require Power BI Service (online). The feature is not available in Power BI Desktop due to browser security restrictions on external API calls.</em></p>
+  <h2>In the report</h2>
+  <p>Click a bar to cross-filter the page; Ctrl-click or Cmd-click to add to the selection; click the selected bar again to clear it. Cross-highlighting dims the bars that fall outside a selection made elsewhere. Bookmarks and the selection pane restore the selection. Right-click a bar for the Power BI context menu. The visual can be used as a report page tooltip.</p>
+
+  <h2>Accessibility</h2>
+  <ul>
+    <li><strong>Keyboard:</strong> Tab moves focus through the bars, and the focused bar takes a contrasting outline. <kbd>Enter</kbd> or <kbd>Space</kbd> selects it; holding <kbd>Ctrl</kbd> adds it to the selection. There is no arrow-key navigation between bars.</li>
+    <li><strong>Screen readers:</strong> each bar carries a label with its category and formatted value.</li>
+    <li><strong>Colour:</strong> the colour-blind safe palette and hatched decreases are both free and can be used together, so a rise and a fall differ by pattern as well as hue — including in black and white print.</li>
+    <li><strong>High contrast:</strong> the visual follows the high contrast theme of the report.</li>
+  </ul>
+
+  <h2>Languages</h2>
+  <p>Interface strings in English, Spanish, French and German, following the Power BI language setting.</p>
+
+  <h2>Privacy</h2>
+  <p>The visual makes <strong>no network calls of any kind</strong>: no telemetry, no analytics, no CDN, no external endpoints. All calculation and rendering happens inside Power BI, on your machine or in your tenant. It reads no local files and persists nothing outside the report beyond your formatting choices. Full detail in the <a href="privacy.html">privacy policy</a>.</p>
 
   <h2>FAQ</h2>
-  <p><strong>Bars appear in the wrong order.</strong><br>Connect a numeric column to the Sort Order role. In the data model, set that column to "Do not summarize".</p>
-  <p><strong>Totals and subtotals show as 0.</strong><br>Make sure the Bar Type column contains exactly <code>total</code>, <code>subtotal</code>, or <code>delta</code> (lowercase). Check for trailing spaces.</p>
-  <p><strong>I upgraded to Pro but bars are still limited.</strong><br>Sign out of Power BI and sign back in to refresh your license status.</p>
-  <p><strong>AI narrative shows "Failed to fetch".</strong><br>AI narratives only work in Power BI Service (online), not in Power BI Desktop. Upload your report to app.powerbi.com.</p>
+  <p><strong>Bars appear in the wrong order.</strong><br />Connect a numeric column to the Order well and set it to "Do not summarize" in the data model.</p>
+  <p><strong>Totals and subtotals come out as zero, or as drivers.</strong><br />The Bar type column must contain exactly <code>total</code>, <code>subtotal</code> or <code>delta</code>, and must be aggregated as <em>First</em> — not <em>Sum</em> or <em>Count</em>. Check for trailing spaces.</p>
+  <p><strong>I see an "Others" bar I did not ask for.</strong><br />Either the free tier is grouping the drivers beyond twelve, or <em>Max drivers shown</em> in the Chart card is set to a number. The total is correct in both cases.</p>
+  <p><strong>I bought Pro but the data table or IBCS mode does nothing.</strong><br />Sign out of Power BI and back in to refresh the licence, then reopen the report. The licence resolves asynchronously, so the chart repaints a moment after the report loads. If it persists, email support with your tenant and the plan you bought.</p>
+  <p><strong>Rotated category labels are cut off.</strong><br />Label angle is a Pro control. If labels still collide, raise the angle, lower the category font size, or switch to horizontal orientation — line-item names read better down the side.</p>
+  <p><strong>Where did the AI narratives go?</strong><br />They were removed in 1.1.0.0. They called external services, which a certified Power BI visual may not do, so the sandbox blocked them in every published report — the feature never worked outside development. The Finance tier went with them.</p>
 
   <h2>Contact</h2>
-  <p>Email: <a href="mailto:support@tcviz.com">support@tcviz.com</a><br>
-  GitHub: <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank">github.com/tinocallarisa-web/waterfall-advanced-powerbi</a></p>
+  <p>
+    Email: <a href="mailto:support@tcviz.com">support@tcviz.com</a><br />
+    Report a bug: <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/issues" target="_blank" rel="noopener">GitHub issues</a><br />
+    What changed in each version: <a href="changelog.html">changelog</a><br />
+    Source code: <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank" rel="noopener">github.com/tinocallarisa-web/waterfall-advanced-powerbi</a><br />
+    All TCViz visuals: <a href="https://tcviz.com" target="_blank" rel="noopener">tcviz.com</a>
+  </p>
 
   <footer>
-    &copy; 2025 TCViz. &nbsp;|&nbsp;
+    &copy; 2026 TCViz. &nbsp;|&nbsp;
     <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms of Use</a>
   </footer>
+
+  <script>
+  // Filtro de la pagina. Solo OCULTA secciones ya presentes en el HTML: si el JS
+  // no carga, la pagina se lee completa.
+  (function () {
+    var q = document.getElementById("q");
+    var count = document.getElementById("count");
+    if (!q || !count) return;
+
+    // Una seccion = un h2 mas todo lo que le sigue hasta el h2 siguiente.
+    var sections = [];
+    var nodes = document.body.children;
+    var current = null;
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.tagName === "H2") {
+        current = { heading: n, body: [], text: n.textContent.toLowerCase() };
+        sections.push(current);
+      } else if (current && n.tagName !== "FOOTER" && n.tagName !== "SCRIPT") {
+        current.body.push(n);
+        current.text += " " + n.textContent.toLowerCase();
+      }
+    }
+
+    function apply() {
+      var term = q.value.trim().toLowerCase();
+      if (!term) {
+        sections.forEach(function (s) {
+          s.heading.hidden = false;
+          s.body.forEach(function (b) { b.hidden = false; });
+        });
+        count.textContent = "";
+        return;
+      }
+      var hits = 0;
+      sections.forEach(function (s) {
+        var match = s.text.indexOf(term) !== -1;
+        if (match) hits++;
+        s.heading.hidden = !match;
+        s.body.forEach(function (b) { b.hidden = !match; });
+      });
+      count.textContent = hits === 0
+        ? "Nothing matches that. Email support@tcviz.com."
+        : hits + (hits === 1 ? " section" : " sections") + " match";
+    }
+
+    q.addEventListener("input", apply);
+    q.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { q.value = ""; apply(); }
+    });
+  })();
+  </script>
 </body>
 </html>

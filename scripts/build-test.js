@@ -3,6 +3,12 @@
 //   node scripts/build-test.js          tier Pro forzado  -> guid ..._test
 //   node scripts/build-test.js --free   tier Free real    -> guid ..._testfree
 //
+// Anade --no-marker para omitir el sello de compilacion. Es para grabar el video
+// de la oferta: el sello pinta "build HH:MM:SS pro" en la esquina inferior
+// izquierda del visual, y en una grabacion se queda ahi para siempre. Sin sello
+// pierdes la forma de confirmar que Power BI ejecuta la build recien compilada,
+// asi que uselo solo para grabar, nunca para depurar.
+//
 // El modo --free no parchea nada: el licenseManager no encuentra plan para ese
 // guid y resuelve a Free por si mismo. Es la unica forma de ver el camino
 // gratuito, porque con el guid real Power BI sirve la version instalada desde
@@ -81,14 +87,26 @@ function main() {
         }
 
         // 3. Sello de compilacion, para saber que build esta cargada
-        const stamp = new Date().toTimeString().slice(0, 8) +
-            (freeMode ? " free" : " pro");
-        const visualTs = path.join(ROOT, "src", "visual.ts");
-        const visualOriginal = readFile(visualTs);
-        writeFile(visualTs, visualOriginal.replace(
-            'const BUILD_MARKER = "";', `const BUILD_MARKER = "${stamp}";`));
-        restoreVisual = () => writeFile(visualTs, visualOriginal);
-        console.log(`Build marker: ${stamp}`);
+        const noMarker = process.argv.includes("--no-marker");
+        if (noMarker) {
+            console.log("--no-marker: sin sello de compilacion (build para grabar)");
+        } else {
+            const stamp = new Date().toTimeString().slice(0, 8) +
+                (freeMode ? " free" : " pro");
+            const visualTs = path.join(ROOT, "src", "visual.ts");
+            const visualOriginal = readFile(visualTs);
+            const patchedVisual = visualOriginal.replace(
+                'const BUILD_MARKER = "";', `const BUILD_MARKER = "${stamp}";`);
+            if (patchedVisual === visualOriginal) {
+                throw new Error(
+                    'No se encontro const BUILD_MARKER = ""; en visual.ts. ' +
+                    "El codigo cambio de forma — actualiza este script, no el fuente."
+                );
+            }
+            writeFile(visualTs, patchedVisual);
+            restoreVisual = () => writeFile(visualTs, visualOriginal);
+            console.log(`Build marker: ${stamp}`);
+        }
 
         // 4. Empaquetar
         execSync("npx pbiviz package", { cwd: ROOT, stdio: "inherit" });
