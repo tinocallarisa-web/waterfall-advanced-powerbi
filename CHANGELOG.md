@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.1.0] — 2026-09-14
+
+### Changed
+
+- **Resubmission of 1.1.0.0 under a new version number.** The previous submission uploaded
+  the 1.0.8.0 package instead of 1.1.0.0, so certification rejected it under 1200.1.1.3
+  (the repository said 1.1.0.0, the package 1.0.8.0). Partner Center had already recorded
+  1.1.0.0 and does not accept the same number twice. No code change: the visual is
+  identical to 1.1.0.0.
+
+---
+
 ## [1.1.0.0] — 2026-09-10
 
 ### Fixed
