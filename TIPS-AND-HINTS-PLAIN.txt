@@ -1,4 +1,4 @@
-WATERFALL ADVANCED -- TIPS & HINTS (v1.1.1.0)
+WATERFALL ADVANCED -- TIPS & HINTS (v1.1.2.0)
 =============================================
 
 A waterfall can be two very different things: a simple before-and-after picture, or a

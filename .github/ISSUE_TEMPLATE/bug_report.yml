@@ -40,7 +40,7 @@ body:
     attributes:
       label: Visual version
       description: Power BI Desktop shows it in the visual's information panel, or see the format pane footer.
-      placeholder: "1.1.1.0"
+      placeholder: "1.1.2.0"
     validations:
       required: true
   - type: input

@@ -1,6 +1,6 @@
 {
   "name": "powerbi-waterfall-advanced",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Advanced Waterfall Chart for Power BI — subtotals, drill-through, targets, AI narratives",
   "scripts": {
     "start": "pbiviz start",

@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.2.0] — 2026-09-14
+
+### Fixed
+
+- **A paying customer could stay on Free.** `getAvailableServicePlans()` returns each plan's
+  `spIdentifier` as the full Partner Center **Service ID** (`publisher.offer.plan`, e.g.
+  `tino_callarisa.waterfall-advanced.pro`), as the licensing API documentation states. The
+  visual compared it with the bare plan ID `pro`, which never matches the full Service ID.
+  It now accepts a Service ID ending in `.pro`, and the bare plan ID as well. The free plan
+  (`….free`) still does not unlock Pro.
+
+---
+
 ## [1.1.1.0] — 2026-09-14
 
 ### Changed

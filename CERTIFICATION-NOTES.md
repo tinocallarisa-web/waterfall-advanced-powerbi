@@ -1,4 +1,4 @@
-# Certification Notes — Waterfall Advanced v1.1.1.0
+# Certification Notes — Waterfall Advanced v1.1.2.0
 
 The short version to paste into Partner Center is
 [`CERTIFICATION-NOTES-SHORT.txt`](./CERTIFICATION-NOTES-SHORT.txt), written to fit the

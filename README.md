@@ -7,7 +7,7 @@ Tell it which rows are anchors, which are checkpoints and which are drivers, and
 P&L walk a committee can read.
 
 [![AppSource](https://img.shields.io/badge/AppSource-Certified-0078D4?logo=microsoft)](https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced)
-[![Version](https://img.shields.io/badge/version-1.1.1.0-brightgreen)](./pbiviz.json)
+[![Version](https://img.shields.io/badge/version-1.1.2.0-brightgreen)](./pbiviz.json)
 [![License](https://img.shields.io/badge/license-Commercial-orange)](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html)
 
 📖 **[Documentation & Support](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html)** ·

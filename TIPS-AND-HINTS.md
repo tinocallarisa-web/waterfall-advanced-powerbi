@@ -1,4 +1,4 @@
-# Waterfall Advanced — Tips & Hints (v1.1.1.0)
+# Waterfall Advanced — Tips & Hints (v1.1.2.0)
 
 A waterfall can be two very different things: a simple before-and-after picture, or a
 structured explanation of how a result was formed. This one is built for the second. The

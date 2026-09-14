@@ -23,12 +23,17 @@
 </head>
 <body>
   <h1>Changelog — Waterfall Advanced</h1>
-  <p class="meta">Current version <strong>1.1.1.0</strong> &nbsp;|&nbsp;
+  <p class="meta">Current version <strong>1.1.2.0</strong> &nbsp;|&nbsp;
     <a href="support.html">Support</a> &nbsp;|&nbsp;
     <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank" rel="noopener">GitHub</a> &nbsp;|&nbsp;
     <a href="https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced" target="_blank" rel="noopener">AppSource</a></p>
 
   <p>All notable changes to this project are documented here. Format follows <a href="https://keepachangelog.com/en/1.0.0/" target="_blank" rel="noopener">Keep a Changelog</a>.</p>
+  <h2 id="v1.1.2.0">1.1.2.0 <span class="date">2026-09-14</span></h2>
+  <h3 class="kind kind-fixed">Fixed</h3>
+  <ul>
+  <li><strong>A paying customer could stay on Free.</strong> <code>getAvailableServicePlans()</code> returns each plan's <code>spIdentifier</code> as the full Partner Center <strong>Service ID</strong> (<code>publisher.offer.plan</code>, e.g. <code>tino_callarisa.waterfall-advanced.pro</code>), as the licensing API documentation states. The visual compared it with the bare plan ID <code>pro</code>, which never matches the full Service ID. It now accepts a Service ID ending in <code>.pro</code>, and the bare plan ID as well. The free plan (<code>….free</code>) still does not unlock Pro.</li>
+  </ul>
   <h2 id="v1.1.1.0">1.1.1.0 <span class="date">2026-09-14</span></h2>
   <h3 class="kind kind-changed">Changed</h3>
   <ul>

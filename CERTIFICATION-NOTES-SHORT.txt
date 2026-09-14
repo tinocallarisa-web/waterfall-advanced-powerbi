@@ -1,8 +1,9 @@
-Waterfall Advanced 1.1.1.0. Full notes: CERTIFICATION-NOTES.md in the repo.
+Waterfall Advanced 1.1.2.0. Full notes: CERTIFICATION-NOTES.md in the repo.
 
-RESUBMISSION (1200.1.1.3)
-Last submission uploaded the 1.0.8.0 package by mistake. Repo and package are now 1.1.1.0;
-code identical to 1.1.0.0, renumbered because that number was already recorded.
+RESUBMISSION
+Replaces 1.1.1.0. Licence fix only: spIdentifier is the full Service ID
+(publisher.offer.plan); the check now accepts one ending in ".pro". Repo and package are
+1.1.2.0 (1200.1.1.3 of the earlier submission was a wrong package upload).
 
 EXTERNAL CALLS REMOVED
 Earlier versions had AI narratives calling api.anthropic.com and api.openai.com, which a

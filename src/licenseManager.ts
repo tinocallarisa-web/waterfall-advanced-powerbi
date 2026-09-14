@@ -58,6 +58,18 @@ const STATE_ACTIVE = 1;
 const STATE_WARNING = 2;
 
 /**
+ * spIdentifier es el Service ID completo que genera Partner Center para cada plan
+ * ("editor.oferta.plan", p.ej. "tino_callarisa.waterfall-advanced.pro"), no el Plan ID
+ * corto: lo dice la documentacion de la licensing API. Comparar solo con "pro" dejaba
+ * en Free a quien pagaba. Se acepta el Service ID que termina en ".<plan>" y, por si
+ * algun entorno devuelve solo el Plan ID, tambien ese.
+ */
+function matchesPlan(spIdentifier: unknown, planId: string): boolean {
+    const sp = String(spIdentifier ?? "");
+    return sp === planId || sp.endsWith("." + planId);
+}
+
+/**
  * Estado antes de que la licencia resuelva, y tambien el resultado cuando no hay
  * licencia. Se exporta para que el visual lo use como valor inicial: tener el
  * limite escrito a mano en dos sitios acabo en que el aviso decia 8 barras y el
@@ -85,7 +97,7 @@ export async function getLicenseState(
         // active and warning states represent a usable license", so a paying
         // customer keeps their features while a billing problem is resolved.
         const licensed = result?.plans?.some(
-            (p: any) => p.spIdentifier === PLAN_PRO &&
+            (p: any) => matchesPlan(p.spIdentifier, PLAN_PRO) &&
                         (p.state === STATE_ACTIVE || p.state === STATE_WARNING)
         ) ?? false;
 
