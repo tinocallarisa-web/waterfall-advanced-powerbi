@@ -7,3 +7,6 @@ webpack.statistics.*.html
 icon_300x300.png
 appsource_listing.md
 test-data.csv
+
+# Paquetes enviados: archivo local, recuperables desde el tag
+_releases/
