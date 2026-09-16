@@ -145,7 +145,6 @@ function main() {
   <h1>Changelog — Waterfall Advanced</h1>
   <p class="meta">Current version <strong>${version}</strong> &nbsp;|&nbsp;
     <a href="support.html">Support</a> &nbsp;|&nbsp;
-    <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi" target="_blank" rel="noopener">GitHub</a> &nbsp;|&nbsp;
     <a href="https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced" target="_blank" rel="noopener">AppSource</a></p>
 
   ${body}
