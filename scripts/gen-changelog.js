@@ -1,4 +1,4 @@
-// Genera changelog.html en la RAIZ del repo a partir de CHANGELOG.md.
+// Genera docs/changelog.html a partir de CHANGELOG.md (Pages sirve solo /docs).
 //
 //   node scripts/gen-changelog.js
 //
@@ -20,7 +20,7 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const SRC  = path.join(ROOT, "CHANGELOG.md");
-const OUT  = path.join(ROOT, "changelog.html");
+const OUT  = path.join(ROOT, "docs", "changelog.html");
 
 function esc(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
