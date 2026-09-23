@@ -30,6 +30,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The toolchain was failing a certification requirement.** `npm audit` returned 2 critical, 8
+  high and 11 moderate advisories — the certification rules state plainly that it "must not
+  return any warnings with high or moderate level". They all came from `powerbi-visuals-tools`
+  5.6.0, which is also three major versions behind the "use the latest version" requirement.
+  Tools are now 7.2.1, the API 5.11.1 and TypeScript 5.5.4, aligned with the rest of the
+  portfolio, with a clean reinstall to prune what the old tree had left behind and the same
+  `overrides` for `qs` and `uuid` that the clean repos already carried. `npm audit` now reports
+  **0 vulnerabilities**. The upgrade also unlocks `pbiviz package --certification-audit`, the
+  official check for `fetch`, `XMLHttpRequest` and `eval` calls, which reports no external
+  requests. None of this changes a line of the visual.
 - **Lint validation runs again.** The repo had no ESLint configuration in the format
   `pbiviz` 5.6 expects, so every build printed *"Can't run lint validation"* and packaged
   anyway. The certification rules — the ones that reject a visual for `innerHTML` and

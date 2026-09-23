@@ -1,43 +1,42 @@
 Waterfall Advanced 1.1.3.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
-
 WHAT CHANGED IN 1.1.3.0
-A licensing fix only: no feature, well or rendering changed since the certified 1.1.2.0.
+A licensing fix only: no feature or rendering changed since the certified 1.1.2.0.
 
 Power BI shows one notification at a time and the last call replaces the previous. The render
 called notifyLicenseRequired and then notifyFeatureBlocked in the same update, so the notice
-carrying the Upgrade button was replaced by the transient banner, and once the banner faded
-there was no purchase path left. The sequence is now: clear, notifyFeatureBlocked naming the
-setting, and 10.5 s later - banner gone - notifyLicenseRequired(0). The timer is cancelled on
-destroy(), since Power BI recreates the visual on every page change.
+carrying the Upgrade button was replaced by the transient banner, and once it faded there was
+no purchase path left. The sequence is now: clear, notifyFeatureBlocked naming the setting,
+and 10.5 s later notifyLicenseRequired(0). The timer is cancelled on destroy(), since Power BI
+recreates the visual on every page change.
 
 NO LICENSING UI OF ITS OWN
 No purchase UI and no watermark, per the guidance that a visual "shouldn't display its own
 licensing UX". The only thing on the canvas is a neutral note saying the smaller drivers are
-grouped and into what - a fact, not an offer, and needed or the totals would not match the
-report. The free tier draws a complete, balanced bridge: it groups rather than hides, so
-there is no partial Pro output to mark.
+grouped and into what - a fact, not an offer, and needed or the totals would not match. The free tier draws a complete bridge: it groups rather than hides, so there is no
+partial Pro output to mark.
 
 PRIVACY: no network calls, no telemetry, no storage. Only the dataView. privileges [].
 
 FREE VS PRO
-Free: the full bridge, 12 individual drivers (the rest grouped into one labelled step),
+Free: the full bridge, 12 individual drivers (rest grouped into one labelled step),
 subtotals, totals, targets, tooltips, cross-filtering, keyboard nav, high contrast.
-Pro: every driver individually, label rotation and truncation, hiding labels that do not fit,
-IBCS mode, the data table.
+Pro: every driver individually, label rotation and truncation, hiding labels that do not
+fit, IBCS mode, the data table.
 
 TEST - FREE (no plan)
-1. Category + Value, more than 12 drivers: the bridge draws, the smaller ones grouped into
-   one step with a neutral note, and it still balances.
+1. Category + Value, over 12 drivers: the bridge draws, the smaller ones grouped into one
+   step with a neutral note, and it still balances.
 2. A banner names the blocked feature; ten seconds later the Upgrade bar appears and stays.
-   Both, one after the other - that is the fix.
-3. IBCS mode, the data table or label rotation: same sequence, named.
+   Both, in that order - that is the fix.
+3. IBCS mode, data table or label rotation: same sequence, named.
 4. Switch report page and back: no stray notification from the disposed visual.
-5. Publish to Web or export, where the licence cannot be resolved: free result, no
-   notification - nobody is asked to buy what they may already own.
+5. Publish to Web or export, where the licence cannot be resolved: free result and no
+   notification - nobody is asked to buy what they may own.
 
 TEST - PRO: every driver drawn individually, Pro settings apply, no notification.
 
-Rendering events on every path of update(), including the error path. Format pane uses
-getFormattingModel (current API). Lint runs clean.
+Toolchain current (tools 7.2.1, API 5.11.1): npm audit reports 0
+vulnerabilities, --certification-audit finds no external requests. Rendering events on every
+path of update(). Format pane uses getFormattingModel.
 
 Support: tinocallarisa-web.github.io/waterfall-advanced/
