@@ -1,9 +1,49 @@
-# Certification Notes — Waterfall Advanced v1.1.2.0
+# Certification Notes — Waterfall Advanced v1.1.3.0
 
 The short version to paste into Partner Center is
 [`CERTIFICATION-NOTES-SHORT.txt`](./CERTIFICATION-NOTES-SHORT.txt), written to fit the
 2,500-character limit of that field, which truncates without warning and mid-word. **That
 field is cleared on every resubmission** — it has to be pasted again each time.
+
+## What changed in 1.1.3.0
+
+A licensing fix and a toolchain update. **No feature, field well or rendering changed** since
+the certified 1.1.2.0.
+
+### The Upgrade bar was being wiped out by the feature banner
+
+Power BI shows one notification at a time and the last call replaces the previous one. The
+render called `required()` and then `blocked()` in the same update, so the persistent notice
+carrying the Upgrade button was replaced by the transient banner; once the banner faded, a
+free user who had reached for a Pro setting had no purchase path left at all.
+
+The fix lives inside `LicenseNotifier`, not in the order of the calls at the render. There
+are three call sites spread across `update()` and the click handler, and the end state has to
+be right whichever order they arrive in — reordering one call site would have left the other
+two as traps. `blocked()` now clears any standing notice first, raises the banner, and
+schedules the Upgrade bar for 10.5 s later, which is how long the banner lasts. `required()`
+stands down while that timer is pending instead of competing with it. The timer is cancelled
+in `destroy()`, because Power BI recreates the visual on every page change and a live timer
+would notify on behalf of a chart that no longer exists.
+
+Still no watermark, and none should be added: see *No watermark and no artificial limits*
+below. The free tier does not render a Pro feature half-way, so there is nothing to mark.
+
+### The toolchain was failing a certification requirement
+
+`npm audit` returned 2 critical, 8 high and 11 moderate advisories, against a requirement
+that states it "must not return any warnings with high or moderate level". They all came from
+`powerbi-visuals-tools` 5.6.0, three major versions behind the "use the latest version"
+requirement. Tools are now 7.2.1, the API 5.11.1 and TypeScript 5.5.4 — TypeScript had to
+move because the current `@types/node` does not compile under 4.9 — with a clean reinstall and
+the same `qs`/`uuid` `overrides` the other repos already carried. `npm audit` now reports **0
+vulnerabilities**.
+
+Lint was not running either: the repo had no ESLint configuration in the format `pbiviz` 5.6
+expects, so every build printed *"Can't run lint validation"* and packaged anyway. It now runs
+clean over 8 files.
+
+`pbiviz package --certification-audit` reports no external requests.
 
 ## Read this first: what changed since the certified 1.0.8.0
 

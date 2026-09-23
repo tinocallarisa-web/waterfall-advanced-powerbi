@@ -1,4 +1,10 @@
-# AppSource Listing — Waterfall Advanced v1.1.0.0
+# AppSource Listing — Waterfall Advanced v1.1.3.0
+
+**The description below does not change for 1.1.3.0.** That release fixes the purchase
+notification sequence and updates the build toolchain; no feature, well or rendering changed,
+so there is nothing new to tell a buyer. What does have to be pasted again is
+`docs/CERTIFICATION-NOTES-SHORT.txt`: Partner Center clears the certification notes field on
+every resubmission.
 
 Copy ready to paste into Partner Center. **The marketplace description is the
 documentation most people read and the one that goes stale fastest** — update it on every
