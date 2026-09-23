@@ -441,4 +441,12 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsSvc.buildFormattingModel(this.formattingSettings);
     }
+
+    /**
+     * Power BI recrea el visual al cambiar de pagina. Un temporizador vivo levantaria la
+     * barra de Upgrade sobre un visual que ya no existe.
+     */
+    public destroy(): void {
+        this.notifier?.dispose();
+    }
 }

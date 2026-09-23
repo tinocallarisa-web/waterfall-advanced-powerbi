@@ -45,7 +45,7 @@ const PLAN_PRO = "pro";
 // escrito porque explica por que hay que comparar el identificador en lugar de
 // mirar si el usuario tiene algun plan activo: quien instala la version gratuita
 // TAMBIEN tiene un plan, y esta activo.
-const PLAN_FREE = "free";   // eslint-disable-line @typescript-eslint/no-unused-vars
+const PLAN_FREE = "free";
 
 // Un bridge de P&L real lleva de diez a veinte pasos. Con ocho, casi cualquier
 // caso principal acaba agrupado, y el tier gratuito parece corto justo donde mas
@@ -134,6 +134,14 @@ export async function getLicenseState(
 export class LicenseNotifier {
     private lastBlocked = "";
     private noticeShown = false;
+    private upgradeTimer: number | null = null;
+
+    /**
+     * Lo que dura el banner de Power BI antes de desvanecerse. La barra de Upgrade se
+     * levanta despues, para que no lo pise: si se levantan a la vez, el usuario ve una
+     * sola de las dos y la que gana es la ultima que se llamo.
+     */
+    private static readonly BANNER_MS = 10500;
 
     constructor(private host: powerbi.extensibility.visual.IVisualHost) {}
 
@@ -150,9 +158,42 @@ export class LicenseNotifier {
         if (!this.actionable(state)) return;
         if (key === this.lastBlocked) return;
         this.lastBlocked = key;
-        try {
-            (this.host as any).licenseManager?.notifyFeatureBlocked(feature);
-        } catch { /* older host */ }
+
+        const lm = (this.host as any).licenseManager;
+        if (!lm) return;
+
+        // Limpiar primero: si hay una barra de Upgrade levantada, el banner la sustituiria
+        // y al expirar no quedaria nada. Limpiando, el banner sale sobre lienzo vacio y la
+        // barra vuelve despues por su cuenta.
+        try { lm.clearLicenseNotification?.(); } catch { /* older host */ }
+        this.noticeShown = false;
+
+        try { lm.notifyFeatureBlocked(feature); } catch { /* older host */ }
+        this.scheduleUpgrade(lm);
+    }
+
+    /** Levanta la barra de Upgrade cuando el banner ya se ha ido. */
+    private scheduleUpgrade(lm: any): void {
+        this.cancelUpgrade();
+        this.upgradeTimer = window.setTimeout(() => {
+            this.upgradeTimer = null;
+            try {
+                lm.notifyLicenseRequired(0);
+                this.noticeShown = true;
+            } catch { /* older host */ }
+        }, LicenseNotifier.BANNER_MS);
+    }
+
+    private cancelUpgrade(): void {
+        if (this.upgradeTimer !== null) {
+            window.clearTimeout(this.upgradeTimer);
+            this.upgradeTimer = null;
+        }
+    }
+
+    /** El visual se destruye: un temporizador vivo notificaria sobre un visual que ya no esta. */
+    public dispose(): void {
+        this.cancelUpgrade();
     }
 
     /** A persistent notice while the report needs a licence it does not have. */
@@ -161,6 +202,7 @@ export class LicenseNotifier {
         if (!lm) return;
 
         if (!needed || !this.actionable(state)) {
+            this.cancelUpgrade();
             if (this.noticeShown) {
                 try { lm.clearLicenseNotification(); } catch { /* older host */ }
                 this.noticeShown = false;
@@ -168,7 +210,10 @@ export class LicenseNotifier {
             }
             return;
         }
-        if (!this.noticeShown) {
+        // Con un banner en curso la barra ya viene programada; levantarla ahora lo pisaria.
+        // Por eso este metodo puede llamarse ANTES que blocked() sin romper la secuencia,
+        // que es justo lo que hace el render.
+        if (!this.noticeShown && this.upgradeTimer === null) {
             try {
                 // LicenseNotificationType.General = 0. It is a const enum, so the
                 // literal is required at runtime.

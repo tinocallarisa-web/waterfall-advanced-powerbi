@@ -162,6 +162,6 @@ has been stopped and the code no longer recognises it.
 - [ ] Version 1.1.0.0 is above the published 1.0.8.0
 - [ ] Screenshots updated — the current ones predate the data table, which is the feature
       that shows best in a thumbnail
-- [x] Video re-recorded for 1.1.0.0 (2026-09-12): https://youtu.be/zDxpsXMD3WM — replaces
+- [x] Video re-recorded for 1.1.0.0 (2026-09-12): https://www.youtube.com/watch?v=zDxpsXMD3WM — replaces
       the 1.0.x walkthrough. Update the video URL in the offer; the old one is still live on
       YouTube, so an un-updated field does not 404 and nothing warns you.

@@ -5,6 +5,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.3.0] — 2026-09-23
+
+### Fixed
+
+- **The Upgrade bar never survived the feature banner, so the purchase path disappeared.**
+  Power BI shows one notification at a time and the last call replaces the previous one. The
+  render called `required()` and then `blocked()` in the same update, so the persistent
+  notice carrying the Upgrade button was replaced by the transient banner; when the banner
+  faded there was nothing left to click. A free user who reached for a Pro setting was told
+  once, briefly, and then left with no way to buy.
+
+  The fix is inside `LicenseNotifier`, not in the order of the calls at the render: there are
+  three call sites spread across `update()` and the click handler, and the end state has to be
+  right whichever order they arrive in. `blocked()` now clears any standing notice first,
+  raises the banner, and schedules the Upgrade bar for 10.5 s later, which is how long the
+  banner lasts. `required()` stands down while that timer is pending instead of competing
+  with it. The timer is cancelled in `destroy()`, so a visual that is disposed — Power BI
+  recreates it on every page change — does not notify on behalf of a chart that is gone.
+
+  No watermark was added, and none should be: the free tier here does not render a Pro
+  feature half-way. It groups the smaller drivers and draws a bridge that still balances,
+  which is a correct chart rather than a crippled one. There is nothing to mark.
+
+### Changed
+
+- **Lint validation runs again.** The repo had no ESLint configuration in the format
+  `pbiviz` 5.6 expects, so every build printed *"Can't run lint validation"* and packaged
+  anyway. The certification rules — the ones that reject a visual for `innerHTML` and
+  friends — live in that step, so the package was being shipped unchecked. ESLint is now
+  aligned with the rest of the portfolio (9.x with the flat config) and the build is clean.
+  One stale `eslint-disable` directive pointing at a rule that is no longer loaded was
+  removed.
+
+---
+
 ## [1.1.2.0] — 2026-09-14
 
 ### Fixed
