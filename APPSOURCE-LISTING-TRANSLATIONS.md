@@ -450,7 +450,7 @@ IM BERICHT
 
 Kreuzfilterung mit Mehrfachauswahl, Kreuzhervorhebung, Lesezeichen, Berichtsseiten als
 Tooltips, Kontextmenü per Rechtsklick, Tastaturnavigation und hoher Kontrast. Die
-Diagrammbeschriftungen und die Übersichtskarten folgen der Power-BI-Sprache in Englisch,
+Diagrammbeschriftungen und die Übersichtskarten folgen der Sprache von Power BI in Englisch,
 Spanisch, Französisch und Deutsch; der Formatierungsbereich ist auf Englisch.
 
 DATENSCHUTZ

@@ -1,42 +1,42 @@
 Waterfall Advanced 1.1.3.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
+
+SOURCE CODE
+github.com/tinocallarisa-web/waterfall-advanced-powerbi, branch "certification".
+PUBLIC: no credentials needed, none included here.
+
+TESTING THE PREMIUM FEATURES - NO KEY NEEDED
+There is no activation key: Pro is granted by the AppSource plan through
+IVisualLicenseManager, so none exists outside the marketplace. This visual shows no
+licensing UI and no watermark, per the guidance that a visual "shouldn't display its
+own licensing UX", so the submitted package cannot show the Pro settings by itself.
+From the branch above: npm install, then node scripts/build-test.js. It forces isPro
+true, packages under GUID + "_test" and restores the source, so what is submitted is
+never the patched build. Import it: every Pro setting applies.
+
+WHAT TO CHECK
+Free, the submitted package. With 12 drivers or fewer nothing is grouped. Above 12, the
+12 largest are drawn individually and the rest grouped into one labelled step, with a
+note saying how many and into what - a fact, not an offer, and needed or the total
+would not balance. Turn on IBCS mode, the data table or label rotation: a banner names
+the blocked setting and, ten seconds later, the Upgrade bar appears and stays. Both, in
+that order: that is the fix in this version. Switch page and back: no stray
+notification. Publish to Web or export: free result, no notice.
+Pro, the _test package: every driver individually, Pro settings apply, no notice.
+
 WHAT CHANGED IN 1.1.3.0
-A licensing fix only: no feature or rendering changed since the certified 1.1.2.0.
-
-Power BI shows one notification at a time and the last call replaces the previous. The render
-called notifyLicenseRequired and then notifyFeatureBlocked in the same update, so the notice
-carrying the Upgrade button was replaced by the transient banner, and once it faded there was
-no purchase path left. The sequence is now: clear, notifyFeatureBlocked naming the setting,
-and 10.5 s later notifyLicenseRequired(0). The timer is cancelled on destroy(), since Power BI
-recreates the visual on every page change.
-
-NO LICENSING UI OF ITS OWN
-No purchase UI and no watermark, per the guidance that a visual "shouldn't display its own
-licensing UX". The only thing on the canvas is a neutral note saying the smaller drivers are
-grouped and into what - a fact, not an offer, and needed or the totals would not match. The free tier draws a complete bridge: it groups rather than hides, so there is no
-partial Pro output to mark.
+A licensing fix only: no feature or rendering changed since the certified 1.1.2.0. The
+render raised notifyLicenseRequired then notifyFeatureBlocked in the same update, and
+Power BI shows one at a time, so the notice carrying the Upgrade button was replaced by
+the transient banner and no purchase path was left. Now: clear, the banner, and the
+Upgrade bar 10.5 s later, cancelled on destroy(). See CHANGELOG.md.
 
 PRIVACY: no network calls, no telemetry, no storage. Only the dataView. privileges [].
 
 FREE VS PRO
-Free: the full bridge, 12 individual drivers (rest grouped into one labelled step),
-subtotals, totals, targets, tooltips, cross-filtering, keyboard nav, high contrast.
-Pro: every driver individually, label rotation and truncation, hiding labels that do not
-fit, IBCS mode, the data table.
+Free: the full bridge - 12 largest drivers individually, the rest grouped into one
+labelled step, subtotals, totals, targets, tooltips, cross-filtering, keyboard, high
+contrast. It groups rather than hides: nothing is left out.
+Pro: every driver individually, label rotation and truncation, hiding labels that do
+not fit, IBCS mode, data table.
 
-TEST - FREE (no plan)
-1. Category + Value, over 12 drivers: the bridge draws, the smaller ones grouped into one
-   step with a neutral note, and it still balances.
-2. A banner names the blocked feature; ten seconds later the Upgrade bar appears and stays.
-   Both, in that order - that is the fix.
-3. IBCS mode, data table or label rotation: same sequence, named.
-4. Switch report page and back: no stray notification from the disposed visual.
-5. Publish to Web or export, where the licence cannot be resolved: free result and no
-   notification - nobody is asked to buy what they may own.
-
-TEST - PRO: every driver drawn individually, Pro settings apply, no notification.
-
-Toolchain current (tools 7.2.1, API 5.11.1): npm audit reports 0
-vulnerabilities, --certification-audit finds no external requests. Rendering events on every
-path of update(). Format pane uses getFormattingModel.
-
-Support: tinocallarisa-web.github.io/waterfall-advanced/
+Support: tinocallarisa-web.github.io/waterfall-advanced-powerbi/
