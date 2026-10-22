@@ -20,7 +20,7 @@
   "Role_Target": "Cel (opcjonalnie)",
   "Role_Target_Desc": "Cel lub budżet. Rysowany jako linia przerywana na słupkach sum.",
   "Role_BarType": "Typ słupka",
-  "Role_BarType_Desc": "Na wiersz: total, subtotal lub delta. Inna wartość to delta. Pierwszy i ostatni wiersz to zawsze sumy. Agreguj jako Pierwszy, nie Suma.",
+  "Role_BarType_Desc": "Na wiersz: total, subtotal lub delta. Inna wartość to delta. Oznacz pierwszy i ostatni wiersz jako total. Agreguj jako Pierwszy, nie Suma.",
   "Role_Order": "Kolejność",
   "Role_Order_Desc": "Pole liczbowe ustalające kolejność. Bez niego słupki idą w kolejności sortowania kategorii.",
   "Role_Tooltips": "Etykietki",

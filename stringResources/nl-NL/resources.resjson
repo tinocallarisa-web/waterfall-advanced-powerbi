@@ -20,7 +20,7 @@
   "Role_Target": "Doel (optioneel)",
   "Role_Target_Desc": "Doel of budget. Getekend als stippellijn op de totaalbalken.",
   "Role_BarType": "Balktype",
-  "Role_BarType_Desc": "Per rij: total, subtotal of delta. Iets anders telt als delta. De eerste en laatste rij zijn altijd totalen. Aggregeer als Eerste, niet Som.",
+  "Role_BarType_Desc": "Per rij: total, subtotal of delta. Iets anders telt als delta. Markeer de eerste en laatste rij als total. Aggregeer als Eerste, niet Som.",
   "Role_Order": "Volgorde",
   "Role_Order_Desc": "Numeriek veld dat de volgorde vastlegt. Zonder volgt de grafiek de sortering van de categorie.",
   "Role_Tooltips": "Knopinfo",

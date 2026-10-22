@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Waterfall Advanced — Infographic | TCViz</title>
+<title>Waterfall Advanced 1.2 — Infographic | TCViz</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/tabler-icons.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet" />
 <style>
@@ -188,13 +188,13 @@
       <p class="lead">The whole bridge, up to twelve individual drivers — the size of a standard P&amp;L walk.</p>
       <ul>
         <li>Totals, subtotals and drivers, from a column in your model</li>
-        <li>Checkpoints drawn from zero: Net Revenue, Gross Profit, EBITDA</li>
-        <li>Horizontal or vertical, plus hierarchical drilldown</li>
-        <li>Target line on the anchor bars, with its own label and figure</li>
-        <li>Drivers beyond two standard deviations flagged automatically</li>
-        <li>Summary cards: opening, closing, variance %, biggest gain and loss</li>
+        <li>Target line on the total bars; summary cards; anomaly marker</li>
+        <li>Horizontal or vertical, drilldown, sort by impact, connectors</li>
+        <li><b>New:</b> 5 style templates — Classic, Modern, Soft, One colour, Dark background</li>
+        <li><b>New:</b> model format, incl. dynamic format strings</li>
+        <li><b>New:</b> value axis, category axis title, legend, on-object formatting</li>
         <li>Colour-blind safe palette and hatched decreases</li>
-        <li>Conditional formatting on bar colour, native fx or a DAX hex</li>
+        <li>fx on bar colour, or a DAX hex per row</li>
         <li>Cross-filtering, bookmarks, keyboard, high contrast, tooltips</li>
       </ul>
     </div>
@@ -205,26 +205,26 @@
         <div class="l">FREE DRIVERS<br />BEFORE "OTHERS"</div>
       </div>
       <div class="pill"><span>Network calls</span><b>zero</b></div>
-      <div class="pill"><span>Languages</span><b>EN ES FR DE</b></div>
+      <div class="pill"><span>Languages</span><b>12</b></div>
       <div class="pill"><span>Data roles</span><b>7</b></div>
       <div class="pill"><span>Free result</span><b>reconciles</b></div>
     </div>
 
     <div class="tier pro">
-      <h2>Pro <span>30-DAY TRIAL ON APPSOURCE</span></h2>
+      <h2>Pro <span>PRO PREVIEW WHILE YOU EDIT</span></h2>
       <p class="lead">Depth of analysis, not a rescue from an incomplete chart. The free bridge is already correct.</p>
       <ul>
         <li><b>Every driver individually</b>, however long the walk</li>
         <li><b>The data table</b>, beside or below the chart: each step with its
             amount, the running total and its share of the opening figure</li>
-        <li><b>IBCS monochrome notation</b>, with the emphasis on deviation, for
-            standards-based reporting across companies</li>
+        <li><b>IBCS monochrome notation</b>, with the emphasis on deviation</li>
         <li><b>Label density controls</b>: angle at −30°, −45° or −90°,
             truncation at N characters, and hiding labels that do not fit</li>
       </ul>
-      <p class="lead" style="margin-top:8px">Above twelve drivers the free tier groups the
-        smallest into one "Others" bar. The bridge still closes on the same figure —
-        the detail is coarser, no number is wrong.</p>
+      <p class="lead" style="margin-top:8px"><b>Pro preview:</b> without a licence, while you edit,
+        the table, IBCS and label settings you turn on are drawn on your data under a watermark.
+        Readers see the free chart. Above twelve drivers the free version groups the smallest
+        into "Others" — the bridge still closes on the same figure.</p>
     </div>
   </div>
 
@@ -239,9 +239,9 @@
       <div class="arrow"><i class="ti ti-chevron-right"></i></div>
       <div class="step"><div class="k">4 · ORDER</div><div class="v">Fix the sequence of the walk</div></div>
       <div class="arrow"><i class="ti ti-chevron-right"></i></div>
-      <div class="step"><div class="k">5 · TARGET</div><div class="v">Dashed line on the anchors</div></div>
+      <div class="step"><div class="k">5 · TARGET</div><div class="v">Dashed line on the totals</div></div>
       <div class="arrow"><i class="ti ti-chevron-right"></i></div>
-      <div class="step"><div class="k">6 · FORMAT</div><div class="v">Labels, palette, cards</div></div>
+      <div class="step"><div class="k">6 · TEMPLATE</div><div class="v">One click, five looks</div></div>
       <div class="arrow"><i class="ti ti-chevron-right"></i></div>
       <div class="step"><div class="k">7 · READ IT</div><div class="v">A walk a committee can follow</div></div>
     </div>
@@ -256,7 +256,7 @@
         <li><b>It reconciles.</b> Subtotals stand on zero, so the closing bar is the sum of what came before it.</li>
         <li><b>It survives print.</b> Hatched decreases read in black and white, in the pack that gets photocopied.</li>
         <li><b>It stays inside Power BI.</b> No telemetry, no endpoints, no CDN — nothing leaves the tenant.</li>
-        <li><b>The free tier is correct, not partial.</b> Grouping beats cropping: a cropped bridge is a wrong bridge.</li>
+        <li><b>The free version is correct, not partial.</b> Grouping beats cropping: a cropped bridge is a wrong bridge.</li>
       </ul>
     </div>
     <div class="panel">
@@ -271,12 +271,12 @@
     <div class="panel">
       <h3>Format pane</h3>
       <table>
-        <tr><td class="c">Colors</td><td>Palette, hatch, increase / decrease / total / target, legend</td></tr>
-        <tr><td class="c">Labels</td><td>Mode, size, colours · angle, truncation, overlap (Pro)</td></tr>
-        <tr><td class="c">Number format</td><td>Currency, scale, decimals, separator</td></tr>
-        <tr><td class="c">Chart</td><td>Connectors, subtotals, target, orientation, "Others"</td></tr>
-        <tr><td class="c">Summary Cards</td><td>Five figures, sizes, theme or custom colours</td></tr>
-        <tr><td class="c">Data Table</td><td>Position, running total, % of opening (Pro)</td></tr>
+        <tr><td class="c">Style template</td><td>Five looks, base colour, setup tips</td></tr>
+        <tr><td class="c">Colors</td><td>Palette, hatch, bar colours with fx · legend</td></tr>
+        <tr><td class="c">Labels</td><td>Mode, size, colours · angle, truncation (Pro)</td></tr>
+        <tr><td class="c">Axes</td><td>Value axis, gridlines, titles</td></tr>
+        <tr><td class="c">Number format</td><td>Custom or model format (dynamic too)</td></tr>
+        <tr><td class="c">Cards · Table</td><td>Summary cards · data table (Pro)</td></tr>
         <tr><td class="c">IBCS</td><td>Monochrome notation (Pro)</td></tr>
       </table>
     </div>

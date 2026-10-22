@@ -20,7 +20,7 @@
   "Role_Target": "Ziel (optional)",
   "Role_Target_Desc": "Ziel oder Budget. Als gestrichelte Linie auf den Summenbalken.",
   "Role_BarType": "Balkentyp",
-  "Role_BarType_Desc": "Pro Zeile: total, subtotal oder delta. Alles andere gilt als delta. Erste und letzte Zeile sind immer Summen. Als Erster aggregieren, nicht Summe.",
+  "Role_BarType_Desc": "Pro Zeile: total, subtotal oder delta. Alles andere gilt als delta. Erste und letzte Zeile als total markieren. Als Erster aggregieren, nicht Summe.",
   "Role_Order": "Reihenfolge",
   "Role_Order_Desc": "Numerisches Feld, das die Reihenfolge festlegt. Ohne es folgen die Balken der Kategoriesortierung.",
   "Role_Tooltips": "QuickInfos",

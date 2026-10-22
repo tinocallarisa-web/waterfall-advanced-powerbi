@@ -20,7 +20,7 @@
   "Role_Target": "Obiettivo (facoltativo)",
   "Role_Target_Desc": "Obiettivo o budget. Disegnato come linea tratteggiata sulle barre dei totali.",
   "Role_BarType": "Tipo di barra",
-  "Role_BarType_Desc": "Per riga: total, subtotal o delta. Altro vale come delta. La prima e l'ultima riga sono sempre totali. Aggrega come Primo, non Somma.",
+  "Role_BarType_Desc": "Per riga: total, subtotal o delta. Altro vale come delta. Segna la prima e l'ultima riga come total. Aggrega come Primo, non Somma.",
   "Role_Order": "Ordine",
   "Role_Order_Desc": "Campo numerico che fissa la sequenza del ponte. Senza, le barre seguono l'ordinamento della categoria.",
   "Role_Tooltips": "Descrizioni comandi",

@@ -20,7 +20,7 @@
   "Role_Target": "목표(선택 사항)",
   "Role_Target_Desc": "목표 또는 예산. 합계 막대에 점선으로 그립니다.",
   "Role_BarType": "막대 유형",
-  "Role_BarType_Desc": "행별 total, subtotal 또는 delta. 그 외는 delta. 첫 행과 마지막 행은 항상 합계. 합계가 아닌 '첫 번째'로 집계.",
+  "Role_BarType_Desc": "행별 total, subtotal 또는 delta. 그 외는 delta. 첫 행과 마지막 행은 total로 표시. 합계가 아닌 '첫 번째'로 집계.",
   "Role_Order": "순서",
   "Role_Order_Desc": "브리지 순서를 고정하는 숫자 필드. 없으면 범주 정렬을 따릅니다.",
   "Role_Tooltips": "도구 설명",

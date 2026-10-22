@@ -20,7 +20,7 @@
   "Role_Target": "Target (optional)",
   "Role_Target_Desc": "Goal or budget. Drawn as a dashed line on the anchor bars.",
   "Role_BarType": "Bar type",
-  "Role_BarType_Desc": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum.",
+  "Role_BarType_Desc": "Per row: total, subtotal or delta. Anything else is read as delta. Mark the first and last rows as total. Aggregate as First, not Sum.",
   "Role_Order": "Order",
   "Role_Order_Desc": "Numeric field that fixes the sequence of the bridge. Without it the bars follow the category sort.",
   "Role_Tooltips": "Tooltips",

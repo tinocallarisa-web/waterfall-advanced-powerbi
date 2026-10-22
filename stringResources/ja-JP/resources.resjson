@@ -20,7 +20,7 @@
   "Role_Target": "目標 (省略可)",
   "Role_Target_Desc": "目標または予算。合計バーに破線で表示されます。",
   "Role_BarType": "バーの種類",
-  "Role_BarType_Desc": "行ごとに total、subtotal、delta。それ以外は delta。最初と最後の行は常に合計。合計ではなく「最初」で集計。",
+  "Role_BarType_Desc": "行ごとに total、subtotal、delta。それ以外は delta。最初と最後の行は total にします。合計ではなく「最初」で集計。",
   "Role_Order": "順序",
   "Role_Order_Desc": "ブリッジの順序を決める数値フィールド。ない場合はカテゴリの並べ替え順になります。",
   "Role_Tooltips": "ツールヒント",

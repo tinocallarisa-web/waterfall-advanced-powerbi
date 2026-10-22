@@ -209,4 +209,15 @@ P.update({
     "Dark background": ["Fundo escuro", "Fond sombre", "Dunkler Hintergrund", "Sfondo scuro", "Donkere achtergrond", "Ciemne tło", "暗い背景", "深色背景", "어두운 배경", "Fondo oscuro"],
     "Base colour": ["Cor base", "Couleur de base", "Grundfarbe", "Colore base", "Basiskleur", "Kolor bazowy", "基本色", "基础颜色", "기본 색", "Color base"],
     "Legend": ["Legenda", "Légende", "Legende", "Legenda", "Legenda", "Legenda", "凡例", "图例", "범례", "Leyenda"],
+    "Per row: total, subtotal or delta. Anything else is read as delta. Mark the first and last rows as total. Aggregate as First, not Sum.": [
+        "Por linha: total, subtotal ou delta. Outro valor conta como delta. Marque a primeira e a última linha como total. Agregue como Primeiro, não Soma.",
+        "Par ligne : total, subtotal ou delta. Toute autre valeur est un delta. Marquez la première et la dernière ligne comme total. Agrégez en Premier, pas Somme.",
+        "Pro Zeile: total, subtotal oder delta. Alles andere gilt als delta. Erste und letzte Zeile als total markieren. Als Erster aggregieren, nicht Summe.",
+        "Per riga: total, subtotal o delta. Altro vale come delta. Segna la prima e l'ultima riga come total. Aggrega come Primo, non Somma.",
+        "Per rij: total, subtotal of delta. Iets anders telt als delta. Markeer de eerste en laatste rij als total. Aggregeer als Eerste, niet Som.",
+        "Na wiersz: total, subtotal lub delta. Inna wartość to delta. Oznacz pierwszy i ostatni wiersz jako total. Agreguj jako Pierwszy, nie Suma.",
+        "行ごとに total、subtotal、delta。それ以外は delta。最初と最後の行は total にします。合計ではなく「最初」で集計。",
+        "每行：total、subtotal 或 delta。其他值视为 delta。将第一行和最后一行标为 total。按“第一个”聚合，而非求和。",
+        "행별 total, subtotal 또는 delta. 그 외는 delta. 첫 행과 마지막 행은 total로 표시. 합계가 아닌 '첫 번째'로 집계.",
+        "Por fila: total, subtotal o delta. Lo demás cuenta como delta. Marca la primera y la última fila como total. Agrega como Primero, no Suma."],
 })

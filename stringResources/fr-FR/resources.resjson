@@ -20,7 +20,7 @@
   "Role_Target": "Objectif (facultatif)",
   "Role_Target_Desc": "Objectif ou budget. Tracé en pointillés sur les barres de total.",
   "Role_BarType": "Type de barre",
-  "Role_BarType_Desc": "Par ligne : total, subtotal ou delta. Toute autre valeur est un delta. La première et la dernière ligne sont toujours des totaux. Agrégez en Premier, pas Somme.",
+  "Role_BarType_Desc": "Par ligne : total, subtotal ou delta. Toute autre valeur est un delta. Marquez la première et la dernière ligne comme total. Agrégez en Premier, pas Somme.",
   "Role_Order": "Ordre",
   "Role_Order_Desc": "Champ numérique qui fixe l'ordre du pont. Sans lui, les barres suivent le tri de la catégorie.",
   "Role_Tooltips": "Info-bulles",

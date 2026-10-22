@@ -28,7 +28,7 @@
       "displayName": "Bar type",
       "name": "barType",
       "kind": "Measure",
-      "description": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum.",
+      "description": "Per row: total, subtotal or delta. Anything else is read as delta. Mark the first and last rows as total. Aggregate as First, not Sum.",
       "displayNameKey": "Role_BarType",
       "descriptionKey": "Role_BarType_Desc"
     },

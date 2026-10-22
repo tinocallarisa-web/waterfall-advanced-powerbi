@@ -1,4 +1,4 @@
-WATERFALL ADVANCED -- TIPS & HINTS (v1.1.2.0)
+WATERFALL ADVANCED -- TIPS & HINTS (v1.2.0.0)
 =============================================
 
 A waterfall can be two very different things: a simple before-and-after picture, or a
@@ -14,6 +14,8 @@ QUICK START
 3. Drag a numeric sequence field into ORDER. Without it the bars follow the category
    sort, which is almost never the order of a P&L.
 4. Drag your type column into BAR TYPE and set it to aggregate as FIRST, not Sum.
+5. Pick a look in Format > Style template, or from the tips bar at the bottom of the
+   visual while you edit.
 
 THE SINGLE MOST COMMON MISTAKE: leaving Bar type as Sum. It is text in a measure well,
 so Power BI tries to add it up and nothing arrives. The chart then treats every row as
@@ -22,12 +24,13 @@ a driver and the bridge never closes on the right figure.
 
 BAR TYPE: THE WHOLE POINT
 -------------------------
-- total ..... drawn from zero to the value ......... the opening and closing anchors
+- total ..... drawn from zero; the first sets the opening figure .. opening and closing
 - subtotal .. drawn from zero to the running total .. Net Revenue, Gross Profit, EBITDA
 - delta ..... floats from the running total ........ every driver: price, volume, payroll
 
-Anything else is read as delta. THE FIRST AND LAST ROWS ARE ALWAYS DRAWN AS TOTALS,
-whatever the column says: a bridge has to start and end somewhere.
+Anything else is read as delta. WITHOUT A BAR TYPE FIELD, THE FIRST AND LAST ROWS ARE
+TOTALS. With the field, mark them "total" yourself: a bridge has to start and end
+somewhere.
 
 A P&L walk with no subtotals is a list of costs. With them it becomes a document a
 committee can read: revenue, what reduced it, where the margin stood, what consumed it,
@@ -36,30 +39,61 @@ where the result landed.
 
 FIELD WELLS
 -----------
-- Category ................. Grouping  The line, driver or step. REQUIRED.
+- Category ................. Grouping  The line, driver or step. REQUIRED. Drill-down.
 - Value .................... Measure   The amount. REQUIRED.
-- Target (optional) ........ Measure   Goal or budget. Dashed line on the anchor bars.
+- Target (optional) ........ Measure   Goal or budget. Dashed line on the total bars.
 - Bar type ................. Measure   total / subtotal / delta. AGGREGATE AS FIRST.
 - Order .................... Grouping  Numeric field fixing the sequence of the bridge.
 - Tooltips ................. Measure   Extra measures on hover.
-- Colour (DAX, optional) ... Measure   A hex colour per row, calculated in the model.
+- Colour (DAX, optional) ... Measure   A hex colour per row. Overrides colours and fx.
+
+
+STYLE TEMPLATES (NEW IN 1.2)
+----------------------------
+- Classic ......... the 1.1 look, and the default
+- Modern .......... deeper colours; total and subtotal labels take their bar colour
+- Soft ............ pale bars, dark value labels
+- One colour ...... from a BASE COLOUR you choose: totals take it, increases lighter,
+                    decreases darker
+- Dark background . for dark report backgrounds, including cards and data table
+
+A template only fills in what you have not set yourself. When you pick one, the
+settings it defines are reset so it looks as designed.
+
+COLOUR STUCK ON EVERY BAR? Before 1.2 a fixed Increase colour was stored bar by bar and
+painted totals and decreases too. Pick any template (Classic keeps the original look)
+and the old value is cleared.
+
+
+NUMBER FORMAT (NEW IN 1.2)
+--------------------------
+- Custom (default) .. currency symbol and position, scale, decimals, thousands separator
+- Model format ...... the measure's own format string, dynamic format strings included,
+                      in the report's language: values, labels, tooltips and the axis
 
 
 FORMAT PANE
 -----------
-- Colors ......... increase, decrease, total and target colours; legend colour and size;
-                   COLOUR-BLIND SAFE PALETTE and HATCHED DECREASES
+- Style template . template, base colour (One colour), show setup tips
+- Chart .......... orientation, connectors, subtotals, target line with label and value,
+                   summary cards, sort by impact, invert colours, max drivers, "Others"
+                   label
+- Colors ......... Colors group: COLOUR-BLIND SAFE PALETTE, HATCHED DECREASES, increase
+                   (with fx), decrease, total and target colours.
+                   Legend group: show, top or bottom, font, size, colour
 - Labels ......... show, mode, font size, value and category colours, totals and
                    subtotals matching their bar colour, and the density controls (Pro):
                    angle, truncation, hiding what does not fit
-- Number format .. currency symbol and position, scale, decimals, thousands separator
-- Chart .......... connectors, subtotals, target line with label and value, summary
-                   cards, sort by impact, invert colours, max drivers, "Others" label,
-                   orientation
+- Value axis ..... show, gridlines, font size, colour, title
+- Category axis .. title
+- Number format .. Custom or Model format
 - Summary Cards .. show, caption and value font sizes, text and background colours
 - Data Table (Pro) position, running total and % of opening columns, background,
                    separator, font size, width
-- IBCS (Pro) ..... standardised monochrome notation
+- IBCS (Pro) ..... monochrome notation
+
+With Format on, you can also click the bars, value labels, category labels, value axis,
+legend, summary cards or data table to format them on the chart.
 
 
 READING A BRIDGE THAT IS TOO WIDE
@@ -68,9 +102,9 @@ Fifteen line items with long names and their amounts do not fit. A waterfall rar
 fails because the arithmetic is wrong; it fails because it is unreadable.
 
 - SWITCH TO HORIZONTAL. Long labels -- "Rent & Facilities", "Warehouse Payroll" -- read
-  far better down the side than under a bar. Biggest single improvement, and it is free.
+  far better down the side than under a bar. It is free.
 - ANGLE THE LABELS (Pro) at -30, -45 or -90 degrees when vertical is the right layout.
-- TRUNCATE (Pro) at a character count. The cut falls on a word boundary and the full
+- TRUNCATE (Pro) at a character count. The cut prefers a word boundary and the full
   name stays in the tooltip.
 - GROUP THE SMALL DRIVERS with Max drivers shown. The rest are summed into an "Others"
   bar, so the bridge still closes on the same figure.
@@ -78,68 +112,70 @@ fails because the arithmetic is wrong; it fails because it is unreadable.
 
 ACCESSIBILITY, AND WHY IT IS FREE
 ---------------------------------
-Around 8% of men cannot reliably separate red from green. A financial bridge is where
-mistaking a rise for a fall costs most.
+In a financial bridge, up-versus-down IS the information, and red against green is the
+pair many readers find hardest to separate.
 
-- COLOUR-BLIND SAFE PALETTE replaces the defaults with Okabe-Ito blue and orange, which
-  stay distinguishable under deuteranopia and protanopia.
-- HATCH DECREASES puts a diagonal pattern on the falling bars. WCAG 1.4.1 asks that
-  colour is not the only means of conveying information, and in a bridge up-versus-down
-  IS the information. With it on, the chart still reads in black and white -- which is
-  how half of these end up, printed in a committee pack.
+- COLOUR-BLIND SAFE PALETTE replaces the defaults with Okabe-Ito blue and orange.
+- HATCH DECREASES puts a diagonal pattern on the falling bars, so colour is not the
+  only cue -- the chart still reads printed in black and white.
+- KEYBOARD: Tab through the bars, Enter or Space to select, Ctrl to add.
+- HIGH CONTRAST: the chart follows the Windows high-contrast theme.
 
-Both are in the free tier deliberately.
+All of these are in the free tier.
 
 
 THE DATA TABLE (Pro)
 --------------------
-A bridge answers WHY. A table answers HOW MUCH. In a committee those two questions
-arrive one after the other, and covering them used to mean putting a matrix beside the
-chart: another visual to filter, another to format, and the chance that the two
-disagree.
-
-The table shows every step with its amount, the running total and optionally each step
-as a percentage of the opening figure. It sits to the right or below, with its own
-background so it reads as a separate block.
+A bridge answers WHY. A table answers HOW MUCH. The table shows every step with its
+amount, the running total and optionally each step as a percentage of the opening
+figure. It sits to the right or below, with its own background so it reads as a
+separate block.
 
 
 WHAT PRO ADDS
 -------------
 - The bridge: totals, subtotals, deltas, connectors  Free: Yes -- Pro: Yes
-- Orientation, drilldown, target line ............... Free: Yes -- Pro: Yes
+- Orientation, drilldown, target, cards, anomalies .. Free: Yes -- Pro: Yes
+- Templates, model format, axes, legend, on-object .. Free: Yes -- Pro: Yes
 - Colour-blind safe palette, hatched decreases ...... Free: Yes -- Pro: Yes
 - Conditional formatting (fx), Colour (DAX) well .... Free: Yes -- Pro: Yes
-- Cross-filtering, multi-select, bookmarks, keyboard  Free: Yes -- Pro: Yes
-- Summary cards, number format, "Others" grouping ... Free: Yes -- Pro: Yes
+- Cross-filtering, bookmarks, keyboard, 12 languages  Free: Yes -- Pro: Yes
 - INDIVIDUAL DRIVERS ................................ Free: 12  -- Pro: ALL
 - DATA TABLE ........................................ Free: No  -- Pro: YES
 - IBCS MODE ......................................... Free: No  -- Pro: YES
 - LABEL ANGLE, TRUNCATION, OVERLAP HANDLING ......... Free: No  -- Pro: YES
 
 Above twelve drivers the smallest are grouped into "Others". THE BRIDGE STILL CLOSES ON
-THE SAME FIGURE -- nothing is dropped, the detail is coarser. Twelve is the size of a
-standard P&L walk, so the free tier covers the main case rather than breaking on it.
+THE SAME FIGURE -- nothing is dropped, the detail is coarser.
 
-Every paid setting says (Pro) in the format pane and is never hidden. Turning one on
-without a licence leaves the free result on screen and Power BI shows its own
-notification with the link to obtain one -- and the setting is kept, so it applies the
-moment the licence is active.
+PRO PREVIEW (NEW IN 1.2). Every paid setting says (Pro) in the format pane and is never
+hidden. Without a licence, WHILE YOU EDIT, the data table, IBCS mode and the label
+density settings you turn on are drawn working on your data under a "Pro preview"
+watermark, and Power BI shows its licence notice and Upgrade bar. READING VIEW shows the
+free chart, and where licences cannot be read (Publish to Web, embedding, export) the
+free result is drawn with no watermark. The grouping beyond twelve drivers is not
+previewed. The setting is kept, so it applies the moment the licence is active.
 
 
 TROUBLESHOOTING
 ---------------
 - Every bar floats, no totals -> Bar type is aggregating as Sum. Set it to First.
 - Bars in the wrong order -> nothing in Order, so they follow the category sort.
-- The closing bar is not the sum of the others -> check that exactly one row is your
-  opening total and that the deltas carry the right sign. Costs must be negative.
+- The closing bar is not what you expected -> with a Bar type field the first row must
+  be "total", and costs must be negative.
+- Every bar has the same colour -> a fixed Increase colour from an earlier version.
+  Pick a template to clear it.
+- "Pro preview" on the chart -> a Pro setting is on without a licence. Readers do not
+  see it.
 - Labels cut off -> switch to horizontal, or angle them (Pro).
 - A driver is missing and there is an "Others" bar -> the free tier shows twelve
   individual drivers; the note at the top right says how many were grouped.
-- The target line only appears on some bars -> by design, it is drawn on totals and
-  subtotals. A target on every cost line would be noise.
+- Summary cards or legend missing -> they hide themselves in small tiles.
+- The target line only appears on some bars -> by design, it is drawn on the total bars.
 
 
 PRIVACY
 -------
 All processing happens inside Power BI. The visual makes no network requests of any
-kind and stores nothing outside the report.
+kind and stores nothing outside the report. The start-screen links open only when you
+click them, through Power BI.

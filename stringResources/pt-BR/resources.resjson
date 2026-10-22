@@ -20,7 +20,7 @@
   "Role_Target": "Meta (opcional)",
   "Role_Target_Desc": "Meta ou orçamento. Desenhado como linha tracejada nas barras de total.",
   "Role_BarType": "Tipo de barra",
-  "Role_BarType_Desc": "Por linha: total, subtotal ou delta. Outro valor conta como delta. A primeira e a última linha são sempre totais. Agregue como Primeiro, não Soma.",
+  "Role_BarType_Desc": "Por linha: total, subtotal ou delta. Outro valor conta como delta. Marque a primeira e a última linha como total. Agregue como Primeiro, não Soma.",
   "Role_Order": "Ordem",
   "Role_Order_Desc": "Campo numérico que fixa a sequência da ponte. Sem ele, as barras seguem a ordem da categoria.",
   "Role_Tooltips": "Dicas de ferramenta",
