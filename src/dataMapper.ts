@@ -14,6 +14,7 @@ export interface WaterfallBar {
     tooltipItems?: { displayName: string; value: string }[];
     conditionalColor?: string;
     sourceIndex?:   number;   // índice original en el dataView; undefined = sin identidad propia (p.ej. barra "Otros")
+    formatString?:  string;   // cadena de formato DINÁMICA de la fila (general.formatString), si el DAX la decide
 }
 
 /**
@@ -88,7 +89,10 @@ export function mapDataView(dataView: DataView): WaterfallBar[] {
         else if (typeRaw === "subtotal") barType = "subtotal";
         else                             barType = "delta";
 
-        return { label, value, target, barType, sortOrder, isHighlighted, hasHighlight, tooltipItems, conditionalColor, sourceIndex: i };
+        const dyn = (measureCol as any).objects?.[i]?.general?.formatString;
+        const formatString = typeof dyn === "string" && dyn ? dyn : undefined;
+
+        return { label, value, target, barType, sortOrder, isHighlighted, hasHighlight, tooltipItems, conditionalColor, sourceIndex: i, formatString };
     });
 
     if (sortOrderCol) {

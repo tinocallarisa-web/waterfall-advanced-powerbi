@@ -25,6 +25,15 @@ interface RenderOptions {
     selectedIndices: Set<number>;
     /** Si el usuario tiene licencia. Decide los ajustes marcados (Pro). */
     isLicensed:    boolean;
+    /** Funciones Pro que se dibujan: con licencia, o en la vista previa (editando, el ajuste puesto). */
+    proTable:      boolean;
+    proIbcs:       boolean;
+    proDensity:    boolean;
+    fmt:           NumberFormatter;
+    /** Textos traducidos (clave, inglés). */
+    t:             (key: string, fallback: string) => string;
+    measureName:   string;
+    categoryName:  string;
     highContrast:  boolean;
     contrastForeground: string;
     contrastBackground: string;
@@ -42,9 +51,12 @@ export class WaterfallRenderer {
     private container:   HTMLElement;
     private loc:         ILocalizationManager;
 
-    private readonly PAD_LEFT   = 52;
+    private PAD_LEFT   = 52;
     private readonly PAD_RIGHT  = 16;
-    private readonly PAD_TOP    = 28;
+    private PAD_TOP    = 28;
+    /** Hueco abajo para la leyenda cuando va abajo (1.2). */
+    private legendBottom = 0;
+    private tr: (key: string, fallback: string) => string = (_k, f) => f;
     private readonly CARD_H     = 76;
     private readonly MIN_BAR_W  = 22;
     private readonly MIN_BAR_H  = 20;
@@ -61,17 +73,27 @@ export class WaterfallRenderer {
             this.container.removeChild(this.container.firstChild);
         }
 
-        const { bars, summary, settings, selectionIds, selectedIndices, isLicensed, highContrast,
-            contrastForeground, contrastBackground, width, height,
+        const { bars, summary, settings, selectionIds, selectedIndices, highContrast,
+            contrastForeground, width, height,
                 onBarClick, onBarHover, onBarLeave } = opts;
+        this.tr = opts.t;
         if (bars.length === 0) { this.renderEmpty(); return; }
 
-        const fmt = new NumberFormatter(settings);
+        const fmt = opts.fmt;
+        const isLicensed = opts.proDensity;
         const cs  = settings.colorSettings;
         const ls  = settings.labelSettings;
         const ch  = settings.chartSettings;
 
         const invert = ch.invertColorSemantics.value;
+        const vaS = settings.valueAxis;
+        this.vaSettings = {
+            show: !!vaS.show.value, gridlines: !!vaS.gridlines.value, fontSize: vaS.fontSize.value,
+            color: highContrast ? contrastForeground : vaS.color.value.value,
+            title: vaS.showTitle.value ? (vaS.title.value || opts.measureName) : ""
+        };
+        const caS = settings.categoryAxis;
+        this.catTitle = caS.showTitle.value ? (caS.title.value || opts.categoryName) : "";
 
         // Paleta Okabe-Ito: azul y naranja se distinguen con deuteranopia y
         // protanopia, que es donde el verde/rojo por defecto falla. Afecta a
@@ -83,7 +105,7 @@ export class WaterfallRenderer {
         // IBCS manda sobre la paleta accesible: es una notacion completa, y
         // mezclarla con otros colores la invalida. En un bridge el enfasis va en
         // la desviacion negativa, que es lo que se mira primero.
-        const ibcs = isLicensed && settings.ibcs.mode.value;
+        const ibcs = opts.proIbcs && settings.ibcs.mode.value;
         const safe = cs.colorBlindSafe.value;
         const posColor = ibcs ? "#8C8C8C" : safe ? CB_POS : cs.positiveColor.value.value;
         const negColor = ibcs ? "#262626" : safe ? CB_NEG : cs.negativeColor.value.value;
@@ -98,14 +120,15 @@ export class WaterfallRenderer {
         // El interruptor vive ahora en su propia tarjeta. Se respeta el antiguo
         // de Chart para no romper informes guardados: si cualquiera de los dos
         // esta apagado, las tarjetas no se pintan.
-        const showCards  = ch.showVarianceCards.value && settings.cardSettings.show.value;
+        // En un mosaico pequeño las tarjetas se comerían el gráfico: se ocultan solas.
+        const showCards  = ch.showVarianceCards.value && settings.cardSettings.show.value && height >= 220 && width >= 280;
         const horizontal = ch.orientation.value.value === "horizontal";
 
         // Tabla de datos (Pro). Reserva su parte antes de calcular el lienzo: si
         // se anadiera despues, el SVG ya estaria dimensionado y la tabla lo
         // empujaria fuera del visual.
         const ts        = settings.tableSettings;
-        const showTable = isLicensed && ts.show.value;
+        const showTable = opts.proTable && ts.show.value;
         const tablePct  = showTable ? Math.min(60, Math.max(20, ts.widthPct.value)) / 100 : 0;
         const tableRight = showTable && ts.position.value.value === "right";
 
@@ -129,8 +152,15 @@ export class WaterfallRenderer {
         this.svg = this.makeSVG(chartW, svgH);
         this.scrollWrap.appendChild(this.svg);
         body.appendChild(this.scrollWrap);
-        this.renderLegend(colors, highContrast ? contrastForeground : cs.legendTextColor.value.value,
-            cs.legendFontSize.value);
+        // Leyenda (1.2): se puede ocultar y poner abajo; en un mosaico muy bajo desaparece sola.
+        const legendOn = cs.showLegend.value && svgH >= 140;
+        const legendAtBottom = legendOn && cs.legendPosition.value.value === "bottom";
+        this.PAD_TOP = legendOn && !legendAtBottom ? 28 : 12;
+        this.legendBottom = legendAtBottom ? Math.round(cs.legendFontSize.value * 1.8) + 6 : 0;
+        if (legendOn) {
+            this.renderLegend(colors, highContrast ? contrastForeground : cs.legendTextColor.value.value,
+                cs.legendFontSize.value, legendAtBottom ? svgH - 6 : 16);
+        }
 
         const defs = this.el("defs") as SVGDefsElement;
         const marker = this.el("marker") as SVGMarkerElement;
@@ -187,9 +217,12 @@ export class WaterfallRenderer {
         const rotRise = rotDeg
             ? longestW * Math.abs(Math.sin(rotDeg * Math.PI / 180)) + 12
             : 0;
+        const va = this.vaSettings;
+        const catTitle = this.catTitle;
         const PAD_BOTTOM = Math.min(
             svgH * 0.45,
-            Math.max(20 + maxLabelLines * 15, 20 + rotRise));
+            Math.max(20 + maxLabelLines * 15, 20 + rotRise)) + this.legendBottom + (catTitle ? 16 : 0);
+        this.PAD_LEFT = (va.show ? 52 : 12) + (va.title ? 16 : 0);
 
         const chartW = width - this.PAD_LEFT - this.PAD_RIGHT;
         const chartH = svgH  - this.PAD_TOP  - PAD_BOTTOM;
@@ -215,6 +248,15 @@ export class WaterfallRenderer {
         const xOf = (i: number) => this.PAD_LEFT + i * (barW + gap);
 
         this.renderYAxis(yScale, minY, maxY, plotW, fmt, ls.categoryLabelColor.value.value);
+        if (va.title) {
+            const tt = this.text(12, this.PAD_TOP + chartH / 2, va.title, va.fontSize, va.color, "middle", "600", -90);
+            tt.setAttribute("data-o", "axis");
+        }
+        if (catTitle) {
+            const ct = this.text(this.PAD_LEFT + plotW / 2, svgH - this.legendBottom - 4, catTitle, ls.categoryFontSize.value,
+                ls.categoryLabelColor.value.value, "middle", "600");
+            ct.setAttribute("data-o", "catLabels");
+        }
 
         const zeroY = yScale(0);
         this.line(this.PAD_LEFT, zeroY, this.PAD_LEFT + plotW, zeroY, "#888780", 0.8);
@@ -254,9 +296,10 @@ export class WaterfallRenderer {
             rect.setAttribute("rx", "3"); rect.setAttribute("fill", fill);
             rect.setAttribute("opacity", String(opacity));
             rect.setAttribute("data-bar-index", String(i));
+            rect.setAttribute("data-o", "bars");
             rect.setAttribute("tabindex", "0");
             rect.setAttribute("role", "img");
-            rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value)}`);
+            rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value, bar.formatString)}`);
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
             rect.addEventListener("focus", () => rect.setAttribute("stroke", highContrast ? contrastForeground : "#252423"));
             rect.addEventListener("blur", () => rect.removeAttribute("stroke"));
@@ -318,7 +361,7 @@ export class WaterfallRenderer {
             if (ls.showLabels.value) {
                 const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
                 const labelColor = ls.autoValueLabelColor.value ? fill : ls.valueLabelColor.value.value;
-                this.text(x + barW / 2, yTop - 5, label, ls.fontSize.value, labelColor, "middle", "500");
+                this.text(x + barW / 2, yTop - 5, label, ls.fontSize.value, labelColor, "middle", "500").setAttribute("data-o", "labels");
             }
 
             // Color de la etiqueta de eje: el de la barra cuando es un anclaje.
@@ -336,7 +379,7 @@ export class WaterfallRenderer {
                 this.truncate(bar.label, maxChars).split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
                         line, ls.categoryFontSize.value, catColor,
-                        anchor, "400", rot);
+                        anchor, "400", rot).setAttribute("data-o", "catLabels");
                 });
             }
         });
@@ -360,10 +403,13 @@ export class WaterfallRenderer {
         // el, la etiqueta mas larga queda pegada al marco y se lee como cortada
         // aunque este entera.
         const GUTTER = 10;
+        const titleLeft = this.catTitle ? 16 : 0;
         const PAD_LEFT_H = Math.min(
             Math.max(width * 0.45, 70),
-            Math.max(70, longestH + GUTTER + 10));
-        const PAD_BOTTOM_H  = 28;
+            Math.max(70, longestH + GUTTER + 10)) + titleLeft;
+        const vaH = this.vaSettings;
+        const catTitleH = this.catTitle;
+        const PAD_BOTTOM_H  = (vaH.show ? 28 : 8) + (vaH.title ? 16 : 0) + this.legendBottom;
 
         const chartW = width - PAD_LEFT_H - this.PAD_RIGHT - 8;
         const chartH = svgH  - this.PAD_TOP - PAD_BOTTOM_H;
@@ -389,6 +435,14 @@ export class WaterfallRenderer {
         const yOf = (i: number) => this.PAD_TOP + i * (barH + gap);
 
         this.renderXAxis(xScale, minV, maxV, plotH, fmt, PAD_LEFT_H, ls.categoryLabelColor.value.value);
+        if (vaH.title) {
+            const tt = this.text(PAD_LEFT_H + chartW / 2, this.PAD_TOP + plotH + (vaH.show ? 30 : 14), vaH.title, vaH.fontSize, vaH.color, "middle", "600");
+            tt.setAttribute("data-o", "axis");
+        }
+        if (catTitleH) {
+            const ct = this.text(10, this.PAD_TOP + plotH / 2, catTitleH, ls.categoryFontSize.value, ls.categoryLabelColor.value.value, "middle", "600", -90);
+            ct.setAttribute("data-o", "catLabels");
+        }
 
         const zeroX = xScale(0);
         this.line(zeroX, this.PAD_TOP, zeroX, this.PAD_TOP + plotH, "#888780", 0.8);
@@ -429,9 +483,10 @@ export class WaterfallRenderer {
             rect.setAttribute("rx", "3"); rect.setAttribute("fill", fill);
             rect.setAttribute("opacity", String(opacity));
             rect.setAttribute("data-bar-index", String(i));
+            rect.setAttribute("data-o", "bars");
             rect.setAttribute("tabindex", "0");
             rect.setAttribute("role", "img");
-            rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value)}`);
+            rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value, bar.formatString)}`);
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
             rect.addEventListener("focus", () => rect.setAttribute("stroke", highContrast ? contrastForeground : "#252423"));
             rect.addEventListener("blur", () => rect.removeAttribute("stroke"));
@@ -487,13 +542,13 @@ export class WaterfallRenderer {
                 const labelX = bar.value >= 0 || bar.barType !== "delta" ? bx + bw + 6 : bx - 6;
                 const anchor = bar.value >= 0 || bar.barType !== "delta" ? "start" : "end";
                 const labelColor = ls.autoValueLabelColor.value ? fill : ls.valueLabelColor.value.value;
-                this.text(labelX, y + barH / 2 + 4, label, ls.fontSize.value, labelColor, anchor, "500");
+                this.text(labelX, y + barH / 2 + 4, label, ls.fontSize.value, labelColor, anchor, "500").setAttribute("data-o", "labels");
             }
 
             // Si aun asi no cabe -etiqueta larguisima, o fuente muy grande- se
             // recorta a lo que entra. Un corte limpio con puntos suspensivos se
             // lee; que la letra se salga del lienzo, no.
-            const fitsChars = Math.floor((PAD_LEFT_H - GUTTER - 10) / (catFsH * 0.60));
+            const fitsChars = Math.floor((PAD_LEFT_H - titleLeft - GUTTER - 10) / (catFsH * 0.60));
             const userMax   = isLicensed ? (ls.labelMaxChars.value ?? 0) : 0;
             const cap       = userMax > 0 ? Math.min(userMax, fitsChars) : fitsChars;
             const catLabel  = this.truncate(
@@ -501,33 +556,41 @@ export class WaterfallRenderer {
             const catColorH = (ls.anchorLabelsMatchBar.value && !highContrast &&
                                (bar.barType === "total" || bar.barType === "subtotal"))
                 ? colors.total : ls.categoryLabelColor.value.value;
-            this.text(PAD_LEFT_H - 8, y + barH / 2 + 4, catLabel, ls.categoryFontSize.value, catColorH, "end");
+            this.text(PAD_LEFT_H - 8, y + barH / 2 + 4, catLabel, ls.categoryFontSize.value, catColorH, "end").setAttribute("data-o", "catLabels");
         });
     }
 
+    /** Ajustes del eje de valores (1.2), los pone render() antes de dibujar. */
+    private vaSettings = { show: true, gridlines: true, fontSize: 9, color: "#888780", title: "" };
+    private catTitle = "";
+
     private renderYAxis(yScale: (v: number) => number, minY: number, maxY: number,
-                        chartW: number, fmt: NumberFormatter, tickColor: string): void {
+                        chartW: number, fmt: NumberFormatter, _tickColor: string): void {
+        const va = this.vaSettings;
+        const range = Math.max(Math.abs(minY), Math.abs(maxY));
         for (let t = 0; t <= 5; t++) {
             const v = minY + (maxY - minY) * (t / 5);
             const y = yScale(v);
-            this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, "#e8e8e6", 0.5);
-            this.text(this.PAD_LEFT - 5, y + 3, fmt.formatAxis(v), 9, tickColor, "end");
+            if (va.gridlines) this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, "#e8e8e6", 0.5);
+            if (va.show) this.text(this.PAD_LEFT - 5, y + 3, fmt.formatAxis(v, range), va.fontSize, va.color, "end").setAttribute("data-o", "axis");
         }
     }
 
     private renderXAxis(xScale: (v: number) => number, minV: number, maxV: number,
-                        chartH: number, fmt: NumberFormatter, padLeft: number, tickColor: string): void {
+                        chartH: number, fmt: NumberFormatter, _padLeft: number, _tickColor: string): void {
+        const va = this.vaSettings;
+        const range = Math.max(Math.abs(minV), Math.abs(maxV));
         for (let t = 0; t <= 5; t++) {
             const v = minV + (maxV - minV) * (t / 5);
             const x = xScale(v);
-            this.line(x, this.PAD_TOP, x, this.PAD_TOP + chartH, "#e8e8e6", 0.5);
-            this.text(x, this.PAD_TOP + chartH + 14, fmt.formatAxis(v), 9, tickColor, "middle");
+            if (va.gridlines) this.line(x, this.PAD_TOP, x, this.PAD_TOP + chartH, "#e8e8e6", 0.5);
+            if (va.show) this.text(x, this.PAD_TOP + chartH + 14, fmt.formatAxis(v, range), va.fontSize, va.color, "middle").setAttribute("data-o", "axis");
         }
     }
 
-    private renderLegend(colors: Record<string, string>, textColor: string, fs = 9): void {
+    private renderLegend(colors: Record<string, string>, textColor: string, fs = 9, baseY = 16): void {
         const items = [
-            ["Total", colors.total], ["Increase", colors.pos], ["Decrease", colors.neg]
+            [this.tr("UI_Total", "Total"), colors.total], [this.tr("UI_Increase", "Increase"), colors.pos], [this.tr("UI_Decrease", "Decrease"), colors.neg]
         ];
         // La separacion y el tamano del cuadrito siguen a la fuente. Con 78px
         // fijos, subir el tamano hacia que las etiquetas se pisaran entre si.
@@ -536,11 +599,12 @@ export class WaterfallRenderer {
         items.forEach(([label, color], index) => {
             const x = this.PAD_LEFT + index * step;
             const swatch = this.el("rect") as SVGRectElement;
-            swatch.setAttribute("x", String(x)); swatch.setAttribute("y", String(16 - sw));
+            swatch.setAttribute("x", String(x)); swatch.setAttribute("y", String(baseY - sw));
             swatch.setAttribute("width", String(sw)); swatch.setAttribute("height", String(sw));
             swatch.setAttribute("rx", "1"); swatch.setAttribute("fill", color);
+            swatch.setAttribute("data-o", "legend");
             this.svg.appendChild(swatch);
-            this.text(x + sw + 4, 16, label, fs, textColor, "start");
+            this.text(x + sw + 4, baseY, label, fs, textColor, "start").setAttribute("data-o", "legend");
         });
     }
 
@@ -577,6 +641,7 @@ export class WaterfallRenderer {
 
         const wrap = document.createElement("div");
         wrap.className = "wf-data-table";
+        wrap.setAttribute("data-o", "table");
         wrap.style.cssText = (toTheRight
             ? `flex:1 1 auto;width:${w}px;height:${h}px;overflow:auto;box-sizing:border-box;padding:4px 8px;`
             : `width:100%;height:${h}px;overflow:auto;box-sizing:border-box;padding:6px 8px 4px;`)
@@ -593,9 +658,9 @@ export class WaterfallRenderer {
         };
 
         const head = document.createElement("tr");
-        const cols = [""].concat(["Value"],
-            ts.showRunning.value ? ["Running"] : [],
-            ts.showShare.value ? ["% open"] : []);
+        const cols = [""].concat([this.tr("UI_Value", "Value")],
+            ts.showRunning.value ? [this.tr("UI_Running", "Running")] : [],
+            ts.showShare.value ? [this.tr("UI_PctOpen", "% open")] : []);
         cols.forEach((label, i) => {
             const th = document.createElement("th");
             th.textContent = label;
@@ -670,12 +735,12 @@ export class WaterfallRenderer {
                 variance: "Variance %", biggestGain: "Biggest gain",
                 biggestLoss: "Biggest loss", base: "base", vsBase: "vs base"
             };
-            const loc = this.loc.getDisplayName(key);
-            return (loc && loc !== key) ? loc : (fallbacks[key] ?? key);
+            return this.tr(key, fallbacks[key] ?? key);
         };
 
         const row = document.createElement("div");
         row.style.cssText = "display:flex;gap:6px;padding:6px 0 0;flex-wrap:wrap;box-sizing:border-box";
+        row.setAttribute("data-o", "cards");
 
         const varPct = (summary.totalDeltaRel >= 0 ? "+" : "") + summary.totalDeltaRel.toFixed(1) + "%";
 
@@ -714,8 +779,8 @@ export class WaterfallRenderer {
     }
 
     private buildLabel(bar: ComputedBar, mode: string, fmt: NumberFormatter): string {
-        if (bar.barType === "total" || bar.barType === "subtotal") return fmt.format(bar.top);
-        const deltaStr = fmt.formatDelta(bar.value);
+        if (bar.barType === "total" || bar.barType === "subtotal") return fmt.format(bar.top, bar.formatString);
+        const deltaStr = fmt.formatDelta(bar.value, bar.formatString);
         const relStr   = (bar.value >= 0 ? "+" : "") + Math.abs(bar.deltaRel).toFixed(1) + "%";
         if (mode === "abs") return deltaStr;
         if (mode === "rel") return relStr;
@@ -725,7 +790,7 @@ export class WaterfallRenderer {
     private renderEmpty(): void {
         const p = document.createElement("p");
         p.style.cssText = "font-size:12px;color:#888;padding:20px;margin:0";
-        p.textContent   = "Connect a category and a value measure to render the waterfall.";
+        p.textContent   = this.tr("landingHint", "Connect Category and Value to render the waterfall");
         this.container.appendChild(p);
     }
 
@@ -809,7 +874,7 @@ export class WaterfallRenderer {
     }
 
     private text(x: number, y: number, content: string, fs: number,
-                 fill: string, anchor = "middle", weight = "400", rotate = 0): void {
+                 fill: string, anchor = "middle", weight = "400", rotate = 0): SVGTextElement {
         const t = this.el("text") as SVGTextElement;
         t.setAttribute("x", String(x)); t.setAttribute("y", String(y));
         t.setAttribute("font-size", String(fs)); t.setAttribute("fill", fill);
@@ -817,5 +882,6 @@ export class WaterfallRenderer {
         t.setAttribute("font-family", "Segoe UI, sans-serif");
         if (rotate) t.setAttribute("transform", `rotate(${rotate} ${x} ${y})`);
         t.textContent = content; this.svg.appendChild(t);
+        return t;
     }
 }

@@ -4,15 +4,24 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import FormattingSettingsCard  = formattingSettings.SimpleCard;
 import FormattingSettingsModel = formattingSettings.Model;
 
+// Las propiedades publicadas hasta 1.1 no cambian de objeto ni de nombre (informes guardados). La 1.2 añade
+// propiedades y tarjetas, y claves de traducción (displayNameKey) a todo: hasta ahora el panel no se traducía.
+
+const rango = (min: number, max: number): any => ({
+    minValue: { type: powerbi.visuals.ValidatorType.Min, value: min },
+    maxValue: { type: powerbi.visuals.ValidatorType.Max, value: max }
+});
+const item = (value: string, displayName: string, key: string) => ({ value, displayName, displayNameKey: key }) as any;
+
 // ─── Color settings ───────────────────────────────────────────────────────────
 
 class ColorSettings extends FormattingSettingsCard {
     colorBlindSafe = new formattingSettings.ToggleSwitch({
-        name: "colorBlindSafe", displayName: "Colour-blind safe palette",
+        name: "colorBlindSafe", displayName: "Colour-blind safe palette", displayNameKey: "colorBlindSafe",
         value: false
     });
     patternOnDecrease = new formattingSettings.ToggleSwitch({
-        name: "patternOnDecrease", displayName: "Hatch decreases",
+        name: "patternOnDecrease", displayName: "Hatch decreases", displayNameKey: "patternOnDecrease",
         value: false
     });
     // El formato condicional necesita LAS DOS cosas, e instanceKind solo es la
@@ -25,116 +34,107 @@ class ColorSettings extends FormattingSettingsCard {
     //                        DataViewWildcardMatchingOption.InstancesAndTotals)
     //
     // Con el selector puesto, Power BI resuelve la regla por categoria y devuelve
-    // los colores en categorical.categories[0].objects[i].
+    // los colores en categorical.categories[0].objects[i]. El color FIJO se guarda a
+    // nivel general gracias a altConstantValueSelector null (se pone en getFormattingModel).
     positiveColor = new formattingSettings.ColorPicker({
-        name: "positiveColor", displayName: "Increase color",
+        name: "positiveColor", displayName: "Increase color", displayNameKey: "positiveColor",
         value: { value: "#1D9E75" },
         selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] } as any,
         instanceKind: 3
     });
     negativeColor = new formattingSettings.ColorPicker({
-        name: "negativeColor", displayName: "Decrease color",
+        name: "negativeColor", displayName: "Decrease color", displayNameKey: "negativeColor",
         value: { value: "#E24B4A" }
     });
     totalColor = new formattingSettings.ColorPicker({
-        name: "totalColor", displayName: "Total / subtotal color",
+        name: "totalColor", displayName: "Total / subtotal color", displayNameKey: "totalColor",
         value: { value: "#378ADD" }
     });
     targetColor = new formattingSettings.ColorPicker({
-        name: "targetColor", displayName: "Target line color",
+        name: "targetColor", displayName: "Target line color", displayNameKey: "targetColor",
         value: { value: "#888780" }
     });
+    showLegend = new formattingSettings.ToggleSwitch({
+        name: "showLegend", displayName: "Show legend", displayNameKey: "showLegend", value: true
+    });
+    legendPosition = new formattingSettings.ItemDropdown({
+        name: "legendPosition", displayName: "Legend position", displayNameKey: "legendPosition",
+        items: [item("top", "Top", "Enum_top"), item("bottom", "Bottom", "Enum_bottom")],
+        value: item("top", "Top", "Enum_top")
+    });
     legendFontSize = new formattingSettings.NumUpDown({
-        name: "legendFontSize", displayName: "Legend font size", value: 9,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 7  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 18 }
-        }
+        name: "legendFontSize", displayName: "Legend font size", displayNameKey: "legendFontSize", value: 9,
+        options: rango(7, 18)
     });
     legendTextColor = new formattingSettings.ColorPicker({
-        name: "legendTextColor", displayName: "Legend text color",
+        name: "legendTextColor", displayName: "Legend text color", displayNameKey: "legendTextColor",
         value: { value: "#777777" }
     });
     name        = "colorSettings";
     displayName = "Colors";
+    displayNameKey = "card_colorSettings";
     slices      = [this.colorBlindSafe, this.patternOnDecrease, this.positiveColor, this.negativeColor, this.totalColor, this.targetColor,
-        this.legendFontSize, this.legendTextColor];
+        this.showLegend, this.legendPosition, this.legendFontSize, this.legendTextColor];
 }
 
 // ─── Label settings ───────────────────────────────────────────────────────────
 
 class LabelSettings extends FormattingSettingsCard {
     showLabels = new formattingSettings.ToggleSwitch({
-        name: "showLabels", displayName: "Show labels", value: true
+        name: "showLabels", displayName: "Show labels", displayNameKey: "showLabels", value: true
     });
     labelMode = new formattingSettings.ItemDropdown({
-        name: "labelMode", displayName: "Label mode",
-        items: [
-            { displayName: "Absolute",   value: "abs"  },
-            { displayName: "Relative %", value: "rel"  },
-            { displayName: "Both",       value: "both" }
-        ],
-        value: { displayName: "Absolute", value: "abs" }
+        name: "labelMode", displayName: "Label mode", displayNameKey: "labelMode",
+        items: [item("abs", "Absolute", "Enum_abs"), item("rel", "Relative %", "Enum_rel"), item("both", "Both", "Enum_both")],
+        value: item("abs", "Absolute", "Enum_abs")
     });
     fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize", displayName: "Font size", value: 11,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 8  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 20 }
-        }
+        name: "fontSize", displayName: "Font size", displayNameKey: "fontSize", value: 11,
+        options: rango(8, 20)
     });
     autoValueLabelColor = new formattingSettings.ToggleSwitch({
-        name: "autoValueLabelColor", displayName: "Value label color: match bar", value: true
+        name: "autoValueLabelColor", displayName: "Value label color: match bar", displayNameKey: "autoValueLabelColor", value: true
     });
     valueLabelColor = new formattingSettings.ColorPicker({
-        name: "valueLabelColor", displayName: "Value label color (when not matching bar)",
+        name: "valueLabelColor", displayName: "Value label color (when not matching bar)", displayNameKey: "valueLabelColor",
         value: { value: "#252423" }
     });
     // Totales y subtotales son los puntos de control del puente: el arranque,
     // los cortes intermedios y el cierre. Darles a sus etiquetas de eje el color
-    // de su barra los separa de los drivers de un vistazo, que es como se lee un
-    // bridge -primero los anclajes, luego que paso entre medias-.
+    // de su barra los separa de los drivers de un vistazo.
     anchorLabelsMatchBar = new formattingSettings.ToggleSwitch({
-        name: "anchorLabelsMatchBar",
+        name: "anchorLabelsMatchBar", displayNameKey: "anchorLabelsMatchBar",
         displayName: "Total / subtotal labels: match bar colour", value: false
     });
     categoryLabelColor = new formattingSettings.ColorPicker({
-        name: "categoryLabelColor", displayName: "Category / axis label color",
+        name: "categoryLabelColor", displayName: "Category / axis label color", displayNameKey: "categoryLabelColor",
         value: { value: "#888780" }
     });
-    // Densidad de etiquetas. Un waterfall no falla por calcular mal, falla por
-    // saturarse: quince categorias con nombres de linea de P&L y sus importes no
-    // caben, se solapan y el grafico deja de leerse. Pesa mas todavia en packs
-    // exportados a PDF, que es donde se consumen estos informes.
+    // Densidad de etiquetas (Pro). Un waterfall no falla por calcular mal, falla por saturarse.
     labelRotation = new formattingSettings.ItemDropdown({
-        name: "labelRotation", displayName: "Category label angle (Pro)",
+        name: "labelRotation", displayName: "Category label angle (Pro)", displayNameKey: "labelRotation",
         items: [
-            { displayName: "Horizontal",   value: "0"  },
-            { displayName: "Tilted (-30°)", value: "-30" },
-            { displayName: "Tilted (-45°)", value: "-45" },
-            { displayName: "Vertical (-90°)", value: "-90" }
+            item("0", "Horizontal", "Enum_rot0"),
+            item("-30", "Tilted (-30°)", "Enum_rot30"),
+            item("-45", "Tilted (-45°)", "Enum_rot45"),
+            item("-90", "Vertical (-90°)", "Enum_rot90")
         ],
-        value: { displayName: "Horizontal", value: "0" }
+        value: item("0", "Horizontal", "Enum_rot0")
     });
     labelMaxChars = new formattingSettings.NumUpDown({
-        name: "labelMaxChars", displayName: "Truncate category labels at (Pro)", value: 0,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 60 }
-        }
+        name: "labelMaxChars", displayName: "Truncate category labels at (Pro)", displayNameKey: "labelMaxChars", value: 0,
+        options: rango(0, 60)
     });
     hideOverlapping = new formattingSettings.ToggleSwitch({
-        name: "hideOverlapping", displayName: "Hide labels that do not fit (Pro)", value: false
+        name: "hideOverlapping", displayName: "Hide labels that do not fit (Pro)", displayNameKey: "hideOverlapping", value: false
     });
     categoryFontSize = new formattingSettings.NumUpDown({
-        name: "categoryFontSize", displayName: "Category label font size", value: 10,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 8  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 18 }
-        }
+        name: "categoryFontSize", displayName: "Category label font size", displayNameKey: "categoryFontSize", value: 10,
+        options: rango(8, 18)
     });
     name        = "labelSettings";
     displayName = "Labels";
+    displayNameKey = "card_labelSettings";
     slices      = [this.showLabels, this.labelMode, this.fontSize,
         this.autoValueLabelColor, this.valueLabelColor, this.anchorLabelsMatchBar, this.categoryLabelColor, this.categoryFontSize,
         this.labelRotation, this.labelMaxChars, this.hideOverlapping];
@@ -143,221 +143,286 @@ class LabelSettings extends FormattingSettingsCard {
 // ─── Number format settings ───────────────────────────────────────────────────
 
 class NumberFormatSettings extends FormattingSettingsCard {
+    // "custom" sigue siendo el valor por defecto: los informes guardados se ven igual. "model" usa la cadena de
+    // formato de la medida (dinámica si el DAX la decide) y el idioma del informe.
+    source = new formattingSettings.ItemDropdown({
+        name: "source", displayName: "Number format", displayNameKey: "nf_source",
+        items: [item("custom", "Custom (below)", "Enum_custom"), item("model", "Model format", "Enum_model")],
+        value: item("custom", "Custom (below)", "Enum_custom")
+    });
     currencySymbol = new formattingSettings.ItemDropdown({
-        name: "currencySymbol", displayName: "Currency symbol",
+        name: "currencySymbol", displayName: "Currency symbol", displayNameKey: "currencySymbol",
         items: [
-            { displayName: "None",     value: ""  },
-            { displayName: "€ Euro",   value: "€" },
-            { displayName: "$ Dollar", value: "$" },
-            { displayName: "£ Pound",  value: "£" },
-            { displayName: "¥ Yen",    value: "¥" }
+            item("", "None", "Enum_none"),
+            item("€", "€ Euro", "Enum_eur"),
+            item("$", "$ Dollar", "Enum_usd"),
+            item("£", "£ Pound", "Enum_gbp"),
+            item("¥", "¥ Yen", "Enum_jpy")
         ],
-        value: { displayName: "None", value: "" }
+        value: item("", "None", "Enum_none")
     });
     symbolPosition = new formattingSettings.ItemDropdown({
-        name: "symbolPosition", displayName: "Symbol position",
-        items: [
-            { displayName: "Prefix", value: "prefix" },
-            { displayName: "Suffix", value: "suffix" }
-        ],
-        value: { displayName: "Prefix", value: "prefix" }
+        name: "symbolPosition", displayName: "Symbol position", displayNameKey: "symbolPosition",
+        items: [item("prefix", "Prefix", "Enum_prefix"), item("suffix", "Suffix", "Enum_suffix")],
+        value: item("prefix", "Prefix", "Enum_prefix")
     });
     scaleMode = new formattingSettings.ItemDropdown({
-        name: "scaleMode", displayName: "Scale",
+        name: "scaleMode", displayName: "Scale", displayNameKey: "scaleMode",
         items: [
-            { displayName: "Auto",          value: "auto" },
-            { displayName: "None",          value: "none" },
-            { displayName: "Thousands (k)", value: "k"   },
-            { displayName: "Millions (M)",  value: "M"   }
+            item("auto", "Auto", "Enum_auto"),
+            item("none", "None", "Enum_none"),
+            item("k", "Thousands (k)", "Enum_k"),
+            item("M", "Millions (M)", "Enum_M")
         ],
-        value: { displayName: "Auto", value: "auto" }
+        value: item("auto", "Auto", "Enum_auto")
     });
     decimals = new formattingSettings.NumUpDown({
-        name: "decimals", displayName: "Decimals", value: 1,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0 },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 4 }
-        }
+        name: "decimals", displayName: "Decimals", displayNameKey: "decimals", value: 1,
+        options: rango(0, 4)
     });
     thousandsSep = new formattingSettings.ToggleSwitch({
-        name: "thousandsSep", displayName: "Thousands separator", value: true
+        name: "thousandsSep", displayName: "Thousands separator", displayNameKey: "thousandsSep", value: true
     });
     name        = "numberFormat";
     displayName = "Number format";
-    slices      = [this.currencySymbol, this.symbolPosition, this.scaleMode, this.decimals, this.thousandsSep];
+    displayNameKey = "card_numberFormat";
+    slices      = [this.source, this.currencySymbol, this.symbolPosition, this.scaleMode, this.decimals, this.thousandsSep];
 }
 
 // ─── Chart settings ───────────────────────────────────────────────────────────
 
 class ChartSettings extends FormattingSettingsCard {
     showConnectors = new formattingSettings.ToggleSwitch({
-        name: "showConnectors", displayName: "Connector lines", value: true
+        name: "showConnectors", displayName: "Connector lines", displayNameKey: "showConnectors", value: true
     });
     showSubtotals = new formattingSettings.ToggleSwitch({
-        name: "showSubtotals", displayName: "Show subtotals", value: true
+        name: "showSubtotals", displayName: "Show subtotals", displayNameKey: "showSubtotals", value: true
     });
     targetLabel = new formattingSettings.TextInput({
-        name: "targetLabel", displayName: "Target label",
+        name: "targetLabel", displayName: "Target label", displayNameKey: "targetLabel",
         placeholder: "Target", value: "Target"
     });
     targetShowValue = new formattingSettings.ToggleSwitch({
-        name: "targetShowValue", displayName: "Show target value", value: true
+        name: "targetShowValue", displayName: "Show target value", displayNameKey: "targetShowValue", value: true
     });
     showTarget = new formattingSettings.ToggleSwitch({
-        name: "showTarget", displayName: "Show target", value: true
+        name: "showTarget", displayName: "Show target", displayNameKey: "showTarget", value: true
     });
     showVarianceCards = new formattingSettings.ToggleSwitch({
-        name: "showVarianceCards", displayName: "Summary cards", value: true
+        name: "showVarianceCards", displayName: "Summary cards", displayNameKey: "showVarianceCards", value: true
     });
     sortBars = new formattingSettings.ToggleSwitch({
-        name: "sortBars", displayName: "Sort by impact", value: false
+        name: "sortBars", displayName: "Sort by impact", displayNameKey: "sortBars", value: false
     });
     invertColorSemantics = new formattingSettings.ToggleSwitch({
-        name: "invertColorSemantics", displayName: "Invert increase/decrease colors",
+        name: "invertColorSemantics", displayName: "Invert increase/decrease colors", displayNameKey: "invertColorSemantics",
         value: false
     });
     maxCategories = new formattingSettings.NumUpDown({
-        name: "maxCategories", displayName: "Max drivers shown (0 = no limit)", value: 0,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 0  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 50 }
-        }
+        name: "maxCategories", displayName: "Max drivers shown (0 = no limit)", displayNameKey: "maxCategories", value: 0,
+        options: rango(0, 50)
     });
     otherLabel = new formattingSettings.TextInput({
-        name: "otherLabel", displayName: "\"Others\" bar label",
+        name: "otherLabel", displayName: "\"Others\" bar label", displayNameKey: "otherLabel",
         placeholder: "Others", value: "Others"
     });
     orientation = new formattingSettings.ItemDropdown({
-        name: "orientation", displayName: "Orientation",
-        items: [
-            { displayName: "Vertical",   value: "vertical"   },
-            { displayName: "Horizontal", value: "horizontal" }
-        ],
-        value: { displayName: "Vertical", value: "vertical" }
+        name: "orientation", displayName: "Orientation", displayNameKey: "orientation",
+        items: [item("vertical", "Vertical", "Enum_vertical"), item("horizontal", "Horizontal", "Enum_horizontal")],
+        value: item("vertical", "Vertical", "Enum_vertical")
     });
     name        = "chartSettings";
     displayName = "Chart";
-    slices      = [this.showConnectors, this.showSubtotals, this.showTarget, this.targetLabel, this.targetShowValue, this.showVarianceCards,
-        this.sortBars, this.invertColorSemantics, this.maxCategories, this.otherLabel, this.orientation];
+    displayNameKey = "card_chartSettings";
+    slices      = [this.orientation, this.showConnectors, this.showSubtotals, this.showTarget, this.targetLabel, this.targetShowValue,
+        this.showVarianceCards, this.sortBars, this.invertColorSemantics, this.maxCategories, this.otherLabel];
+}
+
+// ─── Ejes (1.2) ───────────────────────────────────────────────────────────────
+
+class ValueAxisSettings extends FormattingSettingsCard {
+    show = new formattingSettings.ToggleSwitch({ name: "show", displayName: "Show value axis", displayNameKey: "va_show", value: true });
+    gridlines = new formattingSettings.ToggleSwitch({ name: "gridlines", displayName: "Gridlines", displayNameKey: "va_gridlines", value: true });
+    fontSize = new formattingSettings.NumUpDown({ name: "fontSize", displayName: "Font size", displayNameKey: "fontSize", value: 9, options: rango(7, 18) });
+    color = new formattingSettings.ColorPicker({ name: "color", displayName: "Color", displayNameKey: "color", value: { value: "#888780" } });
+    showTitle = new formattingSettings.ToggleSwitch({ name: "showTitle", displayName: "Axis title", displayNameKey: "ax_showTitle", value: false });
+    title = new formattingSettings.TextInput({ name: "title", displayName: "Title text", displayNameKey: "ax_title", placeholder: "Measure name", value: "" });
+    topLevelSlice = this.show;
+    name = "valueAxis";
+    displayName = "Value axis";
+    displayNameKey = "card_valueAxis";
+    slices = [this.gridlines, this.fontSize, this.color, this.showTitle, this.title];
+}
+
+class CategoryAxisSettings extends FormattingSettingsCard {
+    showTitle = new formattingSettings.ToggleSwitch({ name: "showTitle", displayName: "Axis title", displayNameKey: "ax_showTitle", value: false });
+    title = new formattingSettings.TextInput({ name: "title", displayName: "Title text", displayNameKey: "ax_title", placeholder: "Field name", value: "" });
+    name = "categoryAxis";
+    displayName = "Category axis";
+    displayNameKey = "card_categoryAxis";
+    slices = [this.showTitle, this.title];
 }
 
 class CardSettings extends FormattingSettingsCard {
     show = new formattingSettings.ToggleSwitch({
-        name: "show", displayName: "Show summary cards", value: true
+        name: "show", displayName: "Show summary cards", displayNameKey: "cards_show", value: true
     });
     labelFontSize = new formattingSettings.NumUpDown({
-        name: "labelFontSize", displayName: "Caption font size", value: 9,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 7  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 16 }
-        }
+        name: "labelFontSize", displayName: "Caption font size", displayNameKey: "labelFontSize", value: 9,
+        options: rango(7, 16)
     });
     valueFontSize = new formattingSettings.NumUpDown({
-        name: "valueFontSize", displayName: "Value font size", value: 13,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 9  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 28 }
-        }
+        name: "valueFontSize", displayName: "Value font size", displayNameKey: "valueFontSize", value: 13,
+        options: rango(9, 28)
     });
     textColorAuto = new formattingSettings.ToggleSwitch({
-        name: "textColorAuto", displayName: "Use the report theme text colour", value: true
+        name: "textColorAuto", displayName: "Use the report theme text colour", displayNameKey: "textColorAuto", value: true
     });
     textColor = new formattingSettings.ColorPicker({
-        name: "textColor", displayName: "Custom text colour — turn the switch above off", value: { value: "#252423" }
+        name: "textColor", displayName: "Custom text colour — turn the switch above off", displayNameKey: "textColor", value: { value: "#252423" }
     });
     backgroundAuto = new formattingSettings.ToggleSwitch({
-        name: "backgroundAuto", displayName: "Use the report theme background", value: true
+        name: "backgroundAuto", displayName: "Use the report theme background", displayNameKey: "backgroundAuto", value: true
     });
     backgroundColor = new formattingSettings.ColorPicker({
-        name: "backgroundColor", displayName: "Custom background — turn the switch above off", value: { value: "#F3F2F1" }
+        name: "backgroundColor", displayName: "Custom background — turn the switch above off", displayNameKey: "backgroundColor", value: { value: "#F3F2F1" }
     });
     name        = "cardSettings";
     displayName = "Summary Cards";
+    displayNameKey = "card_cardSettings";
     slices      = [this.show, this.labelFontSize, this.valueFontSize,
         this.textColorAuto, this.textColor, this.backgroundAuto, this.backgroundColor];
 }
 
 class TableSettings extends FormattingSettingsCard {
-    // El puente y las cifras exactas en un solo objeto. Un bridge responde "por
-    // que" y una tabla responde "cuanto", y en un comite se preguntan las dos
-    // cosas seguidas: sin esto hay que poner una matriz al lado, repetir el
-    // filtrado y confiar en que las dos cuenten lo mismo.
+    // El puente y las cifras exactas en un solo objeto: un bridge responde "por que" y una tabla "cuanto".
     show = new formattingSettings.ToggleSwitch({
-        name: "show", displayName: "Show data table (Pro)", value: false
+        name: "show", displayName: "Show data table (Pro)", displayNameKey: "table_show", value: false
     });
     position = new formattingSettings.ItemDropdown({
-        name: "position", displayName: "Position",
-        items: [
-            { displayName: "Right",  value: "right"  },
-            { displayName: "Bottom", value: "bottom" }
-        ],
-        value: { displayName: "Right", value: "right" }
+        name: "position", displayName: "Position", displayNameKey: "table_position",
+        items: [item("right", "Right", "Enum_right"), item("bottom", "Bottom", "Enum_bottom")],
+        value: item("right", "Right", "Enum_right")
     });
     showRunning = new formattingSettings.ToggleSwitch({
-        name: "showRunning", displayName: "Running total column", value: true
+        name: "showRunning", displayName: "Running total column", displayNameKey: "showRunning", value: true
     });
     showShare = new formattingSettings.ToggleSwitch({
-        name: "showShare", displayName: "% of opening column", value: false
+        name: "showShare", displayName: "% of opening column", displayNameKey: "showShare", value: false
     });
     backgroundAuto = new formattingSettings.ToggleSwitch({
-        name: "backgroundAuto", displayName: "Use the report theme background", value: true
+        name: "backgroundAuto", displayName: "Use the report theme background", displayNameKey: "backgroundAuto", value: true
     });
     backgroundColor = new formattingSettings.ColorPicker({
-        name: "backgroundColor", displayName: "Custom background — turn the switch above off", value: { value: "#F3F2F1" }
+        name: "backgroundColor", displayName: "Custom background — turn the switch above off", displayNameKey: "backgroundColor", value: { value: "#F3F2F1" }
     });
     showBorder = new formattingSettings.ToggleSwitch({
-        name: "showBorder", displayName: "Separator line", value: true
+        name: "showBorder", displayName: "Separator line", displayNameKey: "showBorder", value: true
     });
     fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize", displayName: "Font size", value: 10,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 7  },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 18 }
-        }
+        name: "fontSize", displayName: "Font size", displayNameKey: "fontSize", value: 10,
+        options: rango(7, 18)
     });
     widthPct = new formattingSettings.NumUpDown({
-        name: "widthPct", displayName: "Width / height %", value: 34,
-        options: {
-            minValue: { type: powerbi.visuals.ValidatorType.Min, value: 20 },
-            maxValue: { type: powerbi.visuals.ValidatorType.Max, value: 60 }
-        }
+        name: "widthPct", displayName: "Width / height %", displayNameKey: "widthPct", value: 34,
+        options: rango(20, 60)
     });
     name        = "tableSettings";
-    displayName = "Data Table";
+    displayName = "Data Table (Pro)";
+    displayNameKey = "card_tableSettings";
     slices      = [this.show, this.position, this.showRunning, this.showShare,
         this.backgroundAuto, this.backgroundColor, this.showBorder,
         this.fontSize, this.widthPct];
 }
 
 class IbcsSettings extends FormattingSettingsCard {
-    // IBCS es una notacion, no un tema de color: unifica como se leen los
-    // informes financieros entre empresas. En monocromo, y con el enfasis en la
-    // desviacion, que es lo que se mira en un bridge.
+    // IBCS es una notacion, no un tema de color: monocromo y con el enfasis en la desviacion.
     mode = new formattingSettings.ToggleSwitch({
-        name: "mode", displayName: "IBCS mode (Pro)", value: false
+        name: "mode", displayName: "IBCS mode (Pro)", displayNameKey: "ibcs_mode", value: false
     });
     name        = "ibcs";
-    displayName = "IBCS";
+    displayName = "IBCS (Pro)";
+    displayNameKey = "card_ibcs";
     slices      = [this.mode];
+}
+
+// ─── Plantilla de estilo y consejos (1.2) ─────────────────────────────────────
+
+class StyleSettings extends FormattingSettingsCard {
+    template = new formattingSettings.ItemDropdown({
+        name: "template", displayName: "Template", displayNameKey: "style_template",
+        items: [
+            item("classic", "Classic", "Enum_classic"),
+            item("modern", "Modern", "Enum_modern"),
+            item("soft", "Soft", "Enum_soft"),
+            item("mono", "One colour", "Enum_mono"),
+            item("dark", "Dark", "Enum_dark")
+        ],
+        value: item("classic", "Classic", "Enum_classic")
+    });
+    guide = new formattingSettings.ToggleSwitch({
+        name: "guide", displayName: "Show setup tips", displayNameKey: "style_guide", value: true
+    });
+    name = "style";
+    displayName = "Style template";
+    displayNameKey = "card_style";
+    slices = [this.template, this.guide];
 }
 
 // ─── Root model ───────────────────────────────────────────────────────────────
 
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
+    style         = new StyleSettings();
+    chartSettings = new ChartSettings();
     colorSettings = new ColorSettings();
     labelSettings = new LabelSettings();
+    valueAxis     = new ValueAxisSettings();
+    categoryAxis  = new CategoryAxisSettings();
     numberFormat  = new NumberFormatSettings();
-    chartSettings = new ChartSettings();
     cardSettings  = new CardSettings();
     tableSettings = new TableSettings();
     ibcs          = new IbcsSettings();
     cards         = [
+        this.style,
+        this.chartSettings,
         this.colorSettings,
         this.labelSettings,
+        this.valueAxis,
+        this.categoryAxis,
         this.numberFormat,
-        this.chartSettings,
         this.cardSettings,
         this.tableSettings,
         this.ibcs
     ];
 }
+
+/**
+ * Plantillas: valores que la plantilla pone donde el autor no ha fijado nada, por objeto. "classic" es el aspecto
+ * de 1.1 (los informes guardados sin plantilla se ven igual). Al ELEGIR una, el visual borra esas propiedades
+ * guardadas para que se vea.
+ */
+export const TEMPLATES: Record<string, Record<string, Record<string, string | number | boolean>>> = {
+    classic: {},
+    modern: {
+        colorSettings: { positiveColor: "#2F7A47", negativeColor: "#C0504D", totalColor: "#2B6CB0", targetColor: "#1E2A36", legendTextColor: "#605E5C" },
+        labelSettings: { categoryLabelColor: "#605E5C", anchorLabelsMatchBar: true },
+        valueAxis: { color: "#8A8886" }
+    },
+    soft: {
+        colorSettings: { positiveColor: "#7FB89A", negativeColor: "#E39A93", totalColor: "#8FB3D9", targetColor: "#605E5C", legendTextColor: "#605E5C" },
+        labelSettings: { autoValueLabelColor: false, valueLabelColor: "#3D3B39", categoryLabelColor: "#605E5C" },
+        valueAxis: { color: "#8A8886" }
+    },
+    mono: {
+        colorSettings: { positiveColor: "#8FB3D9", negativeColor: "#1F4E80", totalColor: "#2B6CB0", targetColor: "#1E2A36", legendTextColor: "#605E5C" },
+        labelSettings: { categoryLabelColor: "#605E5C" },
+        valueAxis: { color: "#8A8886" }
+    },
+    dark: {
+        colorSettings: { positiveColor: "#7FD1A0", negativeColor: "#F08A80", totalColor: "#9DC3E6", targetColor: "#E1DFDD", legendTextColor: "#C8C6C4" },
+        labelSettings: { autoValueLabelColor: false, valueLabelColor: "#F3F2F1", categoryLabelColor: "#C8C6C4" },
+        valueAxis: { color: "#A19F9D" },
+        cardSettings: { textColorAuto: false, textColor: "#F3F2F1", backgroundAuto: false, backgroundColor: "#2B2B2B" },
+        tableSettings: { backgroundAuto: false, backgroundColor: "#2B2B2B" }
+    }
+};

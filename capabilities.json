@@ -4,43 +4,57 @@
       "displayName": "Category",
       "name": "category",
       "kind": "Grouping",
-      "description": "The P&L line, driver or step. The field order, or the Order well, defines the bridge."
+      "description": "The P&L line, driver or step. The field order, or the Order well, defines the bridge.",
+      "displayNameKey": "Role_Category",
+      "descriptionKey": "Role_Category_Desc"
     },
     {
       "displayName": "Value",
       "name": "measure",
       "kind": "Measure",
-      "description": "The amount for each step. Negative values fall, positive values rise."
+      "description": "The amount for each step. Negative values fall, positive values rise.",
+      "displayNameKey": "Role_Value",
+      "descriptionKey": "Role_Value_Desc"
     },
     {
       "displayName": "Target (optional)",
       "name": "target",
       "kind": "Measure",
-      "description": "Goal or budget. Drawn as a dashed line on the anchor bars."
+      "description": "Goal or budget. Drawn as a dashed line on the anchor bars.",
+      "displayNameKey": "Role_Target",
+      "descriptionKey": "Role_Target_Desc"
     },
     {
       "displayName": "Bar type",
       "name": "barType",
       "kind": "Measure",
-      "description": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum."
+      "description": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum.",
+      "displayNameKey": "Role_BarType",
+      "descriptionKey": "Role_BarType_Desc"
     },
     {
       "displayName": "Order",
       "name": "sortOrder",
       "kind": "Grouping",
-      "description": "Numeric field that fixes the sequence of the bridge. Without it the bars follow the category sort."
+      "description": "Numeric field that fixes the sequence of the bridge. Without it the bars follow the category sort.",
+      "displayNameKey": "Role_Order",
+      "descriptionKey": "Role_Order_Desc"
     },
     {
       "displayName": "Tooltips",
       "name": "tooltips",
       "kind": "Measure",
-      "description": "Extra measures shown on hover."
+      "description": "Extra measures shown on hover.",
+      "displayNameKey": "Role_Tooltips",
+      "descriptionKey": "Role_Tooltips_Desc"
     },
     {
       "displayName": "Colour (DAX, optional)",
       "name": "colorBy",
       "kind": "Measure",
-      "description": "A hex colour per row, calculated in the model. Overrides the increase/decrease colours and the fx rule."
+      "description": "A hex colour per row, calculated in the model. Overrides the increase/decrease colours and the fx rule.",
+      "displayNameKey": "Role_Color",
+      "descriptionKey": "Role_Color_Desc"
     }
   ],
   "dataViewMappings": [
@@ -103,13 +117,15 @@
           "displayName": "Colour-blind safe palette",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "colorBlindSafe"
         },
         "patternOnDecrease": {
           "displayName": "Hatch decreases",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "patternOnDecrease"
         },
         "positiveColor": {
           "displayName": "Increase color",
@@ -129,7 +145,8 @@
                 "category"
               ]
             }
-          }
+          },
+          "displayNameKey": "positiveColor"
         },
         "negativeColor": {
           "displayName": "Decrease color",
@@ -139,7 +156,8 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "negativeColor"
         },
         "totalColor": {
           "displayName": "Total / subtotal color",
@@ -149,7 +167,8 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "totalColor"
         },
         "targetColor": {
           "displayName": "Target line color",
@@ -159,7 +178,8 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "targetColor"
         },
         "legendTextColor": {
           "displayName": "Legend text color",
@@ -169,15 +189,43 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "legendTextColor"
         },
         "legendFontSize": {
           "displayName": "Legend font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "legendFontSize"
+        },
+        "showLegend": {
+          "displayName": "Show legend",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "showLegend"
+        },
+        "legendPosition": {
+          "displayName": "Legend position",
+          "type": {
+            "enumeration": [
+              {
+                "value": "top",
+                "displayName": "Top",
+                "displayNameKey": "Enum_top"
+              },
+              {
+                "value": "bottom",
+                "displayName": "Bottom",
+                "displayNameKey": "Enum_bottom"
+              }
+            ]
+          },
+          "displayNameKey": "legendPosition"
         }
-      }
+      },
+      "displayNameKey": "card_colorSettings"
     },
     "labelSettings": {
       "displayName": "Labels",
@@ -186,7 +234,8 @@
           "displayName": "Show labels",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showLabels"
         },
         "labelMode": {
           "displayName": "Label mode",
@@ -194,30 +243,36 @@
             "enumeration": [
               {
                 "value": "abs",
-                "displayName": "Absolute"
+                "displayName": "Absolute",
+                "displayNameKey": "Enum_abs"
               },
               {
                 "value": "rel",
-                "displayName": "Relative %"
+                "displayName": "Relative %",
+                "displayNameKey": "Enum_rel"
               },
               {
                 "value": "both",
-                "displayName": "Both"
+                "displayName": "Both",
+                "displayNameKey": "Enum_both"
               }
             ]
-          }
+          },
+          "displayNameKey": "labelMode"
         },
         "fontSize": {
           "displayName": "Font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "fontSize"
         },
         "autoValueLabelColor": {
           "displayName": "Value label color: match bar",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "autoValueLabelColor"
         },
         "valueLabelColor": {
           "displayName": "Value label color (when not matching bar)",
@@ -227,7 +282,8 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "valueLabelColor"
         },
         "categoryLabelColor": {
           "displayName": "Category / axis label color",
@@ -237,13 +293,15 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "categoryLabelColor"
         },
         "categoryFontSize": {
           "displayName": "Category label font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "categoryFontSize"
         },
         "labelRotation": {
           "displayName": "Category label angle (Pro)",
@@ -251,42 +309,51 @@
             "enumeration": [
               {
                 "value": "0",
-                "displayName": "Horizontal"
+                "displayName": "Horizontal",
+                "displayNameKey": "Enum_rot0"
               },
               {
                 "value": "-30",
-                "displayName": "Tilted (-30°)"
+                "displayName": "Tilted (-30°)",
+                "displayNameKey": "Enum_rot30"
               },
               {
                 "value": "-45",
-                "displayName": "Tilted (-45°)"
+                "displayName": "Tilted (-45°)",
+                "displayNameKey": "Enum_rot45"
               },
               {
                 "value": "-90",
-                "displayName": "Vertical (-90°)"
+                "displayName": "Vertical (-90°)",
+                "displayNameKey": "Enum_rot90"
               }
             ]
-          }
+          },
+          "displayNameKey": "labelRotation"
         },
         "labelMaxChars": {
           "displayName": "Truncate category labels at (Pro)",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "labelMaxChars"
         },
         "hideOverlapping": {
           "displayName": "Hide labels that do not fit (Pro)",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "hideOverlapping"
         },
         "anchorLabelsMatchBar": {
           "displayName": "Total / subtotal labels: match bar colour",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "anchorLabelsMatchBar"
         }
-      }
+      },
+      "displayNameKey": "card_labelSettings"
     },
     "numberFormat": {
       "displayName": "Number format",
@@ -297,26 +364,32 @@
             "enumeration": [
               {
                 "value": "",
-                "displayName": "None"
+                "displayName": "None",
+                "displayNameKey": "Enum_none"
               },
               {
                 "value": "€",
-                "displayName": "€ Euro"
+                "displayName": "€ Euro",
+                "displayNameKey": "Enum_eur"
               },
               {
                 "value": "$",
-                "displayName": "$ Dollar"
+                "displayName": "$ Dollar",
+                "displayNameKey": "Enum_usd"
               },
               {
                 "value": "£",
-                "displayName": "£ Pound"
+                "displayName": "£ Pound",
+                "displayNameKey": "Enum_gbp"
               },
               {
                 "value": "¥",
-                "displayName": "¥ Yen"
+                "displayName": "¥ Yen",
+                "displayNameKey": "Enum_jpy"
               }
             ]
-          }
+          },
+          "displayNameKey": "currencySymbol"
         },
         "symbolPosition": {
           "displayName": "Symbol position",
@@ -324,14 +397,17 @@
             "enumeration": [
               {
                 "value": "prefix",
-                "displayName": "Prefix"
+                "displayName": "Prefix",
+                "displayNameKey": "Enum_prefix"
               },
               {
                 "value": "suffix",
-                "displayName": "Suffix"
+                "displayName": "Suffix",
+                "displayNameKey": "Enum_suffix"
               }
             ]
-          }
+          },
+          "displayNameKey": "symbolPosition"
         },
         "scaleMode": {
           "displayName": "Scale",
@@ -339,36 +415,62 @@
             "enumeration": [
               {
                 "value": "auto",
-                "displayName": "Auto"
+                "displayName": "Auto",
+                "displayNameKey": "Enum_auto"
               },
               {
                 "value": "none",
-                "displayName": "None"
+                "displayName": "None",
+                "displayNameKey": "Enum_none"
               },
               {
                 "value": "k",
-                "displayName": "Thousands (k)"
+                "displayName": "Thousands (k)",
+                "displayNameKey": "Enum_k"
               },
               {
                 "value": "M",
-                "displayName": "Millions (M)"
+                "displayName": "Millions (M)",
+                "displayNameKey": "Enum_M"
               }
             ]
-          }
+          },
+          "displayNameKey": "scaleMode"
         },
         "decimals": {
           "displayName": "Decimals",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "decimals"
         },
         "thousandsSep": {
           "displayName": "Thousands separator",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "thousandsSep"
+        },
+        "source": {
+          "displayName": "Number format",
+          "type": {
+            "enumeration": [
+              {
+                "value": "custom",
+                "displayName": "Custom (below)",
+                "displayNameKey": "Enum_custom"
+              },
+              {
+                "value": "model",
+                "displayName": "Model format",
+                "displayNameKey": "Enum_model"
+              }
+            ]
+          },
+          "displayNameKey": "nf_source"
         }
-      }
+      },
+      "displayNameKey": "card_numberFormat"
     },
     "chartSettings": {
       "displayName": "Chart",
@@ -377,49 +479,57 @@
           "displayName": "Connector lines",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showConnectors"
         },
         "showSubtotals": {
           "displayName": "Show subtotals",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showSubtotals"
         },
         "showTarget": {
           "displayName": "Show target",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showTarget"
         },
         "showVarianceCards": {
           "displayName": "Summary cards",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showVarianceCards"
         },
         "sortBars": {
           "displayName": "Sort by impact",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "sortBars"
         },
         "invertColorSemantics": {
           "displayName": "Invert increase/decrease colors",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "invertColorSemantics"
         },
         "maxCategories": {
           "displayName": "Max drivers shown (0 = no limit)",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "maxCategories"
         },
         "otherLabel": {
           "displayName": "\"Others\" bar label",
           "type": {
             "text": true
-          }
+          },
+          "displayNameKey": "otherLabel"
         },
         "orientation": {
           "displayName": "Orientation",
@@ -427,28 +537,34 @@
             "enumeration": [
               {
                 "value": "vertical",
-                "displayName": "Vertical"
+                "displayName": "Vertical",
+                "displayNameKey": "Enum_vertical"
               },
               {
                 "value": "horizontal",
-                "displayName": "Horizontal"
+                "displayName": "Horizontal",
+                "displayNameKey": "Enum_horizontal"
               }
             ]
-          }
+          },
+          "displayNameKey": "orientation"
         },
         "targetLabel": {
           "displayName": "Target label",
           "type": {
             "text": true
-          }
+          },
+          "displayNameKey": "targetLabel"
         },
         "targetShowValue": {
           "displayName": "Show target value",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "targetShowValue"
         }
-      }
+      },
+      "displayNameKey": "card_chartSettings"
     },
     "cardSettings": {
       "displayName": "Summary Cards",
@@ -457,25 +573,29 @@
           "displayName": "Show summary cards",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "cards_show"
         },
         "labelFontSize": {
           "displayName": "Caption font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "labelFontSize"
         },
         "valueFontSize": {
           "displayName": "Value font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "valueFontSize"
         },
         "textColorAuto": {
           "displayName": "Use the report theme text colour",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "textColorAuto"
         },
         "textColor": {
           "displayName": "Custom text colour — turn the switch above off",
@@ -485,13 +605,15 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "textColor"
         },
         "backgroundAuto": {
           "displayName": "Use the report theme background",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "backgroundAuto"
         },
         "backgroundColor": {
           "displayName": "Custom background — turn the switch above off",
@@ -501,29 +623,34 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "backgroundColor"
         }
-      }
+      },
+      "displayNameKey": "card_cardSettings"
     },
     "ibcs": {
-      "displayName": "IBCS",
+      "displayName": "IBCS (Pro)",
       "properties": {
         "mode": {
           "displayName": "IBCS mode (Pro)",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "ibcs_mode"
         }
-      }
+      },
+      "displayNameKey": "card_ibcs"
     },
     "tableSettings": {
-      "displayName": "Data Table",
+      "displayName": "Data Table (Pro)",
       "properties": {
         "show": {
           "displayName": "Show data table (Pro)",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "table_show"
         },
         "position": {
           "displayName": "Position",
@@ -531,32 +658,38 @@
             "enumeration": [
               {
                 "value": "right",
-                "displayName": "Right"
+                "displayName": "Right",
+                "displayNameKey": "Enum_right"
               },
               {
                 "value": "bottom",
-                "displayName": "Bottom"
+                "displayName": "Bottom",
+                "displayNameKey": "Enum_bottom"
               }
             ]
-          }
+          },
+          "displayNameKey": "table_position"
         },
         "showRunning": {
           "displayName": "Running total column",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showRunning"
         },
         "showShare": {
           "displayName": "% of opening column",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showShare"
         },
         "backgroundAuto": {
           "displayName": "Use the report theme background",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "backgroundAuto"
         },
         "backgroundColor": {
           "displayName": "Custom background — turn the switch above off",
@@ -566,24 +699,158 @@
                 "color": true
               }
             }
-          }
+          },
+          "displayNameKey": "backgroundColor"
         },
         "showBorder": {
           "displayName": "Separator line",
           "type": {
             "bool": true
-          }
+          },
+          "displayNameKey": "showBorder"
         },
         "fontSize": {
           "displayName": "Font size",
           "type": {
             "numeric": true
-          }
+          },
+          "displayNameKey": "fontSize"
         },
         "widthPct": {
           "displayName": "Width / height %",
           "type": {
             "numeric": true
+          },
+          "displayNameKey": "widthPct"
+        }
+      },
+      "displayNameKey": "card_tableSettings"
+    },
+    "valueAxis": {
+      "properties": {
+        "show": {
+          "displayName": "Show value axis",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "va_show"
+        },
+        "gridlines": {
+          "displayName": "Gridlines",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "va_gridlines"
+        },
+        "fontSize": {
+          "displayName": "Font size",
+          "type": {
+            "numeric": true
+          },
+          "displayNameKey": "fontSize"
+        },
+        "color": {
+          "displayName": "Color",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayNameKey": "color"
+        },
+        "showTitle": {
+          "displayName": "Axis title",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "ax_showTitle"
+        },
+        "title": {
+          "displayName": "Title text",
+          "type": {
+            "text": true
+          },
+          "displayNameKey": "ax_title"
+        }
+      },
+      "displayName": "Value axis",
+      "displayNameKey": "card_valueAxis"
+    },
+    "categoryAxis": {
+      "properties": {
+        "showTitle": {
+          "displayName": "Axis title",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "ax_showTitle"
+        },
+        "title": {
+          "displayName": "Title text",
+          "type": {
+            "text": true
+          },
+          "displayNameKey": "ax_title"
+        }
+      },
+      "displayName": "Category axis",
+      "displayNameKey": "card_categoryAxis"
+    },
+    "style": {
+      "properties": {
+        "template": {
+          "displayName": "Template",
+          "type": {
+            "enumeration": [
+              {
+                "value": "classic",
+                "displayName": "Classic",
+                "displayNameKey": "Enum_classic"
+              },
+              {
+                "value": "modern",
+                "displayName": "Modern",
+                "displayNameKey": "Enum_modern"
+              },
+              {
+                "value": "soft",
+                "displayName": "Soft",
+                "displayNameKey": "Enum_soft"
+              },
+              {
+                "value": "mono",
+                "displayName": "One colour",
+                "displayNameKey": "Enum_mono"
+              },
+              {
+                "value": "dark",
+                "displayName": "Dark",
+                "displayNameKey": "Enum_dark"
+              }
+            ]
+          },
+          "displayNameKey": "style_template"
+        },
+        "guide": {
+          "displayName": "Show setup tips",
+          "type": {
+            "bool": true
+          },
+          "displayNameKey": "style_guide"
+        }
+      },
+      "displayName": "Style template",
+      "displayNameKey": "card_style"
+    },
+    "general": {
+      "properties": {
+        "formatString": {
+          "type": {
+            "formatting": {
+              "formatString": true
+            }
           }
         }
       }
@@ -606,5 +873,7 @@
   "supportsLandingPage": true,
   "supportsEmptyDataView": true,
   "supportsKeyboardFocus": true,
-  "supportsMultiVisualSelection": true
+  "supportsMultiVisualSelection": true,
+  "supportsOnObjectFormatting": true,
+  "enablePointerEventsFormatMode": true
 }

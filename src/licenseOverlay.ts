@@ -35,7 +35,8 @@ export class LicenseOverlay {
         driversInData: number,
         license: LicenseState,
         groupedByTier: boolean,
-        otherLabel: string
+        otherLabel: string,
+        texto?: (shown: number, grouped: number, other: string) => string
     ): void {
         LicenseOverlay.clear(container);
         if (!groupedByTier) return;
@@ -48,8 +49,9 @@ export class LicenseOverlay {
             "font-family:Segoe UI,sans-serif;font-size:10px;color:#8A6D1F;" +
             "background:rgba(253,243,231,0.92);border:1px solid #E8C88A;" +
             "border-radius:4px;padding:2px 8px;pointer-events:none";
-        note.textContent =
-            `${license.maxBars} largest drivers shown · ${grouped} grouped into "${otherLabel}"`;
+        note.textContent = texto
+            ? texto(license.maxBars, grouped, otherLabel)
+            : `${license.maxBars} largest drivers shown · ${grouped} grouped into "${otherLabel}"`;
         container.appendChild(note);
     }
 }
