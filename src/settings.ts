@@ -419,7 +419,7 @@ export const TEMPLATES: Record<string, Record<string, Record<string, string | nu
         valueAxis: { color: "#8A8886" }
     },
     dark: {
-        colorSettings: { positiveColor: "#7FD1A0", negativeColor: "#F08A80", totalColor: "#9DC3E6", targetColor: "#E1DFDD", legendTextColor: "#C8C6C4" },
+        colorSettings: { positiveColor: "#3FB37F", negativeColor: "#E5534B", totalColor: "#4A90D9", targetColor: "#E1DFDD", legendTextColor: "#C8C6C4" },
         labelSettings: { autoValueLabelColor: false, valueLabelColor: "#F3F2F1", categoryLabelColor: "#C8C6C4" },
         valueAxis: { color: "#A19F9D" },
         cardSettings: { textColorAuto: false, textColor: "#F3F2F1", backgroundAuto: false, backgroundColor: "#2B2B2B" },
