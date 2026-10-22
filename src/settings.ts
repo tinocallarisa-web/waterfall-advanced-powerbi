@@ -356,7 +356,7 @@ class StyleSettings extends FormattingSettingsCard {
             item("modern", "Modern", "Enum_modern"),
             item("soft", "Soft", "Enum_soft"),
             item("mono", "One colour", "Enum_mono"),
-            item("dark", "Dark", "Enum_dark")
+            item("dark", "Dark background", "Enum_dark")
         ],
         value: item("classic", "Classic", "Enum_classic")
     });

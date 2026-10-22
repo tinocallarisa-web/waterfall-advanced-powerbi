@@ -826,7 +826,7 @@
               },
               {
                 "value": "dark",
-                "displayName": "Dark",
+                "displayName": "Dark background",
                 "displayNameKey": "Enum_dark"
               }
             ]

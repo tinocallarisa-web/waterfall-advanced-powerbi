@@ -366,6 +366,12 @@ export class Visual implements IVisual {
             objectName: obj, selector: null as any,
             properties: Object.keys(tp[obj]).reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
         }));
+        // El color de subida admite fx y hasta 1.1 el color FIJO se guardaba con el selector comodín, barra a barra:
+        // ese valor pisa a todas las barras y la plantilla no se vería. Se borra también.
+        if (tp.colorSettings?.positiveColor !== undefined) {
+            remove.push({ objectName: "colorSettings", selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] } as any,
+                properties: { positiveColor: null } });
+        }
         if (remove.length) this.host.persistProperties({ remove });
     }
 
@@ -444,7 +450,7 @@ export class Visual implements IVisual {
         };
         const f1 = fila(this.t("Guide_TryStyle", "Try a style:"));
         const actual = String((s.style.template.value as any)?.value ?? "classic");
-        ([["classic", "Classic"], ["modern", "Modern"], ["soft", "Soft"], ["mono", "One colour"], ["dark", "Dark"]] as [string, string][])
+        ([["classic", "Classic"], ["modern", "Modern"], ["soft", "Soft"], ["mono", "One colour"], ["dark", "Dark background"]] as [string, string][])
             .forEach(([v, d]) => boton(f1, this.t("Enum_" + v, d), v === actual, () => this.persistir("style", { template: v })));
         const objs: any = this.lastOptions?.dataViews?.[0]?.metadata?.objects ?? {};
         const f2 = fila(this.license.isLicensed ? this.t("Guide_ProOn", "Pro:") : this.t("Guide_TryPro", "Try Pro:"));
@@ -452,8 +458,11 @@ export class Visual implements IVisual {
         boton(f2, this.t("Guide_Table", "Data table"), tabla, () => this.persistir("tableSettings", { show: !tabla }));
         const ibcs = objs?.ibcs?.mode === true;
         boton(f2, this.t("Guide_Ibcs", "IBCS"), ibcs, () => this.persistir("ibcs", { mode: !ibcs }));
-        const angulo = objs?.labelSettings?.labelRotation === "-45";
-        boton(f2, this.t("Guide_Angle", "Tilted labels"), angulo, () => this.persistir("labelSettings", { labelRotation: angulo ? "0" : "-45" }));
+        // Inclinar solo tiene sentido en vertical: en horizontal las categorías van a la izquierda.
+        if ((s.chartSettings.orientation.value as any)?.value !== "horizontal") {
+            const angulo = objs?.labelSettings?.labelRotation === "-45";
+            boton(f2, this.t("Guide_Angle", "Tilted labels"), angulo, () => this.persistir("labelSettings", { labelRotation: angulo ? "0" : "-45" }));
+        }
         const x = document.createElement("button");
         x.type = "button";
         x.className = "wf-g-close";
