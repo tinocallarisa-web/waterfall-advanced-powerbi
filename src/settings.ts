@@ -415,7 +415,8 @@ export const TEMPLATES: Record<string, Record<string, Record<string, string | nu
     },
     mono: {
         colorSettings: { positiveColor: "#8FB3D9", negativeColor: "#1F4E80", totalColor: "#2B6CB0", targetColor: "#1E2A36", legendTextColor: "#605E5C" },
-        labelSettings: { categoryLabelColor: "#605E5C" },
+        // El azul claro de las subidas no se lee como texto sobre fondo blanco: etiquetas en azul oscuro.
+        labelSettings: { autoValueLabelColor: false, valueLabelColor: "#1F4E80", categoryLabelColor: "#605E5C" },
         valueAxis: { color: "#8A8886" }
     },
     dark: {

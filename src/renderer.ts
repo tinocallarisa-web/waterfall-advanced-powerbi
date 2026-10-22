@@ -34,6 +34,8 @@ interface RenderOptions {
     t:             (key: string, fallback: string) => string;
     measureName:   string;
     categoryName:  string;
+    /** Plantilla para fondo oscuro: el halo de los textos pasa a ser oscuro. */
+    darkBackground: boolean;
     highContrast:  boolean;
     contrastForeground: string;
     contrastBackground: string;
@@ -77,6 +79,7 @@ export class WaterfallRenderer {
             contrastForeground, width, height,
                 onBarClick, onBarHover, onBarLeave } = opts;
         this.tr = opts.t;
+        this.darkBg = !!opts.darkBackground;
         if (bars.length === 0) { this.renderEmpty(); return; }
 
         const fmt = opts.fmt;
@@ -862,14 +865,14 @@ export class WaterfallRenderer {
     /** Lo último: etiquetas de valor, por encima del objetivo. */
     private late: (() => void)[] = [];
 
+    private darkBg = false;
+
     /**
-     * Halo detrás del texto para que se lea sobre una barra: claro si el texto es oscuro y al revés (plantilla Dark).
+     * Halo detrás del texto para que se lea al cruzar una línea o una barra. Va del color del FONDO del informe, no del
+     * texto: claro siempre, oscuro solo con la plantilla para fondo oscuro (un halo oscuro emborronaba sobre blanco).
      */
-    private halo(t: SVGTextElement, color: string): void {
-        const hex = color.replace("#", "");
-        const f = hex.length === 3 ? hex.split("").map(c => c + c).join("") : hex;
-        const lum = f.length === 6 ? (0.299 * parseInt(f.slice(0, 2), 16) + 0.587 * parseInt(f.slice(2, 4), 16) + 0.114 * parseInt(f.slice(4, 6), 16)) / 255 : 0;
-        t.setAttribute("stroke", lum > 0.6 ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.9)");
+    private halo(t: SVGTextElement, _color: string): void {
+        t.setAttribute("stroke", this.darkBg ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.9)");
         t.setAttribute("stroke-width", "3");
         t.setAttribute("stroke-linejoin", "round");
         t.setAttribute("paint-order", "stroke");

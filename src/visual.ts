@@ -304,6 +304,7 @@ export class Visual implements IVisual {
             proDensity:    on("density"),
             fmt:           this.fmt,
             t:             (k, f) => this.t(k, f),
+            darkBackground: tpl === "dark",
             measureName:   measureCol?.source?.displayName ?? "",
             categoryName:  catCol?.source?.displayName ?? "",
             highContrast: this.host.colorPalette.isHighContrast,
