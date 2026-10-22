@@ -353,7 +353,8 @@ export class Visual implements IVisual {
             if (!card) return;
             Object.keys(tp[obj]).forEach(prop => {
                 if (objs?.[obj]?.[prop] !== undefined) return;
-                const sl: any = (card.slices ?? []).find((x: any) => x.name === prop);
+                const todas: any[] = card.slices ?? (card.groups ?? []).flatMap((g: any) => g.slices ?? []);
+                const sl: any = todas.find((x: any) => x.name === prop);
                 if (!sl) return;
                 sl.value = sl instanceof formattingSettings.ColorPicker ? { value: String(tp[obj][prop]) } : tp[obj][prop];
             });
@@ -711,6 +712,7 @@ export class Visual implements IVisual {
             case "axis": return { type: Text, fontSize: ref("valueAxis", "fontSize", "fontSize", "Font size"),
                 fontColor: ref("valueAxis", "color", "color", "Color") } as any;
             case "legend": return { type: Text, fontSize: ref("colorSettings", "legendFontSize", "legendFontSize", "Legend font size"),
+                fontFamily: ref("colorSettings", "legendFontFamily", "fontFamily", "Font"),
                 fontColor: ref("colorSettings", "legendTextColor", "legendTextColor", "Legend text color") } as any;
             case "cards": return { type: Text, fontSize: ref("cardSettings", "valueFontSize", "valueFontSize", "Value font size"),
                 fontColor: ref("cardSettings", "textColor", "textColor", "Text colour") } as any;
@@ -754,7 +756,7 @@ export class Visual implements IVisual {
             case "legend":
                 return [picker("colorSettings", "legendPosition", "legendPosition", "Legend position"),
                     toggle("colorSettings", "showLegend", "showLegend", "Show legend"), div,
-                    reset("colorSettings", ["legendFontSize", "legendTextColor"]), nav] as any;
+                    reset("colorSettings", ["legendFontFamily", "legendFontSize", "legendTextColor"]), nav] as any;
             case "cards":
                 return [toggle("cardSettings", "show", "cards_show", "Show summary cards"), div,
                     reset("cardSettings", ["labelFontSize", "valueFontSize"]), nav] as any;

@@ -162,5 +162,8 @@
   "UI_Value": "Waarde",
   "UI_Running": "Cumulatief",
   "UI_PctOpen": "% opening",
-  "style_baseColor": "Basiskleur"
+  "style_baseColor": "Basiskleur",
+  "fontFamily": "Lettertype",
+  "grpColors": "Kleuren",
+  "grpLegend": "Legenda"
 }

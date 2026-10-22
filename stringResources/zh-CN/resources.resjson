@@ -162,5 +162,8 @@
   "UI_Value": "值",
   "UI_Running": "累计",
   "UI_PctOpen": "期初 %",
-  "style_baseColor": "基础颜色"
+  "style_baseColor": "基础颜色",
+  "fontFamily": "字体",
+  "grpColors": "颜色",
+  "grpLegend": "图例"
 }

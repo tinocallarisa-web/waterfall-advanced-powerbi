@@ -162,5 +162,8 @@
   "UI_Value": "Wert",
   "UI_Running": "Kumuliert",
   "UI_PctOpen": "% Anfang",
-  "style_baseColor": "Grundfarbe"
+  "style_baseColor": "Grundfarbe",
+  "fontFamily": "Schriftart",
+  "grpColors": "Farben",
+  "grpLegend": "Legende"
 }

@@ -208,4 +208,5 @@ P.update({
     "{0} largest drivers shown · {1} grouped into \"{2}\"": ["{0} maiores fatores mostrados · {1} agrupados em \"{2}\"", "{0} principaux facteurs affichés · {1} regroupés dans « {2} »", "{0} größte Treiber angezeigt · {1} in „{2}“ gruppiert", "{0} fattori principali mostrati · {1} raggruppati in \"{2}\"", "{0} grootste drivers getoond · {1} gegroepeerd in \"{2}\"", "Pokazano {0} największych czynników · {1} zgrupowano w „{2}”", "上位 {0} 個の要因を表示 · {1} 個を「{2}」にまとめました", "显示前 {0} 个驱动因素 · {1} 个归入“{2}”", "상위 {0}개 요인 표시 · {1}개를 \"{2}\"(으)로 묶음", "{0} factores principales · {1} agrupados en \"{2}\""],
     "Dark background": ["Fundo escuro", "Fond sombre", "Dunkler Hintergrund", "Sfondo scuro", "Donkere achtergrond", "Ciemne tło", "暗い背景", "深色背景", "어두운 배경", "Fondo oscuro"],
     "Base colour": ["Cor base", "Couleur de base", "Grundfarbe", "Colore base", "Basiskleur", "Kolor bazowy", "基本色", "基础颜色", "기본 색", "Color base"],
+    "Legend": ["Legenda", "Légende", "Legende", "Legenda", "Legenda", "Legenda", "凡例", "图例", "범례", "Leyenda"],
 })

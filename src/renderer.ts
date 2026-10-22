@@ -158,11 +158,12 @@ export class WaterfallRenderer {
         // Leyenda (1.2): se puede ocultar y poner abajo; en un mosaico muy bajo desaparece sola.
         const legendOn = cs.showLegend.value && svgH >= 140;
         const legendAtBottom = legendOn && cs.legendPosition.value.value === "bottom";
-        this.PAD_TOP = legendOn && !legendAtBottom ? 28 : 12;
+        // El hueco de arriba crece con la fuente de la leyenda: con 18 px se montaba sobre el eje.
+        this.PAD_TOP = legendOn && !legendAtBottom ? Math.max(28, Math.round(cs.legendFontSize.value * 1.6) + 14) : 12;
         this.legendBottom = legendAtBottom ? Math.round(cs.legendFontSize.value * 1.8) + 6 : 0;
         if (legendOn) {
             this.renderLegend(colors, highContrast ? contrastForeground : cs.legendTextColor.value.value,
-                cs.legendFontSize.value, legendAtBottom ? svgH - 6 : 16);
+                cs.legendFontSize.value, legendAtBottom ? svgH - 6 : Math.max(16, cs.legendFontSize.value + 6), cs.legendFontFamily.value);
         }
 
         const defs = this.el("defs") as SVGDefsElement;
@@ -608,7 +609,7 @@ export class WaterfallRenderer {
         }
     }
 
-    private renderLegend(colors: Record<string, string>, textColor: string, fs = 9, baseY = 16): void {
+    private renderLegend(colors: Record<string, string>, textColor: string, fs = 9, baseY = 16, family = ""): void {
         const items = [
             [this.tr("UI_Total", "Total"), colors.total], [this.tr("UI_Increase", "Increase"), colors.pos], [this.tr("UI_Decrease", "Decrease"), colors.neg]
         ];
@@ -624,7 +625,9 @@ export class WaterfallRenderer {
             swatch.setAttribute("rx", "1"); swatch.setAttribute("fill", color);
             swatch.setAttribute("data-o", "legend");
             this.svg.appendChild(swatch);
-            this.text(x + sw + 4, baseY, label, fs, textColor, "start").setAttribute("data-o", "legend");
+            const lt = this.text(x + sw + 4, baseY, label, fs, textColor, "start");
+            lt.setAttribute("data-o", "legend");
+            if (family) lt.setAttribute("font-family", family);
         });
     }
 

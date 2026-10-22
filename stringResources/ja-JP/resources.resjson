@@ -162,5 +162,8 @@
   "UI_Value": "値",
   "UI_Running": "累計",
   "UI_PctOpen": "期首比 %",
-  "style_baseColor": "基本色"
+  "style_baseColor": "基本色",
+  "fontFamily": "フォント",
+  "grpColors": "色",
+  "grpLegend": "凡例"
 }

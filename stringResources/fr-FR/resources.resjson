@@ -162,5 +162,8 @@
   "UI_Value": "Valeur",
   "UI_Running": "Cumul",
   "UI_PctOpen": "% ouverture",
-  "style_baseColor": "Couleur de base"
+  "style_baseColor": "Couleur de base",
+  "fontFamily": "Police",
+  "grpColors": "Couleurs",
+  "grpLegend": "Légende"
 }

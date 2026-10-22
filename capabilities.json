@@ -223,6 +223,15 @@
             ]
           },
           "displayNameKey": "legendPosition"
+        },
+        "legendFontFamily": {
+          "displayName": "Font",
+          "displayNameKey": "fontFamily",
+          "type": {
+            "formatting": {
+              "fontFamily": true
+            }
+          }
         }
       },
       "displayNameKey": "card_colorSettings"

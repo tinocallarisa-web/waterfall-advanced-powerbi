@@ -162,5 +162,8 @@
   "UI_Value": "값",
   "UI_Running": "누계",
   "UI_PctOpen": "기초 %",
-  "style_baseColor": "기본 색"
+  "style_baseColor": "기본 색",
+  "fontFamily": "글꼴",
+  "grpColors": "색",
+  "grpLegend": "범례"
 }

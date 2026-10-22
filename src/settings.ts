@@ -15,7 +15,8 @@ const item = (value: string, displayName: string, key: string) => ({ value, disp
 
 // ─── Color settings ───────────────────────────────────────────────────────────
 
-class ColorSettings extends FormattingSettingsCard {
+// Tarjeta compuesta (1.2): todo sigue en el objeto colorSettings, solo se agrupa en el panel.
+class ColorSettings extends formattingSettings.CompositeCard {
     colorBlindSafe = new formattingSettings.ToggleSwitch({
         name: "colorBlindSafe", displayName: "Colour-blind safe palette", displayNameKey: "colorBlindSafe",
         value: false
@@ -62,6 +63,10 @@ class ColorSettings extends FormattingSettingsCard {
         items: [item("top", "Top", "Enum_top"), item("bottom", "Bottom", "Enum_bottom")],
         value: item("top", "Top", "Enum_top")
     });
+    legendFontFamily = new formattingSettings.FontPicker({
+        name: "legendFontFamily", displayName: "Font", displayNameKey: "fontFamily",
+        value: "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif"
+    });
     legendFontSize = new formattingSettings.NumUpDown({
         name: "legendFontSize", displayName: "Legend font size", displayNameKey: "legendFontSize", value: 9,
         options: rango(7, 18)
@@ -73,8 +78,12 @@ class ColorSettings extends FormattingSettingsCard {
     name        = "colorSettings";
     displayName = "Colors";
     displayNameKey = "card_colorSettings";
-    slices      = [this.colorBlindSafe, this.patternOnDecrease, this.positiveColor, this.negativeColor, this.totalColor, this.targetColor,
-        this.showLegend, this.legendPosition, this.legendFontSize, this.legendTextColor];
+    groups: formattingSettings.Group[] = [
+        new formattingSettings.Group({ name: "grpColors", displayName: "Colors", displayNameKey: "grpColors",
+            slices: [this.colorBlindSafe, this.patternOnDecrease, this.positiveColor, this.negativeColor, this.totalColor, this.targetColor] } as any),
+        new formattingSettings.Group({ name: "grpLegend", displayName: "Legend", displayNameKey: "grpLegend",
+            slices: [this.showLegend, this.legendPosition, this.legendFontFamily, this.legendFontSize, this.legendTextColor] } as any)
+    ];
 }
 
 // ─── Label settings ───────────────────────────────────────────────────────────

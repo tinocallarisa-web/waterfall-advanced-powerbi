@@ -162,5 +162,8 @@
   "UI_Value": "Wartość",
   "UI_Running": "Narastająco",
   "UI_PctOpen": "% początk.",
-  "style_baseColor": "Kolor bazowy"
+  "style_baseColor": "Kolor bazowy",
+  "fontFamily": "Czcionka",
+  "grpColors": "Kolory",
+  "grpLegend": "Legenda"
 }
