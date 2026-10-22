@@ -5,6 +5,46 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.0.0] — 2026-10-22
+
+### Fixed
+
+- **Rendering events.** The chart reported "render finished" to Power BI also when the licence resolved, after a click
+  and when a bookmark was applied — events with no matching start, which certification rejects. Each update now
+  raises exactly one start and one finish; repaints outside an update raise none.
+- **A fixed Increase colour could paint every bar.** Before 1.2 the fixed colour was stored bar by bar, through the
+  same selector the fx rule uses, so it overrode totals and decreases too and no setting could change them. Fixed
+  colours are now stored for the whole visual, and choosing a style template clears the old per-bar value.
+- **The format pane was always in English.** The translations existed but were never connected. It now follows the
+  language of Power BI in 12 languages.
+
+### Added
+
+- **Pro preview.** While you edit without a licence, the data table, IBCS mode and the label density settings you
+  turn on are drawn working on your own data, under a "Pro preview" watermark; Power BI shows its own licence notice
+  and Upgrade bar. Reading view shows the free chart, and where licences cannot be read (Publish to Web, embedding,
+  export) the free result is drawn with no watermark.
+- **Style templates**: Classic (the look of earlier versions, and the default), Modern, Soft, One colour — with a base
+  colour you choose: totals take it, increases a lighter shade, decreases a darker one — and Dark background, for
+  reports with a dark background.
+- **Setup tips** while editing: the templates in one click, and the Pro features to try on your data.
+- **Model format**: values, labels, tooltips and the axis can use the measure's own format string — dynamic format
+  strings included — in the report's language. The custom format (symbol, scale, decimals) stays the default.
+- **Value axis**: show or hide, gridlines, font size, colour and title. **Category axis** title.
+- **Legend**: show or hide, top or bottom, font, size and colour, in its own group of the Colors card.
+- **On-object formatting**: bars, value labels, category labels, value axis, legend, summary cards and data table.
+- **Start screen** with the steps and links, and a new icon.
+
+### Changed
+
+- The target line, its label and the value labels are drawn above the bars, with a halo, so a neighbouring bar no
+  longer covers them; the target label sits above its line, centred on its bar. When a total's value falls at the
+  height of its target, the value moves inside the bar.
+- In small tiles the summary cards and the legend hide themselves instead of squeezing the chart.
+- Toolchain: Power BI visuals API 5.11.1, pbiviz 7.2.1, TypeScript 5.9, ESLint 10.
+
+---
+
 ## [1.1.3.0] — 2026-09-23
 
 ### Fixed

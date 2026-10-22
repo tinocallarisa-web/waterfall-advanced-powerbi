@@ -1,42 +1,44 @@
-Waterfall Advanced 1.1.3.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
+Waterfall Advanced 1.2.0.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
+Repo, branch certification: https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification
+Docs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html (+privacy, terms, changelog)
+Video: https://www.youtube.com/watch?v=zDxpsXMD3WM
 
-SOURCE CODE
-github.com/tinocallarisa-web/waterfall-advanced-powerbi, branch "certification".
-PUBLIC: no credentials needed, none included here.
+WHY THIS SUBMISSION
+Replaces 1.1.3.0. Same objects/properties (saved reports unchanged); new ones added.
+Fix: rendering events were raised also from repaints (licence, click, bookmark). Now
+one renderingStarted and one Finished/Failed per update(); repaints raise none.
+New: style templates, Pro preview, model format strings, axis and legend settings,
+on-object formatting, start screen, 12 languages. API 5.11.1.
 
-TESTING THE PREMIUM FEATURES - NO KEY NEEDED
-There is no activation key: Pro is granted by the AppSource plan through
-IVisualLicenseManager, so none exists outside the marketplace. This visual shows no
-licensing UI and no watermark, per the guidance that a visual "shouldn't display its
-own licensing UX", so the submitted package cannot show the Pro settings by itself.
-From the branch above: npm install, then node scripts/build-test.js. It forces isPro
-true, packages under GUID + "_test" and restores the source, so what is submitted is
-never the patched build. Import it: every Pro setting applies.
+PRO PREVIEW
+Without a licence, IN EDIT MODE ONLY, the Pro settings turned on (data table, IBCS,
+label density) render under a "Pro preview" watermark. Intentional. Reading view,
+before the licence resolves and where licences cannot be read (Publish to Web,
+embed, export): free result, no watermark.
 
-WHAT TO CHECK
-Free, the submitted package. With 12 drivers or fewer nothing is grouped. Above 12, the
-12 largest are drawn individually and the rest grouped into one labelled step, with a
-note saying how many and into what - a fact, not an offer, and needed or the total
-would not balance. Turn on IBCS mode, the data table or label rotation: a banner names
-the blocked setting and, ten seconds later, the Upgrade bar appears and stays. Both, in
-that order: that is the fix in this version. Switch page and back: no stray
-notification. Publish to Web or export: free result, no notice.
-Pro, the _test package: every driver individually, Pro settings apply, no notice.
+TESTING - FREE (no plan)
+1. Sample .pbix: Category, Value, Bar type, Target. Bridge with totals and subtotal.
+More than 12 drivers: smallest grouped in "Others", note says how many; Power BI
+licence notice, Upgrade bar ~10 s later.
+2. Edit mode: tips bar at the bottom. "Try Pro > Data table": table under watermark.
+Reading view: no table. Turn it off: notices clear.
+3. Format > Style template > Modern: colours change. Format mode: click a bar.
+4. Click a bar: cross-filter (Ctrl adds). Bookmarks restore it. Right-click menu.
+allowInteractions false: no selection.
 
-WHAT CHANGED IN 1.1.3.0
-A licensing fix only: no feature or rendering changed since the certified 1.1.2.0. The
-render raised notifyLicenseRequired then notifyFeatureBlocked in the same update, and
-Power BI shows one at a time, so the notice carrying the Upgrade button was replaced by
-the transient banner and no purchase path was left. Now: clear, the banner, and the
-Upgrade bar 10.5 s later, cancelled on destroy(). See CHANGELOG.md.
+TESTING - PRO (plan "pro")
+All drivers individually; data table, IBCS, label angle: no watermark, no notice.
 
-PRIVACY: no network calls, no telemetry, no storage. Only the dataView. privileges [].
+PERSISTPROPERTIES
+Only on a click in the tips bar (template, Try Pro, close) and once when the template
+is changed in the format pane (clears the settings it defines). Never in the
+selection callback.
 
-FREE VS PRO
-Free: the full bridge - 12 largest drivers individually, the rest grouped into one
-labelled step, subtotals, totals, targets, tooltips, cross-filtering, keyboard, high
-contrast. It groups rather than hides: nothing is left out.
-Pro: every driver individually, label rotation and truncation, hiding labels that do
-not fit, IBCS mode, data table.
+PRIVACY
+No network, telemetry, cookies or storage. privileges: []. No innerHTML in src/.
+Start-screen links open only on click via host.launchUrl.
 
-Support: tinocallarisa-web.github.io/waterfall-advanced-powerbi/
+LICENSING
+IVisualLicenseManager only. Pro if Service ID ends in ".pro", state Active or
+Warning. Never blocks render; failure = Free. No licensing UI of its own.
+Full notes: CERTIFICATION-NOTES.md

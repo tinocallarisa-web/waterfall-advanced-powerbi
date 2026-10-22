@@ -1,4 +1,82 @@
-# Certification Notes — Waterfall Advanced v1.1.3.0
+# Certification notes — Waterfall Advanced 1.2.0.0
+
+Short version to paste: `docs/CERTIFICATION-NOTES-SHORT.txt`.
+
+```
+Waterfall Advanced 1.2.0.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
+Repo, branch certification: https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification
+Docs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html (+privacy, terms, changelog)
+Video: https://www.youtube.com/watch?v=zDxpsXMD3WM
+
+WHY THIS SUBMISSION
+Replaces 1.1.3.0. Same objects/properties (saved reports unchanged); new ones added.
+Fix: rendering events were raised also from repaints (licence, click, bookmark). Now
+one renderingStarted and one Finished/Failed per update(); repaints raise none.
+New: style templates, Pro preview, model format strings, axis and legend settings,
+on-object formatting, start screen, 12 languages. API 5.11.1.
+
+PRO PREVIEW
+Without a licence, IN EDIT MODE ONLY, the Pro settings turned on (data table, IBCS,
+label density) render under a "Pro preview" watermark. Intentional. Reading view,
+before the licence resolves and where licences cannot be read (Publish to Web,
+embed, export): free result, no watermark.
+
+TESTING - FREE (no plan)
+1. Sample .pbix: Category, Value, Bar type, Target. Bridge with totals and subtotal.
+More than 12 drivers: smallest grouped in "Others", note says how many; Power BI
+licence notice, Upgrade bar ~10 s later.
+2. Edit mode: tips bar at the bottom. "Try Pro > Data table": table under watermark.
+Reading view: no table. Turn it off: notices clear.
+3. Format > Style template > Modern: colours change. Format mode: click a bar.
+4. Click a bar: cross-filter (Ctrl adds). Bookmarks restore it. Right-click menu.
+allowInteractions false: no selection.
+
+TESTING - PRO (plan "pro")
+All drivers individually; data table, IBCS, label angle: no watermark, no notice.
+
+PERSISTPROPERTIES
+Only on a click in the tips bar (template, Try Pro, close) and once when the template
+is changed in the format pane (clears the settings it defines). Never in the
+selection callback.
+
+PRIVACY
+No network, telemetry, cookies or storage. privileges: []. No innerHTML in src/.
+Start-screen links open only on click via host.launchUrl.
+
+LICENSING
+IVisualLicenseManager only. Pro if Service ID ends in ".pro", state Active or
+Warning. Never blocks render; failure = Free. No licensing UI of its own.
+```
+
+## Rendering events (the fix in 1.2)
+
+`update()` raises `renderingStarted` immediately and debounces the drawing 300 ms; the debounced callback draws and
+raises `renderingFinished` (or `renderingFailed`). A superseded pending update is closed with `renderingFinished`.
+Repaints from the licence resolving, a bar click or `registerOnSelectCallback` call `draw()`, which raises nothing.
+Until 1.1.3 those repaints went through the same method that raised `renderingFinished`.
+
+## Capabilities changes in 1.2
+
+New objects `valueAxis`, `categoryAxis`, `style` and `general.formatString` (dynamic measure formats); new properties
+`colorSettings.showLegend/legendPosition/legendFontFamily`, `numberFormat.source`. `displayNameKey` on every
+property. `supportsOnObjectFormatting` and `enablePointerEventsFormatMode`. No property removed or renamed.
+
+## Fixed colour and fx
+
+`colorSettings.positiveColor` offers fx (instanceKind ConstantOrRule, wildcard selector). The descriptor now carries
+`altConstantValueSelector: null`, so a fixed colour is stored at visual level; choosing a template also removes a
+value stored with the wildcard selector by earlier versions.
+
+## Build
+
+powerbi-visuals-tools 7.2.1, API 5.11.1, TypeScript 5.9, ESLint 10 + eslint-plugin-powerbi-visuals (recommended),
+clean. `npm audit --omit=dev`: 0.
+
+---
+
+# History (notes of the previous version)
+
+## Notes — previous version
 
 The short version to paste into Partner Center is
 [`CERTIFICATION-NOTES-SHORT.txt`](./CERTIFICATION-NOTES-SHORT.txt), written to fit the

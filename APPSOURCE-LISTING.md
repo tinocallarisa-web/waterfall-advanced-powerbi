@@ -1,173 +1,111 @@
-# AppSource Listing — Waterfall Advanced v1.1.3.0
+# Waterfall Advanced — ficha de AppSource (1.2.0.0, 22-10-2026)
 
-**The description below does not change for 1.1.3.0.** That release fixes the purchase
-notification sequence and updates the build toolchain; no feature, well or rendering changed,
-so there is nothing new to tell a buyer. What does have to be pasted again is
-`docs/CERTIFICATION-NOTES-SHORT.txt`: Partner Center clears the certification notes field on
-every resubmission.
+Texto para pegar en Partner Center → oferta Waterfall Advanced → Offer listing. **Editar este fichero no cambia la
+oferta:** cada campo hay que pegarlo a mano en la consola.
 
-Copy ready to paste into Partner Center. **The marketplace description is the
-documentation most people read and the one that goes stale fastest** — update it on every
-release, not only when the code changes.
-
-> The 1.0.x listing advertised **AI narratives**, which have been removed: they called
-> external services, which a certified visual may not do. Anything mentioning Anthropic,
-> OpenAI, API keys or the Finance tier has to go from the live offer too.
+Cambios frente a la ficha de 1.1:
+- Quitado "30-day free trial on AppSource": la oferta no tiene prueba (catálogo, 17-10-2026).
+- Quitado "the format pane is in English": en 1.2 está en 12 idiomas.
+- Nuevo: plantillas, vista previa Pro, formato del modelo, ejes, leyenda, edición sobre el visual.
 
 ---
 
-## Short description (max 100 characters)
+## Resumen de resultados de búsqueda (≤ 100)
 
 ```
-Financial bridge chart with subtotals, targets and a data table. Certified.
+Financial bridge for Power BI: totals, subtotals, target, data table and IBCS. Certified.
 ```
 
-*(74 characters)*
-
----
-
-## Long description
+## Descripción (≤ 5.000)
 
 ```
-Power BI's built-in waterfall handles category movement. It does not handle a bridge: an
-opening anchor, drivers that explain the movement, intermediate checkpoints a finance
-reader expects, and a closing total. Without those, a P&L walk is a row of floating bars
-and the reader has to reconstruct the story themselves.
+Power BI's built-in waterfall handles category movement. It does not handle a bridge: an opening anchor, drivers that
+explain the movement, intermediate checkpoints a finance reader expects, and a closing total. Without those, a P&L walk
+is a row of floating bars and the reader has to reconstruct the story themselves.
 
-Waterfall Advanced adds the one thing that changes that: semantic control over what each
-bar means. Mark a row as a total, a subtotal or a driver, and the chart draws the bridge
-your finance team already has in their heads.
+Waterfall Advanced adds the one thing that changes that: control over what each bar means. Mark a row as a total, a
+subtotal or a driver, and the chart draws the bridge your finance team already has in their heads.
 
 BUILT FOR P&L WALKS
-
 • Totals, subtotals and drivers as distinct bar types, from a column in your model
-• Intermediate checkpoints — Net Revenue, Gross Profit, EBITDA, EBIT — drawn from zero,
-  so a reader sees where the margin stood before the next block of costs
+• Intermediate checkpoints — Net Revenue, Gross Profit, EBITDA — drawn from zero
 • Horizontal or vertical, because line-item names read better down the side
-• Hierarchical drilldown: start at region, open into country or product without leaving
-  the bridge
-• A target line on the anchor bars, with its own label and figure
-• Drivers beyond two standard deviations from the mean are flagged automatically
+• A target line on the anchor bars, with its own label and figure, drawn above the bars
+• Drivers far from the rest are flagged automatically
 • Summary cards: opening, closing, variance %, biggest gain, biggest loss
 
 READABLE ON PURPOSE
+• Style templates in one click: Classic, Modern, Soft, One colour (from a base colour you choose) and Dark background
+• A colour-blind safe palette and hatched decreases, so a rise and a fall still read printed in black and white
+• Conditional formatting on bar colour through the native fx dialog, or a hex colour per row from your model
+• The measure's own format — dynamic format strings included — or your own symbol, scale and decimals
+• Value axis, gridlines, axis titles and legend under your control
+• On-object formatting: click a bar, a label, the axis or the legend to format it
 
-• A colour-blind safe palette and hatched decreases. Around 8% of men cannot reliably
-  separate red from green, and a bridge is where mistaking a rise for a fall costs most.
-  With the hatch on, the chart still reads printed in black and white — which is how half
-  of these end up, in a committee pack.
-• Conditional formatting on bar colour through the native fx dialog, or a hex colour per
-  row calculated in your model
-• Label angle, truncation and automatic handling of labels that do not fit
-• IBCS monochrome notation for standards-based reporting
-
-THE NUMBERS BESIDE THE CHART
-
-A bridge answers why. A table answers how much. The built-in data table puts both in one
-visual — every step with its amount, the running total and each step as a share of the
-opening figure — instead of a matrix beside the chart that has to be filtered and
-formatted separately.
-
-IN THE REPORT
-
-Cross-filtering with multi-select, cross-highlighting, bookmarks, report page tooltips,
-right-click context menu, keyboard navigation and high contrast. The chart labels and
-summary cards follow the Power BI language setting in English, Spanish, French and
-German; the format pane is in English.
-
-PRIVACY
-
-No network calls of any kind: no telemetry, no analytics, no CDN, no endpoints. All
-calculation and rendering happens inside Power BI, on your machine or your tenant.
-
-CERTIFIED
-
-Power BI certified, so it works in exports to PDF and PowerPoint and in tenants that only
-allow certified visuals.
+THE NUMBERS BESIDE THE CHART (PRO)
+A bridge answers why. A table answers how much. The data table puts every step with its amount, the running total and
+its share of the opening figure next to the chart, instead of a matrix that has to be filtered and formatted
+separately.
 
 FREE AND PRO
+The free tier is the whole bridge — totals, subtotals, drivers, target, summary cards, templates, conditional
+formatting, both orientations — with twelve individual drivers, the size of a standard P&L walk. Above twelve, the
+smallest drivers are grouped into "Others" and the bridge still closes on the same figure: coarser, nothing lost.
 
-The free tier is the whole bridge: totals, subtotals, drivers, connectors, both
-orientations, drilldown, the target line, conditional formatting, the accessible palette,
-summary cards, cross-filtering, bookmarks, keyboard and high contrast — with twelve
-individual drivers, which is the size of a standard P&L walk.
+Pro adds every driver individually, the data table, IBCS monochrome notation and the label density controls (angle,
+truncation, hiding labels that do not fit).
 
-Above twelve, the smallest drivers are grouped into an "Others" bar. The bridge still
-closes on the same figure: the detail is coarser, nothing is lost.
+SEE PRO ON YOUR OWN DATA BEFORE YOU BUY
+While you edit, turn on a Pro feature — or use "Try Pro" in the setup tips — and it is drawn working under a "Pro
+preview" watermark: your own bridge, not a screenshot. Power BI shows its own notice with the link to get a licence.
+Reading view shows the free chart, so a published report never uses a feature nobody paid for.
 
-Pro adds every driver individually, the data table, IBCS mode and the label density
-controls. 30-day free trial on AppSource.
+IN THE REPORT
+Cross-filtering with multi-select, cross-highlighting, bookmarks, report page tooltips, drilldown, context menu,
+keyboard navigation and high contrast. Format pane and labels in 12 languages.
+
+PRIVACY
+No network calls of any kind: no telemetry, no analytics, no CDN. All calculation and rendering happens inside Power BI.
+
+GETTING STARTED
+1. Category: the steps of the bridge. 2. Value: the amount of each step. 3. Optional: Bar type ("subtotal"), Order,
+Target. Then pick a style template.
+
+Documentation, FAQ and use cases: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html
+Support: support@tcviz.com — a person answers.
+
+WHAT'S NEW IN 1.2
+Style templates, Pro preview on your own data, model format with dynamic format strings, axis and legend controls,
+on-object formatting, 12 languages, and the target and labels always readable above the bars.
 ```
 
----
+## Palabras clave (3)
 
-## What's new — v1.1.0.0
+`Waterfall` · `Bridge` · `Variance` — sin cambios. `Waterfall` carga la búsqueda; `Bridge` es como lo llaman los
+equipos de finanzas ("build me the EBITDA bridge"); `Variance` capta el plan contra real.
 
-```
-• Fixed: the Pro licence could never be granted. The visual called a licensing method that
-  does not exist, and the fallback decided the tier from the browser hostname — so every
-  published user was served the free tier whatever they had bought.
-• A data table beside or below the chart: every step with its amount, running total and
-  share of the opening figure.
-• A colour-blind safe palette and hatched decreases, both free. Colour is no longer the
-  only thing separating a rise from a fall.
-• IBCS monochrome mode, and controls for label angle, truncation and overlap.
-• Bookmarks now restore the selection.
-• Conditional formatting on bar colour through the native fx dialog.
-• The free limit groups the smallest drivers into "Others" instead of hiding bars, so the
-  bridge always closes on the right figure — and it rises from 8 drivers to 12.
-• Removed: AI narratives and the Finance tier. They called external services, which a
-  certified visual may not do, so the sandbox blocked them in every published report.
-• Removed: the padlock overlay and the upgrade banner drawn inside the chart.
-```
+## Vídeo
 
----
+URL canónica `https://www.youtube.com/watch?v=<id>`. PENDIENTE del vídeo de la 1.2; hasta entonces
+`https://www.youtube.com/watch?v=zDxpsXMD3WM`.
 
-## Keywords (max 3)
+## Imágenes
 
-```
-Waterfall · Bridge · Variance
-```
+- Logo 300×300: `assets/icon_300x300.png` (icono nuevo de la serie)
+- Capturas 1366×768 e infografía (fuente `docs/infographic.html`): regenerar con la 1.2.
 
-`Waterfall` carries the search. `Bridge` is what finance teams actually call it, and it is
-the word in a brief like "build me the EBITDA bridge". `Variance` catches budget-versus-
-actual, which is the other half of the audience.
+## URLs
 
----
-
-## URLs to keep in sync
-
-| Field | Value |
+| Campo | Valor |
 |---|---|
-| Support / documentation | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html |
-| Privacy policy | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/privacy.html |
-| Terms of use | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html |
-| Repository (certification branch) | https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification |
-| Demo video | https://www.youtube.com/watch?v=zDxpsXMD3WM |
+| Soporte | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html |
+| Privacidad | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/privacy.html |
+| Términos | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html |
+| Repo (rama certification) | https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification |
 
-**The repository slug is `waterfall-advanced-powerbi`** — not `Waterfall`, which is only
-the local folder name.
+El slug del repo es `waterfall-advanced-powerbi`, no `Waterfall` (solo es la carpeta local).
+Planes publicados: `free` y `pro` (el de 15 USD no se puede cambiar de precio en un plan publicado).
 
-**The certification notes field caps at 2,500 characters** and truncates without warning,
-mid-word. Paste `CERTIFICATION-NOTES-SHORT.txt`, written to fit at 2,494. That field is
-cleared on every resubmission.
+## Notas para la certificación
 
-**Plans:** the offer publishes `free` and `pro`. The `finance` plan is retired — its sale
-has been stopped and the code no longer recognises it.
-
----
-
-## Before submitting
-
-- [ ] Long description pasted, replacing the one that advertises AI narratives
-- [ ] "What's new" pasted
-- [ ] Every mention of Anthropic, OpenAI, API keys and the Finance tier removed from the
-      live offer
-- [ ] Support, privacy and terms URLs checked with a real request, not assumed
-- [ ] Certification notes pasted from `CERTIFICATION-NOTES-SHORT.txt`
-- [ ] Version 1.1.0.0 is above the published 1.0.8.0
-- [ ] Screenshots updated — the current ones predate the data table, which is the feature
-      that shows best in a thumbnail
-- [x] Video re-recorded for 1.1.0.0 (2026-09-12): https://www.youtube.com/watch?v=zDxpsXMD3WM — replaces
-      the 1.0.x walkthrough. Update the video URL in the offer; the old one is still live on
-      YouTube, so an un-updated field does not 404 and nothing warns you.
+`docs/CERTIFICATION-NOTES-SHORT.txt` — el campo se vacía en cada reenvío: pegarlo siempre.

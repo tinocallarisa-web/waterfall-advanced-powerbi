@@ -23,17 +23,47 @@
 </head>
 <body>
   <h1>Changelog — Waterfall Advanced</h1>
-  <p class="meta">Current version <strong>1.1.3.0</strong> &nbsp;|&nbsp;
+  <p class="meta">Current version <strong>1.2.0.0</strong> &nbsp;|&nbsp;
     <a href="support.html">Support</a> &nbsp;|&nbsp;
     <a href="https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced" target="_blank" rel="noopener">AppSource</a></p>
 
   <p>All notable changes to this project are documented here. Format follows <a href="https://keepachangelog.com/en/1.0.0/" target="_blank" rel="noopener">Keep a Changelog</a>.</p>
-  <h2 id="v1.1.3.0">1.1.3.0 <span class="date">2026-09-23</span></h2>
+  <h2 id="v1.2.0.0">1.2.0.0 <span class="date">2026-10-22</span></h2>
+  <h3 class="kind kind-fixed">Fixed</h3>
   <ul>
-  <li><strong>The Upgrade bar never survived the feature banner.</strong> Power BI shows one notification at a time and the last call replaces the previous one. The visual raised the persistent notice first and the banner second, so the notice carrying the Upgrade button was wiped out and, once the banner faded, there was no way left to buy. The banner now comes first and the Upgrade bar follows 10.5 seconds later, when the banner has gone.</li>
-  <li><strong>Lint validation runs again.</strong> The build had been skipping it silently, which is also where the certification rules are checked.</li>
+  <li><strong>Rendering events.</strong> The chart reported "render finished" to Power BI also when the licence resolved, after a click and when a bookmark was applied — events with no matching start, which certification rejects. Each update now raises exactly one start and one finish; repaints outside an update raise none.</li>
+  <li><strong>A fixed Increase colour could paint every bar.</strong> Before 1.2 the fixed colour was stored bar by bar, through the same selector the fx rule uses, so it overrode totals and decreases too and no setting could change them. Fixed colours are now stored for the whole visual, and choosing a style template clears the old per-bar value.</li>
+  <li><strong>The format pane was always in English.</strong> The translations existed but were never connected. It now follows the language of Power BI in 12 languages.</li>
   </ul>
-
+  <h3 class="kind kind-added">Added</h3>
+  <ul>
+  <li><strong>Pro preview.</strong> While you edit without a licence, the data table, IBCS mode and the label density settings you turn on are drawn working on your own data, under a "Pro preview" watermark; Power BI shows its own licence notice and Upgrade bar. Reading view shows the free chart, and where licences cannot be read (Publish to Web, embedding, export) the free result is drawn with no watermark.</li>
+  <li><strong>Style templates</strong>: Classic (the look of earlier versions, and the default), Modern, Soft, One colour — with a base colour you choose: totals take it, increases a lighter shade, decreases a darker one — and Dark background, for reports with a dark background.</li>
+  <li><strong>Setup tips</strong> while editing: the templates in one click, and the Pro features to try on your data.</li>
+  <li><strong>Model format</strong>: values, labels, tooltips and the axis can use the measure's own format string — dynamic format strings included — in the report's language. The custom format (symbol, scale, decimals) stays the default.</li>
+  <li><strong>Value axis</strong>: show or hide, gridlines, font size, colour and title. <strong>Category axis</strong> title.</li>
+  <li><strong>Legend</strong>: show or hide, top or bottom, font, size and colour, in its own group of the Colors card.</li>
+  <li><strong>On-object formatting</strong>: bars, value labels, category labels, value axis, legend, summary cards and data table.</li>
+  <li><strong>Start screen</strong> with the steps and links, and a new icon.</li>
+  </ul>
+  <h3 class="kind kind-changed">Changed</h3>
+  <ul>
+  <li>The target line, its label and the value labels are drawn above the bars, with a halo, so a neighbouring bar no longer covers them; the target label sits above its line, centred on its bar. When a total's value falls at the height of its target, the value moves inside the bar.</li>
+  <li>In small tiles the summary cards and the legend hide themselves instead of squeezing the chart.</li>
+  <li>Toolchain: Power BI visuals API 5.11.1, pbiviz 7.2.1, TypeScript 5.9, ESLint 10.</li>
+  </ul>
+  <h2 id="v1.1.3.0">1.1.3.0 <span class="date">2026-09-23</span></h2>
+  <h3 class="kind kind-fixed">Fixed</h3>
+  <ul>
+  <li><strong>The Upgrade bar never survived the feature banner, so the purchase path disappeared.</strong> Power BI shows one notification at a time and the last call replaces the previous one. The render called <code>required()</code> and then <code>blocked()</code> in the same update, so the persistent notice carrying the Upgrade button was replaced by the transient banner; when the banner faded there was nothing left to click. A free user who reached for a Pro setting was told once, briefly, and then left with no way to buy.</li>
+  </ul>
+  <p>The fix is inside <code>LicenseNotifier</code>, not in the order of the calls at the render: there are three call sites spread across <code>update()</code> and the click handler, and the end state has to be right whichever order they arrive in. <code>blocked()</code> now clears any standing notice first, raises the banner, and schedules the Upgrade bar for 10.5 s later, which is how long the banner lasts. <code>required()</code> stands down while that timer is pending instead of competing with it. The timer is cancelled in <code>destroy()</code>, so a visual that is disposed — Power BI recreates it on every page change — does not notify on behalf of a chart that is gone.</p>
+  <p>No watermark was added, and none should be: the free tier here does not render a Pro feature half-way. It groups the smaller drivers and draws a bridge that still balances, which is a correct chart rather than a crippled one. There is nothing to mark.</p>
+  <h3 class="kind kind-changed">Changed</h3>
+  <ul>
+  <li><strong>The toolchain was failing a certification requirement.</strong> <code>npm audit</code> returned 2 critical, 8 high and 11 moderate advisories — the certification rules state plainly that it "must not return any warnings with high or moderate level". They all came from <code>powerbi-visuals-tools</code> 5.6.0, which is also three major versions behind the "use the latest version" requirement. Tools are now 7.2.1, the API 5.11.1 and TypeScript 5.5.4, aligned with the rest of the portfolio, with a clean reinstall to prune what the old tree had left behind and the same <code>overrides</code> for <code>qs</code> and <code>uuid</code> that the clean repos already carried. <code>npm audit</code> now reports <strong>0 vulnerabilities</strong>. The upgrade also unlocks <code>pbiviz package --certification-audit</code>, the official check for <code>fetch</code>, <code>XMLHttpRequest</code> and <code>eval</code> calls, which reports no external requests. None of this changes a line of the visual.</li>
+  <li><strong>Lint validation runs again.</strong> The repo had no ESLint configuration in the format <code>pbiviz</code> 5.6 expects, so every build printed *"Can't run lint validation"* and packaged anyway. The certification rules — the ones that reject a visual for <code>innerHTML</code> and friends — live in that step, so the package was being shipped unchecked. ESLint is now aligned with the rest of the portfolio (9.x with the flat config) and the build is clean. One stale <code>eslint-disable</code> directive pointing at a rule that is no longer loaded was removed.</li>
+  </ul>
   <h2 id="v1.1.2.0">1.1.2.0 <span class="date">2026-09-14</span></h2>
   <h3 class="kind kind-fixed">Fixed</h3>
   <ul>
