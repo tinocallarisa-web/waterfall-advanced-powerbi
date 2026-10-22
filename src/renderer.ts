@@ -246,6 +246,8 @@ export class WaterfallRenderer {
         }
         barW = Math.max(10, barW);
         const xOf = (i: number) => this.PAD_LEFT + i * (barW + gap);
+        this.deferred = [];
+        this.late = [];
 
         this.renderYAxis(yScale, minY, maxY, plotW, fmt, ls.categoryLabelColor.value.value);
         if (va.title) {
@@ -339,7 +341,8 @@ export class WaterfallRenderer {
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
 
-            if (ch.showTarget.value && bar.target != null && bar.barType === "total") {
+            // El objetivo se dibuja DESPUÉS de todas las barras: si no, la barra siguiente lo tapa.
+            if (ch.showTarget.value && bar.target != null && bar.barType === "total") this.deferred.push(() => {
                 const ty = yScale(bar.target);
                 this.line(x - 4, ty, x + barW + 4, ty, colors.target, 1.5, "5 3");
 
@@ -347,22 +350,28 @@ export class WaterfallRenderer {
                 // objetivo sin su cifra no dice si se cumple ni por cuanto.
                 const tLabel = (ch.targetLabel.value || "Target") +
                     (ch.targetShowValue.value ? " " + fmt.format(bar.target) : "");
-                // Si no cabe a la derecha, la etiqueta se pone a la izquierda de
-                // la linea en vez de salirse del lienzo.
+                // Encima de la línea y centrada en su barra (a la derecha se montaba sobre la barra vecina). Sin salirse
+                // del lienzo por los lados.
                 const tW = this.textWidth(tLabel, 9);
-                const rightRoom = width - (x + barW + 6) - this.PAD_RIGHT;
-                if (tW <= rightRoom) {
-                    this.text(x + barW + 6, ty + 3, tLabel, 9, colors.target, "start");
-                } else {
-                    this.text(x - 6, ty + 3, tLabel, 9, colors.target, "end");
-                }
-            }
+                const cx = Math.min(Math.max(x + barW / 2, this.PAD_LEFT + tW / 2), width - this.PAD_RIGHT - tW / 2);
+                this.halo(this.text(cx, ty - 4, tLabel, 9, colors.target, "middle", "600"), colors.target);
+            });
 
-            if (ls.showLabels.value) {
+            // Las etiquetas de valor van al final, por encima de la línea del objetivo, con halo.
+            if (ls.showLabels.value) this.late.push(() => {
                 const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
-                const labelColor = ls.autoValueLabelColor.value ? fill : ls.valueLabelColor.value.value;
-                this.text(x + barW / 2, yTop - 5, label, ls.fontSize.value, labelColor, "middle", "500").setAttribute("data-o", "labels");
-            }
+                let labelColor = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
+                let ly = yTop - 5;
+                const fsL = ls.fontSize.value;
+                if (ch.showTarget.value && bar.target != null && bar.barType === "total" &&
+                    Math.abs(yScale(bar.target) - yTop) < fsL + 12 && bh > fsL + 8) {
+                    ly = yTop + fsL + 3;
+                    labelColor = highContrast ? contrastForeground : "#FFFFFF";
+                }
+                const lt = this.text(x + barW / 2, ly, label, fsL, labelColor, "middle", "500");
+                lt.setAttribute("data-o", "labels");
+                if (ly < yTop) this.halo(lt, labelColor);   // dentro de la barra no hace falta halo
+            });
 
             // Color de la etiqueta de eje: el de la barra cuando es un anclaje.
             // En alto contraste no se toca, que ahi manda el tema del sistema.
@@ -383,6 +392,8 @@ export class WaterfallRenderer {
                 });
             }
         });
+        this.deferred.forEach(f => f());
+        this.late.forEach(f => f());
     }
 
     private renderHorizontal(bars: ComputedBar[], summary: WaterfallSummary, ch: VisualFormattingSettingsModel["chartSettings"],
@@ -433,6 +444,8 @@ export class WaterfallRenderer {
         }
         barH = Math.max(10, barH);
         const yOf = (i: number) => this.PAD_TOP + i * (barH + gap);
+        this.deferred = [];
+        this.late = [];
 
         this.renderXAxis(xScale, minV, maxV, plotH, fmt, PAD_LEFT_H, ls.categoryLabelColor.value.value);
         if (vaH.title) {
@@ -526,7 +539,7 @@ export class WaterfallRenderer {
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
 
-            if (ch.showTarget.value && bar.target != null && bar.barType === "total") {
+            if (ch.showTarget.value && bar.target != null && bar.barType === "total") this.deferred.push(() => {
                 const tx = xScale(bar.target);
                 this.line(tx, y - 4, tx, y + barH + 4, colors.target, 1.5, "5 3");
                 const tLabel = (ch.targetLabel.value || "Target") +
@@ -534,16 +547,18 @@ export class WaterfallRenderer {
                 const tW = this.textWidth(tLabel, 9);
                 // Centrada se saldria por la derecha en el ultimo tramo del eje.
                 const anchor = tx + tW / 2 > width - this.PAD_RIGHT ? "end" : "middle";
-                this.text(tx, y - 6, tLabel, 9, colors.target, anchor);
-            }
+                this.halo(this.text(tx, y - 6, tLabel, 9, colors.target, anchor), colors.target);
+            });
 
-            if (ls.showLabels.value) {
+            if (ls.showLabels.value) this.late.push(() => {
                 const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
                 const labelX = bar.value >= 0 || bar.barType !== "delta" ? bx + bw + 6 : bx - 6;
                 const anchor = bar.value >= 0 || bar.barType !== "delta" ? "start" : "end";
-                const labelColor = ls.autoValueLabelColor.value ? fill : ls.valueLabelColor.value.value;
-                this.text(labelX, y + barH / 2 + 4, label, ls.fontSize.value, labelColor, anchor, "500").setAttribute("data-o", "labels");
-            }
+                const labelColor = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
+                const lt = this.text(labelX, y + barH / 2 + 4, label, ls.fontSize.value, labelColor, anchor, "500");
+                lt.setAttribute("data-o", "labels");
+                this.halo(lt, labelColor);
+            });
 
             // Si aun asi no cabe -etiqueta larguisima, o fuente muy grande- se
             // recorta a lo que entra. Un corte limpio con puntos suspensivos se
@@ -558,6 +573,8 @@ export class WaterfallRenderer {
                 ? colors.total : ls.categoryLabelColor.value.value;
             this.text(PAD_LEFT_H - 8, y + barH / 2 + 4, catLabel, ls.categoryFontSize.value, catColorH, "end").setAttribute("data-o", "catLabels");
         });
+        this.deferred.forEach(f => f());
+        this.late.forEach(f => f());
     }
 
     /** Ajustes del eje de valores (1.2), los pone render() antes de dibujar. */
@@ -839,6 +856,24 @@ export class WaterfallRenderer {
     }
 
     private el(tag: string): Element { return document.createElementNS(SVG_NS, tag); }
+
+    /** Lo que se dibuja encima de todas las barras (objetivo). */
+    private deferred: (() => void)[] = [];
+    /** Lo último: etiquetas de valor, por encima del objetivo. */
+    private late: (() => void)[] = [];
+
+    /**
+     * Halo detrás del texto para que se lea sobre una barra: claro si el texto es oscuro y al revés (plantilla Dark).
+     */
+    private halo(t: SVGTextElement, color: string): void {
+        const hex = color.replace("#", "");
+        const f = hex.length === 3 ? hex.split("").map(c => c + c).join("") : hex;
+        const lum = f.length === 6 ? (0.299 * parseInt(f.slice(0, 2), 16) + 0.587 * parseInt(f.slice(2, 4), 16) + 0.114 * parseInt(f.slice(4, 6), 16)) / 255 : 0;
+        t.setAttribute("stroke", lum > 0.6 ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.9)");
+        t.setAttribute("stroke-width", "3");
+        t.setAttribute("stroke-linejoin", "round");
+        t.setAttribute("paint-order", "stroke");
+    }
 
     private line(x1: number, y1: number, x2: number, y2: number,
                  stroke: string, sw = 0.5, dash?: string): void {
