@@ -161,5 +161,6 @@
   "UI_Decrease": "减少",
   "UI_Value": "值",
   "UI_Running": "累计",
-  "UI_PctOpen": "期初 %"
+  "UI_PctOpen": "期初 %",
+  "style_baseColor": "基础颜色"
 }

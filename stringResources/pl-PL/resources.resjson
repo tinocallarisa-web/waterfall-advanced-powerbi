@@ -161,5 +161,6 @@
   "UI_Decrease": "Spadek",
   "UI_Value": "Wartość",
   "UI_Running": "Narastająco",
-  "UI_PctOpen": "% początk."
+  "UI_PctOpen": "% początk.",
+  "style_baseColor": "Kolor bazowy"
 }

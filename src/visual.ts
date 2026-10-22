@@ -15,7 +15,7 @@ import ISelectionManager         = powerbi.extensibility.ISelectionManager;
 import ILocalizationManager      = powerbi.extensibility.ILocalizationManager;
 import VisualUpdateType          = powerbi.VisualUpdateType;
 
-import { VisualFormattingSettingsModel, TEMPLATES }  from "./settings";
+import { VisualFormattingSettingsModel, TEMPLATES, monoTemplate }  from "./settings";
 import { mapDataView, sortByImpact, applyTopN, WaterfallBar }  from "./dataMapper";
 import { computeBars, computeSummary, ComputedBar, WaterfallSummary } from "./waterfallEngine";
 import { WaterfallRenderer, ClickEventData }         from "./renderer";
@@ -346,7 +346,7 @@ export class Visual implements IVisual {
     // ── Plantillas ───────────────────────────────────────────────────────────
 
     private applyTemplateDefaults(tpl: string, objs: any): void {
-        const tp = TEMPLATES[tpl];
+        const tp = tpl === "mono" ? monoTemplate(objs?.style?.baseColor?.solid?.color ?? "#2B6CB0") : TEMPLATES[tpl];
         if (!tp) return;
         Object.keys(tp).forEach(obj => {
             const card: any = (this.formattingSettings.cards as any[]).find(c => c.name === obj);
@@ -775,6 +775,7 @@ export class Visual implements IVisual {
         s.colorSettings.legendPosition.visible = !!s.colorSettings.showLegend.value;
         s.valueAxis.title.visible = !!s.valueAxis.showTitle.value;
         s.categoryAxis.title.visible = !!s.categoryAxis.showTitle.value;
+        s.style.baseColor.visible = (s.style.template.value as any)?.value === "mono";
         const model = this.formattingSettingsSvc.buildFormattingModel(s);
         // fx en el color de subida: el color FIJO tiene que guardarse a nivel general, no con el selector comodín
         // (si no, llega por fila, el panel no lo recuerda y el visual lo toma por regla). Bar Chart 1.11.

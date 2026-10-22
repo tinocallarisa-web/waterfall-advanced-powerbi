@@ -161,5 +161,6 @@
   "UI_Decrease": "Decrease",
   "UI_Value": "Value",
   "UI_Running": "Running",
-  "UI_PctOpen": "% open"
+  "UI_PctOpen": "% open",
+  "style_baseColor": "Base colour"
 }

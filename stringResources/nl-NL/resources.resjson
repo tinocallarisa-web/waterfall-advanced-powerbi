@@ -161,5 +161,6 @@
   "UI_Decrease": "Daling",
   "UI_Value": "Waarde",
   "UI_Running": "Cumulatief",
-  "UI_PctOpen": "% opening"
+  "UI_PctOpen": "% opening",
+  "style_baseColor": "Basiskleur"
 }

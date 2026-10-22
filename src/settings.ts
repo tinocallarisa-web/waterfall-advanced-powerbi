@@ -360,13 +360,17 @@ class StyleSettings extends FormattingSettingsCard {
         ],
         value: item("classic", "Classic", "Enum_classic")
     });
+    // Solo con "One colour": de él salen el total (tal cual), las subidas (aclarado) y las bajadas (oscurecido).
+    baseColor = new formattingSettings.ColorPicker({
+        name: "baseColor", displayName: "Base colour", displayNameKey: "style_baseColor", value: { value: "#2B6CB0" }
+    });
     guide = new formattingSettings.ToggleSwitch({
         name: "guide", displayName: "Show setup tips", displayNameKey: "style_guide", value: true
     });
     name = "style";
     displayName = "Style template";
     displayNameKey = "card_style";
-    slices = [this.template, this.guide];
+    slices = [this.template, this.baseColor, this.guide];
 }
 
 // ─── Root model ───────────────────────────────────────────────────────────────
@@ -401,6 +405,26 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
  * de 1.1 (los informes guardados sin plantilla se ven igual). Al ELEGIR una, el visual borra esas propiedades
  * guardadas para que se vea.
  */
+/** Mezcla un color hex con blanco (t > 0) o con negro (t < 0). */
+function tono(hex: string, t: number): string {
+    const v = hex.replace("#", "");
+    const f = v.length === 3 ? v.split("").map(c => c + c).join("") : v;
+    const ch = [0, 2, 4].map(i => parseInt(f.slice(i, i + 2), 16));
+    const out = ch.map(c => Math.round(t >= 0 ? c + (255 - c) * t : c * (1 + t)));
+    return "#" + out.map(c => Math.max(0, Math.min(255, c)).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+/** "One colour" a partir del color base que elija el autor. */
+export function monoTemplate(base: string): Record<string, Record<string, string | number | boolean>> {
+    const b = /^#?[0-9a-fA-F]{6}$|^#?[0-9a-fA-F]{3}$/.test(base || "") ? (base.startsWith("#") ? base : "#" + base) : "#2B6CB0";
+    return {
+        colorSettings: { positiveColor: tono(b, 0.45), negativeColor: tono(b, -0.3), totalColor: b, targetColor: "#1E2A36", legendTextColor: "#605E5C" },
+        // El tono claro de las subidas no se lee como texto sobre fondo blanco: etiquetas en el tono oscuro.
+        labelSettings: { autoValueLabelColor: false, valueLabelColor: tono(b, -0.3), categoryLabelColor: "#605E5C" },
+        valueAxis: { color: "#8A8886" }
+    };
+}
+
 export const TEMPLATES: Record<string, Record<string, Record<string, string | number | boolean>>> = {
     classic: {},
     modern: {
@@ -413,12 +437,7 @@ export const TEMPLATES: Record<string, Record<string, Record<string, string | nu
         labelSettings: { autoValueLabelColor: false, valueLabelColor: "#3D3B39", categoryLabelColor: "#605E5C" },
         valueAxis: { color: "#8A8886" }
     },
-    mono: {
-        colorSettings: { positiveColor: "#8FB3D9", negativeColor: "#1F4E80", totalColor: "#2B6CB0", targetColor: "#1E2A36", legendTextColor: "#605E5C" },
-        // El azul claro de las subidas no se lee como texto sobre fondo blanco: etiquetas en azul oscuro.
-        labelSettings: { autoValueLabelColor: false, valueLabelColor: "#1F4E80", categoryLabelColor: "#605E5C" },
-        valueAxis: { color: "#8A8886" }
-    },
+    mono: monoTemplate("#2B6CB0"),
     dark: {
         colorSettings: { positiveColor: "#3FB37F", negativeColor: "#E5534B", totalColor: "#4A90D9", targetColor: "#E1DFDD", legendTextColor: "#C8C6C4" },
         labelSettings: { autoValueLabelColor: false, valueLabelColor: "#F3F2F1", categoryLabelColor: "#C8C6C4" },

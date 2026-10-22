@@ -839,6 +839,17 @@
             "bool": true
           },
           "displayNameKey": "style_guide"
+        },
+        "baseColor": {
+          "displayName": "Base colour",
+          "displayNameKey": "style_baseColor",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
         }
       },
       "displayName": "Style template",
