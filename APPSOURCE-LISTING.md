@@ -4,7 +4,7 @@ Texto para pegar en Partner Center → oferta Waterfall Advanced → Offer listi
 oferta:** cada campo hay que pegarlo a mano en la consola.
 
 Cambios frente a la ficha de 1.1:
-- Quitado "30-day free trial on AppSource": la oferta no tiene prueba (catálogo, 17-10-2026).
+- Prueba gratuita de 1 mes activada en el plan Pro el 23-10-2026 (Tino), en la misma publicación que la 1.2.
 - Quitado "the format pane is in English": en 1.2 está en 12 idiomas.
 - Nuevo: plantillas, vista previa Pro, formato del modelo, ejes, leyenda, edición sobre el visual.
 
@@ -53,7 +53,7 @@ formatting, both orientations — with twelve individual drivers, the size of a 
 smallest drivers are grouped into "Others" and the bridge still closes on the same figure: coarser, nothing lost.
 
 Pro adds every driver individually, the data table, IBCS monochrome notation and the label density controls (angle,
-truncation, hiding labels that do not fit).
+truncation, hiding labels that do not fit). One-month free trial on AppSource.
 
 SEE PRO ON YOUR OWN DATA BEFORE YOU BUY
 While you edit, turn on a Pro feature — or use "Try Pro" in the setup tips — and it is drawn working under a "Pro
