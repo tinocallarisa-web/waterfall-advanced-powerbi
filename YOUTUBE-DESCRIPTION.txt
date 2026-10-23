@@ -1,6 +1,6 @@
 ================================================================================
 YOUTUBE — Waterfall Advanced v1.2.0.0
-Video (current): https://www.youtube.com/watch?v=zDxpsXMD3WM
+Video (current): https://www.youtube.com/watch?v=GOym3Akbiaw
 ================================================================================
 
 IMPORTANT — the chapter timestamps below are PLACEHOLDERS (all 0:00). Watch the
@@ -9,9 +9,6 @@ does not show. YouTube only renders chapters if the first one is 0:00, there are
 least three, and each lasts 10 seconds or more. A wrong timestamp is worse than no
 chapters: the viewer clicks and lands mid-sentence.
 
-The current video was recorded on an earlier version. If a new 1.2 video is
-uploaded, replace the URL here and in docs/support.html, and paste it in Partner
-Center as https://www.youtube.com/watch?v=<id> (never youtu.be).
 
 
 --------------------------------------------------------------------------------

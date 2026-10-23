@@ -6,7 +6,7 @@ Short version to paste: `docs/CERTIFICATION-NOTES-SHORT.txt`.
 Waterfall Advanced 1.2.0.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
 Repo, branch certification: https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification
 Docs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html (+privacy, terms, changelog)
-Video: https://www.youtube.com/watch?v=zDxpsXMD3WM
+Video: https://www.youtube.com/watch?v=GOym3Akbiaw
 
 WHY THIS SUBMISSION
 Replaces 1.1.3.0. Same objects/properties (saved reports unchanged); new ones added.
@@ -223,7 +223,7 @@ the developer's machine. Restored in this release, and the gap is recorded in
 | Terms of Use | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/terms.html |
 | Support | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html |
 | Changelog | https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html |
-| Demo video | https://www.youtube.com/watch?v=zDxpsXMD3WM |
+| Demo video | https://www.youtube.com/watch?v=GOym3Akbiaw |
 
 All four pages are served from the repository root by GitHub Pages. The privacy,
 terms and support pages were rewritten for 1.1.0.0 and `changelog.html` is new, so

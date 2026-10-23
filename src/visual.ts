@@ -37,7 +37,7 @@ const BUILD_MARKER = "";
 
 const URL_GUIDE = "https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html";
 const URL_PRODUCT = "https://tcviz.com/product/waterfall-pro/?ref=visual-waterfall";
-const URL_VIDEO = "https://www.youtube.com/watch?v=zDxpsXMD3WM";
+const URL_VIDEO = "https://www.youtube.com/watch?v=GOym3Akbiaw";
 
 export class Visual implements IVisual {
 

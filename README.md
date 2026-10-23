@@ -8,7 +8,7 @@ y el visual dibuja el puente.
 
 [Documentación y soporte](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html) ·
 [Changelog](https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html) ·
-[Vídeo](https://www.youtube.com/watch?v=zDxpsXMD3WM) ·
+[Vídeo](https://www.youtube.com/watch?v=GOym3Akbiaw) ·
 [Ficha](https://tcviz.com/product/waterfall-pro/) ·
 [Tips & Hints](./TIPS-AND-HINTS.md)
 

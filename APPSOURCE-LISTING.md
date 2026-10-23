@@ -86,8 +86,8 @@ equipos de finanzas ("build me the EBITDA bridge"); `Variance` capta el plan con
 
 ## Vídeo
 
-URL canónica `https://www.youtube.com/watch?v=<id>`. PENDIENTE del vídeo de la 1.2; hasta entonces
-`https://www.youtube.com/watch?v=zDxpsXMD3WM`.
+URL canónica `https://www.youtube.com/watch?v=<id>`. Vídeo de la 1.2:
+`https://www.youtube.com/watch?v=GOym3Akbiaw`.
 
 ## Imágenes
 
