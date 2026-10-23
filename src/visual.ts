@@ -61,6 +61,8 @@ export class Visual implements IVisual {
     private lastSummary:  WaterfallSummary | null = null;
     private selectionIds: (powerbi.visuals.ISelectionId | null)[] = [];
     private selectedIndices: Set<number> = new Set<number>();
+    /** Barra "Otros": las identidades de todas las filas que agrupa, por índice de barra. */
+    private groupIds: Map<number, powerbi.visuals.ISelectionId[]> = new Map();
     private lastOptions:  VisualUpdateOptions | null = null;
     private pendingOptions: VisualUpdateOptions | null = null;
     private debounceId:   ReturnType<typeof setTimeout> | null = null;
@@ -157,6 +159,25 @@ export class Visual implements IVisual {
         // Un renderingStarted y un renderingFinished/Failed por cada update(). Los repintados que no vienen de
         // update() (licencia, clic, marcadores) usan draw(), que no emite eventos (rechazo 1200.1.2 de Likert).
         this.host.eventService.renderingStarted(options);
+        try {
+            this.updateSync(options);
+        } catch (e) {
+            // Sin esto, un fallo en la parte síncrona dejaba un Started sin Finished ni Failed.
+            this.host.eventService.renderingFailed(options, String(e));
+        }
+    }
+
+    /** Cierra (Finished) un dibujo diferido pendiente: lo sustituye otro update o el visual se destruye. */
+    private closePending(): void {
+        if (this.debounceId) {
+            clearTimeout(this.debounceId);
+            this.debounceId = null;
+            if (this.pendingOptions) this.host.eventService.renderingFinished(this.pendingOptions);
+            this.pendingOptions = null;
+        }
+    }
+
+    private updateSync(options: VisualUpdateOptions): void {
 
         const viewMode = (options as any).viewMode;
         this.editing = typeof viewMode === "number" && viewMode !== 0;
@@ -168,6 +189,8 @@ export class Visual implements IVisual {
         this.container.style.setProperty("--wf-focus", pal?.isHighContrast ? (pal.foregroundSelected?.value || pal.foreground?.value || "#FFFF00") : "#005A9E");
 
         if (!options.dataViews?.[0]) {
+            // Un dibujo pendiente pintaría el gráfico anterior encima de la pantalla de inicio.
+            this.closePending();
             this.lastOptions = options;
             this.showLandingPage(options.viewport);
             this.renderBuildMarker();
@@ -184,8 +207,8 @@ export class Visual implements IVisual {
         const isData       = (type & VisualUpdateType.Data)   !== 0;
         const isResize     = (type & VisualUpdateType.Resize) !== 0;
         const isFormatting = (type & VisualUpdateType.Style)  !== 0;
-        // 64 = FormattingSubSelectionChange (const enum que no todas las versiones de la API exponen)
-        const isMode       = (type & VisualUpdateType.ViewMode) !== 0 || (type & 64) !== 0;
+        // 64 = FormattingSubSelectionChange, 128 = FormatModeChange (const enum que no todas las versiones exponen)
+        const isMode       = (type & VisualUpdateType.ViewMode) !== 0 || (type & (64 | 128)) !== 0;
 
         if (!isData && !isResize && !isFormatting && !isMode && this.lastOptions) {
             // Nada que repintar, pero el modo de formato y las subselecciones sí pueden haber cambiado.
@@ -198,13 +221,15 @@ export class Visual implements IVisual {
 
         this.lastOptions = options;
 
+        // R4: el cambio de plantilla se detecta aquí, en un update, y nunca en un repintado (callback de selección
+        // o licencia): persistProperties no debe salir de registerOnSelectCallback.
+        const objsU: any = options.dataViews[0].metadata?.objects ?? {};
+        const tplU = String(objsU?.style?.template ?? "classic");
+        if (this.editing && this.tplVisto !== null && this.tplVisto !== tplU) this.aplicarPlantilla(tplU);
+        this.tplVisto = tplU;
+
         // Si había un render pendiente por debounce, se da por terminado (no fallido: fue sustituido).
-        if (this.debounceId) {
-            clearTimeout(this.debounceId);
-            if (this.pendingOptions) {
-                this.host.eventService.renderingFinished(this.pendingOptions);
-            }
-        }
+        this.closePending();
 
         this.pendingOptions = options;
         this.debounceId = setTimeout(() => {
@@ -233,8 +258,6 @@ export class Visual implements IVisual {
         const objs: any = dataView.metadata?.objects ?? {};
         const tpl = String(objs?.style?.template ?? "classic");
         this.applyTemplateDefaults(tpl, objs);
-        if (this.editing && this.tplVisto !== null && this.tplVisto !== tpl) this.aplicarPlantilla(tpl);
-        this.tplVisto = tpl;
 
         if (settings.chartSettings.sortBars.value) rawBars = sortByImpact(rawBars);
 
@@ -517,8 +540,10 @@ export class Visual implements IVisual {
     private handleBarClick(data: ClickEventData): void {
         if (this.formatMode || !this.interactionsAllowed()) return;   // en modo formato el clic elige qué formatear
         const { index, selectionId, multiSelect } = data;
+        // La barra "Otros" agrupa varias filas: se seleccionan todas (lección de Calendar 13-10).
+        const ids = this.groupIds.get(index) ?? (selectionId ? [selectionId] : []);
 
-        if (selectionId) {
+        if (ids.length) {
             if (multiSelect) {
                 if (this.selectedIndices.has(index)) this.selectedIndices.delete(index);
                 else this.selectedIndices.add(index);
@@ -531,10 +556,8 @@ export class Visual implements IVisual {
 
             if (this.selectedIndices.size === 0) {
                 this.selectionManager.clear();
-            } else if (multiSelect) {
-                this.selectionManager.select(selectionId, true);
             } else {
-                this.selectionManager.select(selectionId, false);
+                this.selectionManager.select(ids, multiSelect);
             }
             if (this.lastOptions) this.draw(this.lastOptions);
         }
@@ -549,11 +572,10 @@ export class Visual implements IVisual {
     private indicesFromSelection(ids: powerbi.extensibility.ISelectionId[]): Set<number> {
         const out = new Set<number>();
         if (!ids?.length) return out;
+        const eq = (a: any, b: any) => (a?.equals ? a.equals(b) : a === b);
         this.selectionIds.forEach((sid, i) => {
-            if (!sid) return;
-            const match = ids.some(id =>
-                (sid as any).equals ? (sid as any).equals(id) : sid === id);
-            if (match) out.add(i);
+            const grupo = this.groupIds.get(i);
+            if (grupo ? grupo.some(g => ids.some(id => eq(g, id))) : (sid && ids.some(id => eq(sid, id)))) out.add(i);
         });
         return out;
     }
@@ -563,12 +585,19 @@ export class Visual implements IVisual {
     private buildSelectionIds(dataView: powerbi.DataView, bars: ComputedBar[]):
             (powerbi.visuals.ISelectionId | null)[] {
         const catCol = dataView.categorical?.categories?.find(c => c.source?.roles?.["category"]);
+        this.groupIds = new Map();
         if (!catCol) return bars.map((): powerbi.visuals.ISelectionId | null => null);
-        return bars.map((bar): powerbi.visuals.ISelectionId | null => {
+        const idOf = (i: number): powerbi.visuals.ISelectionId | null => {
+            try { return this.host.createSelectionIdBuilder().withCategory(catCol, i).createSelectionId(); } catch { return null; }
+        };
+        return bars.map((bar, k): powerbi.visuals.ISelectionId | null => {
+            if (bar.groupIndices?.length) {
+                const g = bar.groupIndices.map(idOf).filter(x => !!x);
+                if (g.length) this.groupIds.set(k, g);
+                return g[0] ?? null;
+            }
             if (bar.sourceIndex == null) return null;
-            try {
-                return this.host.createSelectionIdBuilder().withCategory(catCol, bar.sourceIndex).createSelectionId();
-            } catch { return null; }
+            return idOf(bar.sourceIndex);
         });
     }
 
@@ -794,6 +823,6 @@ export class Visual implements IVisual {
      */
     public destroy(): void {
         this.notifier?.dispose();
-        if (this.debounceId) clearTimeout(this.debounceId);
+        this.closePending();
     }
 }

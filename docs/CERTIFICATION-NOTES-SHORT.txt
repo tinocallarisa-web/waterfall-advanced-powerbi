@@ -17,9 +17,10 @@ before the licence resolves and where licences cannot be read (Publish to Web,
 embed, export): free result, no watermark.
 
 TESTING - FREE (no plan)
-1. Sample .pbix: Category, Value, Bar type, Target. Bridge with totals and subtotal.
-More than 12 drivers: smallest grouped in "Others", note says how many; Power BI
-licence notice, Upgrade bar ~10 s later.
+1. Sample .pbix: Category, Value, Bar type, Target. Bridge with totals and subtotal;
+click a bar and the table beside it filters. With more than 12 drivers the smallest
+are grouped in "Others" (a click selects all of them), a note says how many, Power BI
+shows its licence notice and the Upgrade bar ~10 s later.
 2. Edit mode: tips bar at the bottom. "Try Pro > Data table": table under watermark.
 Reading view: no table. Turn it off: notices clear.
 3. Format > Style template > Modern: colours change. Format mode: click a bar.

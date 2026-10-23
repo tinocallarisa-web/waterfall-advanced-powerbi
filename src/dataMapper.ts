@@ -15,6 +15,7 @@ export interface WaterfallBar {
     conditionalColor?: string;
     sourceIndex?:   number;   // índice original en el dataView; undefined = sin identidad propia (p.ej. barra "Otros")
     formatString?:  string;   // cadena de formato DINÁMICA de la fila (general.formatString), si el DAX la decide
+    groupIndices?:  number[]; // barra "Otros": índices de todas las filas que agrupa (para seleccionarlas todas)
 }
 
 /**
@@ -148,7 +149,8 @@ export function applyTopN(bars: WaterfallBar[], maxCategories: number, otherLabe
         sortOrder: Math.max(...dropped.map(b => b.sortOrder ?? 0)),
         isHighlighted: true,
         hasHighlight: false,
-        tooltipItems: [{ displayName: "Grouped items", value: String(dropped.length) }]
+        tooltipItems: [{ displayName: "Grouped items", value: String(dropped.length) }],
+        groupIndices: dropped.flatMap(b => b.groupIndices ?? (b.sourceIndex != null ? [b.sourceIndex] : []))
     };
 
     const keptMiddle = middle.filter(b => b.barType !== "delta" || kept.has(b));
