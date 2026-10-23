@@ -92,7 +92,7 @@ URL canónica `https://www.youtube.com/watch?v=<id>`. Vídeo de la 1.2:
 ## Imágenes
 
 - Logo 300×300: `assets/icon_300x300.png` (icono nuevo de la serie)
-- Capturas 1366×768 e infografía (fuente `docs/infographic.html`): regenerar con la 1.2.
+- Capturas: `assets/Screenshot_1.png`, `assets/Screeshot_2.png` (1.2, Tino 23-10) y `assets/waterfall-infographic.png` (fuente `docs/infographic.html`)
 
 ## URLs
 
