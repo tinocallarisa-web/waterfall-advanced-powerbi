@@ -360,6 +360,15 @@ async def main():
         ov = await pg.evaluate(OVERLAPS)
         check("mismo caso a 1000×560: sin scroll ni solapes", sc == [] and ov == [], str(sc) + str(ov[:4]))
         await pg.close()
+        for ang in ("-30", "-45", "-90"):
+            pg = await page(b, dv_tino({"style": {"template": "boardroom"}, "tableSettings": {"show": True},
+                                        "labelSettings": {"labelRotation": ang}}), W=940, H=700, name=f"09d_tino_rot{ang}")
+            cl = await pg.evaluate("""() => { const svg = document.querySelector('svg').getBoundingClientRect();
+                return Array.from(document.querySelectorAll('[data-o=catLabels]')).map(t => { const r = t.getBoundingClientRect();
+                  return { t: t.textContent, fuera: r.bottom > svg.bottom + 0.5 || r.left < svg.left - 0.5 }; }); }""")
+            check(f"rotadas {ang}°: 13 nombres enteros, sin '…'", len(cl) == 13 and not any(c["t"].endswith("…") for c in cl), str([c["t"] for c in cl][:5]))
+            check(f"rotadas {ang}°: ninguna etiqueta se sale del lienzo", not any(c["fuera"] for c in cl), str([c for c in cl if c["fuera"]][:3]))
+            await pg.close()
         pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=300, H=300)
         sb = await pg.evaluate("() => getComputedStyle(document.getElementById('host')).getPropertyValue('--wf-sb-thumb').trim()")
         check("Boardroom: barras de desplazamiento con el color del estilo (no blancas)", sb.upper().startswith("#") and sb.upper() != "#FFFFFF", sb)

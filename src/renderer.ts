@@ -466,7 +466,7 @@ export class WaterfallRenderer {
             if ((!(isLicensed && ls.hideOverlapping.value) || fitsWidth) && (rot !== 0 || i % catEvery === 0)) {
                 const anchor = rot ? "end" : "middle";
                 const cap = rot ? maxChars : (maxChars > 0 ? Math.min(maxChars, catChars - 1) : catChars - 1);
-                this.truncate(bar.label, Math.max(1, cap)).split(/\\n|\n/).forEach((line, li) => {
+                this.truncate(bar.label, rot ? cap : Math.max(1, cap)).split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
                         line, ls.categoryFontSize.value, catColor,
                         anchor, "400", rot).setAttribute("data-o", "catLabels");
