@@ -56,6 +56,9 @@ interface RenderOptions {
     onBarLeave:    () => void;
 }
 
+/** Columnas y fuente de la tabla de datos (1.3), decididas antes de dibujar para que quepa sin scroll. */
+interface TablePlan { fs: number; running: boolean; share: boolean; valueW: number; runningW: number; shareW: number; needW: number; }
+
 export class WaterfallRenderer {
 
     private svg!:        SVGSVGElement;
@@ -70,7 +73,8 @@ export class WaterfallRenderer {
     private legendBottom = 0;
     private tr: (key: string, fallback: string) => string = (_k, f) => f;
     private readonly CARD_H     = 76;
-    private readonly MIN_BAR_W  = 22;
+    /** 1.3: antes 22 px, que en un visual de 530 px con 13 barras ya sacaba scroll. Solo hay scroll por debajo de 8. */
+    private readonly MIN_BAR_W  = 8;
     private readonly MIN_BAR_H  = 20;
 
     constructor(container: HTMLElement, loc: ILocalizationManager) {
@@ -152,8 +156,15 @@ export class WaterfallRenderer {
         const tablePct  = showTable ? Math.min(60, Math.max(20, ts.widthPct.value)) / 100 : 0;
         const tableRight = showTable && ts.position.value.value === "right";
 
-        const chartW = tableRight ? Math.round(width * (1 - tablePct)) : width;
         const bodyH  = showCards ? height - this.CARD_H : height;
+        // 1.3: la tabla se planifica antes que el gráfico: columnas que caben (se quitan primero % apertura y Acumulado),
+        // fuente que cabe a lo alto, y a la derecha ocupa solo el ancho que necesita, hasta el % elegido. El gráfico se
+        // queda el resto (con el hueco de 8 px entre los dos): nada sale del visual ni saca scroll.
+        const tablePlan = showTable ? this.planTable(bars, summary, fmt, ts,
+            tableRight ? Math.round(width * tablePct) : width - 16,
+            tableRight ? bodyH : Math.round(bodyH * tablePct)) : null;
+        const tableW = tableRight && tablePlan ? Math.min(Math.round(width * tablePct), tablePlan.needW) : 0;
+        const chartW = tableRight ? width - tableW - 8 : width;
         const svgH   = showTable && !tableRight
             ? Math.round(bodyH * (1 - tablePct)) : bodyH;
 
@@ -206,8 +217,8 @@ export class WaterfallRenderer {
         }
 
         if (showTable) {
-            this.renderDataTable(body, bars, summary, fmt, ts, colors,
-                tableRight, tableRight ? Math.round(width * tablePct) : 0,
+            this.renderDataTable(body, bars, summary, fmt, ts, tablePlan, colors,
+                tableRight, tableRight ? tableW : 0,
                 tableRight ? bodyH : Math.round(bodyH * tablePct),
                 highContrast ? contrastForeground : ls.categoryLabelColor.value.value);
         }
@@ -253,8 +264,11 @@ export class WaterfallRenderer {
         const yScale = (v: number) =>
             this.PAD_TOP + chartH - ((v - minY) / yRange) * chartH;
 
+        // 1.3: todas las barras caben en el ancho disponible. El hueco se estrecha con la barra (15 % de cada paso, entre
+        // 2 y 10 px) y solo hay scroll si ni así caben barras de 8 px.
         const n   = bars.length;
-        const gap = Math.max(4, Math.min(10, chartW * 0.015));
+        const slot = chartW / n;
+        const gap = Math.max(2, Math.min(10, slot * 0.15));
         let barW  = (chartW - gap * (n - 1)) / n;
         let plotW = chartW;
         if (barW < this.MIN_BAR_W) {
@@ -265,10 +279,23 @@ export class WaterfallRenderer {
             this.svg.style.width = totalW + "px";
             this.svg.setAttribute("viewBox", `0 0 ${totalW} ${svgH}`);
         }
-        barW = Math.max(10, barW);
         const xOf = (i: number) => this.PAD_LEFT + i * (barW + gap);
+        const svgW = Math.max(width, this.PAD_LEFT + plotW + this.PAD_RIGHT);
         this.deferred = [];
         this.late = [];
+        this.queue = [];
+        this.boxes = [];
+        const maxAbs = Math.max(...bars.map(b => Math.abs(b.value)), 1);
+        // Zonas que las etiquetas no pueden ocupar: la franja de las categorías y la leyenda de arriba.
+        this.boxes.push({ x0: 0, y0: this.PAD_TOP + chartH + 1, x1: svgW, y1: svgH, bar: -3 });
+        if (this.PAD_TOP > 12) this.boxes.push({ x0: 0, y0: 0, x1: svgW, y1: this.PAD_TOP - 8, bar: -3 });
+
+        // Etiquetas de categoría que no caben en su paso (1.3, sin rotar): se recortan con "…" al ancho del paso y, si ni
+        // cuatro letras caben, se muestra una de cada k. El nombre completo sigue en la descripción emergente.
+        const catFsV = ls.categoryFontSize.value;
+        const charW = this.fz(catFsV) * 0.60;
+        const catEvery = rotDeg ? 1 : Math.max(1, Math.ceil(4.5 * charW / (barW + gap)));
+        const catChars = Math.floor((catEvery * (barW + gap) - 2) / charW);
 
         this.renderYAxis(yScale, minY, maxY, plotW, fmt, ls.categoryLabelColor.value.value);
         if (va.title) {
@@ -345,6 +372,7 @@ export class WaterfallRenderer {
                 }
             });
             this.svg.appendChild(rect);
+            this.boxes.push({ x0: x, y0: yTop, x1: x + barW, y1: yTop + bh, bar: i });
 
             if (ch.showAnomalies.value && summary.anomalies.find(a => a.label === bar.label)) {
                 const rA = Math.max(5, this.fz(7) * 0.72) + 2;
@@ -363,37 +391,67 @@ export class WaterfallRenderer {
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
 
+            const anchorBar = bar.barType === "total" || bar.barType === "subtotal";
+
             // El objetivo se dibuja DESPUÉS de todas las barras: si no, la barra siguiente lo tapa.
-            if (ch.showTarget.value && bar.target != null && bar.barType === "total") this.deferred.push(() => {
+            // 1.3: la línea siempre; su etiqueta busca un sitio que no pise barras ni otras etiquetas (encima, debajo, a
+            // un lado) y, si no lo hay, se abrevia a la cifra; si ni así cabe, se omite (la cifra sigue en la tabla y en
+            // la descripción emergente).
+            // La línea ocupa su sitio desde ya: ninguna etiqueta de valor puede quedar cruzada por ella.
+            if (ch.showTarget.value && bar.target != null && bar.barType === "total")
+                this.boxes.push({ x0: x - 4, y0: yScale(bar.target) - 1, x1: x + barW + 4, y1: yScale(bar.target) + 1, bar: -1 });
+            if (ch.showTarget.value && bar.target != null && bar.barType === "total") this.queue.push({ p: 1, f: () => {
                 const ty = yScale(bar.target);
                 this.line(x - 4, ty, x + barW + 4, ty, colors.target, 1.5, "5 3");
-
-                // "tgt" no lo entiende nadie fuera de quien programo esto, y el
-                // objetivo sin su cifra no dice si se cumple ni por cuanto.
-                const tLabel = (ch.targetLabel.value || "Target") +
-                    (ch.targetShowValue.value ? " " + fmt.format(bar.target) : "");
-                // Encima de la línea y centrada en su barra (a la derecha se montaba sobre la barra vecina). Sin salirse
-                // del lienzo por los lados.
-                const tW = this.textWidth(tLabel, 9);
-                const cx = Math.min(Math.max(x + barW / 2, this.PAD_LEFT + tW / 2), width - this.PAD_RIGHT - tW / 2);
-                this.halo(this.text(cx, ty - 4, tLabel, 9, colors.target, "middle", "600"), colors.target);
-            });
-
-            // Las etiquetas de valor van al final, por encima de la línea del objetivo, con halo.
-            if (ls.showLabels.value) this.late.push(() => {
-                const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
-                let labelColor = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
-                let ly = yTop - 5;
-                const fsL = ls.fontSize.value;
-                if (ch.showTarget.value && bar.target != null && bar.barType === "total" &&
-                    Math.abs(yScale(bar.target) - yTop) < fsL + 12 && bh > fsL + 8) {
-                    ly = yTop + fsL + 3;
-                    labelColor = highContrast ? (this.hcBg || "#FFFFFF") : "#FFFFFF";
+                const full = (ch.targetLabel.value || "Target") + (ch.targetShowValue.value ? " " + fmt.format(bar.target) : "");
+                const short = ch.targetShowValue.value ? fmt.format(bar.target) : "";
+                const th = this.fz(9);
+                for (const tLabel of [full, short].filter(t => !!t)) {
+                    const tW = this.textWidth(tLabel, 9) * 0.92;
+                    const cxc = Math.min(Math.max(x + barW / 2, tW / 2 + 2), svgW - tW / 2 - 2);
+                    const cands: [number, number][] = [[cxc, ty - 4], [cxc, ty + th + 2], [x + barW + 6 + tW / 2, ty + th / 2 - 1], [x - 6 - tW / 2, ty + th / 2 - 1]];
+                    const ok = cands.find(([cx, by]) => this.isFree(this.boxAt(cx, by, tW, th), -2, svgW, svgH));
+                    if (ok) {
+                        this.boxes.push({ ...this.boxAt(ok[0], ok[1], tW, th), bar: -1 });
+                        const tt = this.text(ok[0], ok[1], tLabel, 9, colors.target, "middle", "600");
+                        tt.setAttribute("data-o", "targetLabel");
+                        this.halo(tt, colors.target);
+                        break;
+                    }
                 }
-                const lt = this.text(x + barW / 2, ly, label, fsL, labelColor, "middle", "500");
+            } });
+
+            // Etiquetas de valor (1.3): primero las de totales y subtotales, luego las de los cambios de mayor a menor. Cada
+            // una prueba encima de la barra, dentro (si cabe) y debajo; si choca con una barra u otra etiqueta en los tres
+            // sitios, se omite en vez de montarse ("+97.0k−143.0k"). La cifra sigue en la descripción emergente.
+            if (ls.showLabels.value) this.queue.push({ p: anchorBar ? 0 : 2 + (1 - Math.abs(bar.value) / maxAbs), f: () => {
+                const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
+                const fsL = ls.fontSize.value;
+                // Para chocar se usa un ancho más ajustado (0,55 em) que el de reservar márgenes (0,60 em).
+                const tw = this.textWidth(label, fsL) * 0.92, th = this.fz(fsL);
+                const color = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
+                const inside = highContrast ? (this.hcBg || "#FFFFFF") : (this.luminance(baseFill) > 0.55 ? "#1B1B1B" : "#FFFFFF");
+                const nearTarget = ch.showTarget.value && bar.target != null && bar.barType === "total" &&
+                    Math.abs(yScale(bar.target) - yTop) < fsL + 12;
+                const fitsInside = bh > th + 8 && tw <= barW + 2;
+                // Encima: centrada, o alineada con el borde derecho o izquierdo de su barra si la centrada choca.
+                const mid = x + barW / 2, xs = [mid, x + barW - tw / 2, x + tw / 2];
+                const cands: [number, number, string, boolean][] = [];
+                const above = () => xs.forEach(cx => cands.push([cx, yTop - 5, color, true]));
+                if (!nearTarget) above();
+                if (fitsInside) cands.push([mid, yTop + th + 3, inside, false]);
+                if (nearTarget) above();
+                if (bar.barType === "delta" && bar.value < 0) xs.forEach(cx => cands.push([cx, yTop + bh + th + 2, color, true]));
+                const ok = cands.find(([cx, by, , out]) => {
+                    const bx = this.boxAt(cx, by, tw, th);
+                    return this.isFree(bx, out ? -2 : i, svgW, svgH) && (out || bx.y1 <= yTop + bh);
+                });
+                if (!ok) return;
+                this.boxes.push({ ...this.boxAt(ok[0], ok[1], tw, th), bar: -1 });
+                const lt = this.text(ok[0], ok[1], label, fsL, ok[2], "middle", "500");
                 lt.setAttribute("data-o", "labels");
-                if (ly < yTop) this.halo(lt, labelColor);   // dentro de la barra no hace falta halo
-            });
+                if (ok[3]) this.halo(lt, ok[2]);   // dentro de la barra no hace falta halo
+            } });
 
             // Color de la etiqueta de eje: el de la barra cuando es un anclaje.
             // En alto contraste no se toca, que ahi manda el tema del sistema.
@@ -405,17 +463,17 @@ export class WaterfallRenderer {
             // Rotada, la etiqueta ya no compite por el ancho de la barra.
             const fitsWidth = rot !== 0 ||
                 this.textWidth(bar.label, ls.categoryFontSize.value) <= barW + gap;
-            if (!(isLicensed && ls.hideOverlapping.value) || fitsWidth) {
+            if ((!(isLicensed && ls.hideOverlapping.value) || fitsWidth) && (rot !== 0 || i % catEvery === 0)) {
                 const anchor = rot ? "end" : "middle";
-                this.truncate(bar.label, maxChars).split(/\\n|\n/).forEach((line, li) => {
+                const cap = rot ? maxChars : (maxChars > 0 ? Math.min(maxChars, catChars - 1) : catChars - 1);
+                this.truncate(bar.label, Math.max(1, cap)).split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
                         line, ls.categoryFontSize.value, catColor,
                         anchor, "400", rot).setAttribute("data-o", "catLabels");
                 });
             }
         });
-        this.deferred.forEach(f => f());
-        this.late.forEach(f => f());
+        this.queue.sort((a, b) => a.p - b.p).forEach(q => q.f());
     }
 
     private renderHorizontal(bars: ComputedBar[], summary: WaterfallSummary, ch: VisualFormattingSettingsModel["chartSettings"],
@@ -614,7 +672,12 @@ export class WaterfallRenderer {
         ticks.forEach((v, i) => {
             const y = yScale(v);
             if (va.gridlines) this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, this.ink.grid, 0.5);
-            if (va.show) this.text(this.PAD_LEFT - 5, y + 3, labels[i], va.fontSize, va.color, "end").setAttribute("data-o", "axis");
+            if (va.show) {
+                this.text(this.PAD_LEFT - 5, y + 3, labels[i], va.fontSize, va.color, "end").setAttribute("data-o", "axis");
+                // Obstáculo para las etiquetas del gráfico (1.3): no se montan sobre las marcas del eje.
+                const w = this.textWidth(labels[i], va.fontSize), h = this.fz(va.fontSize);
+                this.boxes.push({ x0: this.PAD_LEFT - 5 - w, y0: y + 3 - h * 0.85, x1: this.PAD_LEFT - 3, y1: y + 3 + h * 0.2, bar: -3 });
+            }
         });
     }
 
@@ -668,10 +731,11 @@ export class WaterfallRenderer {
     private renderDataTable(
             parent: HTMLElement, bars: ComputedBar[], summary: WaterfallSummary,
             fmt: NumberFormatter, ts: VisualFormattingSettingsModel["tableSettings"],
-            colors: Record<string, string>, toTheRight: boolean,
+            plan: TablePlan, colors: Record<string, string>, toTheRight: boolean,
             w: number, h: number, textColor: string): void {
 
-        const fs = this.fz(ts.fontSize.value);
+        const fs = plan.fs;
+        const showRunning = plan.running, showShare = plan.share;
 
         // Fondo propio para que la tabla se lea como un bloque aparte y no
         // flotando sobre el grafico. En automatico va un tinte neutro que
@@ -689,13 +753,21 @@ export class WaterfallRenderer {
         wrap.className = "wf-data-table";
         wrap.setAttribute("data-o", "table");
         wrap.style.cssText = (toTheRight
-            ? `flex:1 1 auto;width:${w}px;height:${h}px;overflow:auto;box-sizing:border-box;padding:4px 8px;`
+            ? `flex:0 0 auto;width:${w}px;height:${h}px;overflow:auto;box-sizing:border-box;padding:4px 8px;`
             : `width:100%;height:${h}px;overflow:auto;box-sizing:border-box;padding:6px 8px 4px;`)
             + `background:${bg};border-radius:6px;${border}`;
 
         const table = document.createElement("table");
         table.style.cssText =
-            `border-collapse:collapse;width:100%;font-size:${fs}px;font-family:${this.font};color:${textColor}`;
+            `border-collapse:collapse;width:100%;table-layout:fixed;font-size:${fs}px;font-family:${this.font};color:${textColor}`;
+        // Anchos fijos: los números, lo que miden; el nombre, el resto (con "…" si no cabe).
+        const cg = document.createElement("colgroup");
+        [0, plan.valueW].concat(showRunning ? [plan.runningW] : [], showShare ? [plan.shareW] : []).forEach((cw, i) => {
+            const c = document.createElement("col");
+            if (i) c.style.width = cw + "px";
+            cg.appendChild(c);
+        });
+        table.appendChild(cg);
 
         const num = (el: HTMLElement) => {
             el.style.textAlign = "right";
@@ -705,8 +777,8 @@ export class WaterfallRenderer {
 
         const head = document.createElement("tr");
         const cols = [""].concat([this.tr("UI_Value", "Value")],
-            ts.showRunning.value ? [this.tr("UI_Running", "Running")] : [],
-            ts.showShare.value ? [this.tr("UI_PctOpen", "% open")] : []);
+            showRunning ? [this.tr("UI_Running", "Running")] : [],
+            showShare ? [this.tr("UI_PctOpen", "% open")] : []);
         cols.forEach((label, i) => {
             const th = document.createElement("th");
             th.textContent = label;
@@ -729,7 +801,7 @@ export class WaterfallRenderer {
             name.textContent = bar.label.split(/\\n|\n/).join(" ");
             name.style.cssText =
                 `padding:2px 0;${anchor ? "font-weight:600;" : ""}` +
-                `max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
+                `overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
             name.title = bar.label;          // el nombre completo, al pasar el raton
             tr.appendChild(name);
 
@@ -743,13 +815,13 @@ export class WaterfallRenderer {
             else val.style.color = bar.value >= 0 ? colors.pos : colors.neg;
             tr.appendChild(val);
 
-            if (ts.showRunning.value) {
+            if (showRunning) {
                 const run = document.createElement("td");
                 run.textContent = fmt.format(bar.running);
                 num(run); run.style.padding = "2px 0"; run.style.opacity = ".8";
                 tr.appendChild(run);
             }
-            if (ts.showShare.value) {
+            if (showShare) {
                 const sh = document.createElement("td");
                 sh.textContent = opening ? (bar.value / opening * 100).toFixed(1) + "%" : "—";
                 num(sh); sh.style.padding = "2px 0"; sh.style.opacity = ".8";
@@ -762,6 +834,42 @@ export class WaterfallRenderer {
 
         wrap.appendChild(table);
         parent.appendChild(wrap);
+    }
+
+    /**
+     * Plan de la tabla (1.3): qué columnas caben y con qué fuente, sin scroll. Orden: todas a la fuente elegida; sin
+     * % apertura; sin Acumulado; y luego se baja la fuente (hasta el mínimo de Accesibilidad, nunca por debajo de 8)
+     * hasta que quepa a lo ancho y a lo alto. Si ni así cabe, la última opción (y la tabla hará scroll).
+     */
+    private planTable(bars: ComputedBar[], summary: WaterfallSummary, fmt: NumberFormatter,
+                      ts: VisualFormattingSettingsModel["tableSettings"], availW: number, availH: number): TablePlan {
+        const opening = summary.initialValue || 0;
+        const colW = (head: string, vals: string[], fs: number) =>
+            Math.ceil(Math.max(this.textWidth(head, fs), ...vals.map(v => this.textWidth(v, fs)))) + 10;
+        const names = bars.map(b => b.label.split(/\\n|\n/).join(" "));
+        const vVals = bars.map(b => fmt.format(b.value)), rVals = bars.map(b => fmt.format(b.running));
+        const sVals = bars.map(b => opening ? (b.value / opening * 100).toFixed(1) + "%" : "—");
+        const opciones: [boolean, boolean][] = [[!!ts.showRunning.value, !!ts.showShare.value], [!!ts.showRunning.value, false], [false, false]];
+        const fs0 = this.fz(ts.fontSize.value), fsMin = Math.min(fs0, Math.max(8, this.minText));
+        let last: TablePlan | null = null;
+        for (let fs = fs0; fs >= fsMin; fs--) {
+            const seen = new Set<string>();
+            for (const [running, share] of opciones) {
+                const key = running + "|" + share;
+                if (seen.has(key)) continue;
+                seen.add(key);
+                const valueW = colW(this.tr("UI_Value", "Value"), vVals, fs);
+                const runningW = running ? colW(this.tr("UI_Running", "Running"), rVals, fs) : 0;
+                const shareW = share ? colW(this.tr("UI_PctOpen", "% open"), sVals, fs) : 0;
+                const nameMin = Math.min(Math.max(...names.map(n => this.textWidth(n, fs))), fs * 7);
+                const nameFull = Math.min(Math.max(...names.map(n => this.textWidth(n, fs))), fs * 14);
+                const nums = valueW + runningW + shareW + 18;   // + relleno del contenedor
+                const rowsH = (bars.length + 1) * Math.ceil(fs * 1.35 + 5) + 12;
+                last = { fs, running, share, valueW, runningW, shareW, needW: Math.ceil(nums + nameFull) };
+                if (nums + nameMin <= availW && rowsH <= availH) return last;
+            }
+        }
+        return last;
     }
 
     private renderVarianceCards(summary: WaterfallSummary, colors: Record<string, string>,
@@ -886,6 +994,29 @@ export class WaterfallRenderer {
     }
 
     private el(tag: string): Element { return document.createElementNS(SVG_NS, tag); }
+
+    /** 1.3 (vertical): etiquetas por orden de prioridad y cajas ocupadas (barras y etiquetas ya puestas). */
+    private queue: { p: number; f: () => void }[] = [];
+    private boxes: { x0: number; y0: number; x1: number; y1: number; bar: number }[] = [];
+
+    /** Caja de un texto centrado en cx con la línea base en by. */
+    private boxAt(cx: number, by: number, w: number, h: number): { x0: number; y0: number; x1: number; y1: number } {
+        return { x0: cx - w / 2, y0: by - h * 0.85, x1: cx + w / 2, y1: by + h * 0.2 };
+    }
+
+    /** ¿La caja cabe en el lienzo sin tocar ninguna ocupada? ownBar: la barra que se puede pisar (dentro de ella). */
+    private isFree(b: { x0: number; y0: number; x1: number; y1: number }, ownBar: number, w: number, h: number): boolean {
+        if (b.x0 < 0 || b.x1 > w || b.y0 < 0 || b.y1 > h) return false;
+        return !this.boxes.some(o => o.bar !== ownBar && b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+    }
+
+    /** Luminancia aproximada de un color #RRGGBB (0 negro … 1 blanco); otro formato cuenta como oscuro. */
+    private luminance(c: string): number {
+        const m = /^#?([0-9a-f]{6})$/i.exec(String(c || "").trim());
+        if (!m) return 0;
+        const n = parseInt(m[1], 16);
+        return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    }
 
     /** Lo que se dibuja encima de todas las barras (objetivo). */
     private deferred: (() => void)[] = [];

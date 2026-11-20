@@ -344,6 +344,9 @@ export class Visual implements IVisual {
         const hc = this.hc();
         const tk: StyleTokens | null = !hc.on ? STYLE_TOKENS[tpl] ?? null : null;
         this.container.style.background = tk ? (tk.grad || tk.bg) : (hc.on && !hc.sys ? hc.bg : "");
+        // Barras de desplazamiento (si quedara alguna): finas y del estilo; en alto contraste, del tema.
+        this.container.style.setProperty("--wf-sb-thumb", hc.on ? hc.fg : tk ? mixHex(tk.bg, tk.axis, 0.55) : "rgba(128,128,128,0.45)");
+        this.container.style.setProperty("--wf-sb-track", hc.on ? hc.bg : tk ? (tk.dark ? tk.bg : "transparent") : "transparent");
         const acc = settings.accessibility;
 
         const cats = dataView.categorical?.categories ?? [];

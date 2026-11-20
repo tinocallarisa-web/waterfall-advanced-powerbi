@@ -52,6 +52,39 @@ PYG = [("Revenue", 5000.0), ("Product cost", -2600.0), ("Logistics", -140.0), ("
 NEGATIVO = [("Opening", 100.0), ("Write-off", -300.0), ("Recovery", 50.0), ("Closing", 0.0)]
 
 
+# Caso de Tino en Desktop (20-11-2026): 13 categorías con subtotal y dos objetivos, en importes reales.
+TINO = [("Ventas 2023", 1350000.0, "total", 1300000.0), ("Precio", 97000.0, "delta", None), ("Volumen", -143000.0, "delta", None),
+        ("Mix", 62000.0, "delta", None), ("Promociones", -54000.0, "delta", None), ("Nuevos clientes", 210000.0, "delta", None),
+        ("Subtotal Comercial", 0.0, "subtotal", None), ("Logística", -38000.0, "delta", None), ("Canal online", 88000.0, "delta", None),
+        ("Devoluciones", -21000.0, "delta", None), ("Divisa", -17000.0, "delta", None), ("Otros", 9000.0, "delta", None),
+        ("Ventas 2024", 0.0, "total", 1500000.0)]
+
+
+def dv_tino(objects=None):
+    cat = {"source": {"displayName": "Concepto", "queryName": "P.Concepto", "roles": {"category": True}}, "values": [r[0] for r in TINO]}
+    val = {"source": {"displayName": "Importe", "queryName": "Sum(P.Importe)", "roles": {"measure": True}, "isMeasure": True, "format": "#,0"}, "values": [r[1] for r in TINO]}
+    typ = {"source": {"displayName": "Tipo", "queryName": "Min(P.Tipo)", "roles": {"barType": True}}, "values": [r[2] for r in TINO]}
+    tgt = {"source": {"displayName": "Objetivo", "queryName": "Sum(P.Objetivo)", "roles": {"target": True}, "isMeasure": True}, "values": [r[3] for r in TINO]}
+    return {"metadata": {"columns": [cat["source"], val["source"], typ["source"], tgt["source"]], "objects": objects or {}},
+            "categorical": {"categories": [cat], "values": [val, typ, tgt]}}
+
+
+SCROLLS = """() => { const o = []; document.querySelectorAll('#host *').forEach(e => { const cs = getComputedStyle(e);
+    if (['auto', 'scroll'].includes(cs.overflowX) && e.scrollWidth > e.clientWidth + 1) o.push('x ' + (e.className || e.tagName) + ' ' + e.scrollWidth + '>' + e.clientWidth);
+    if (['auto', 'scroll'].includes(cs.overflowY) && e.scrollHeight > e.clientHeight + 1) o.push('y ' + (e.className || e.tagName) + ' ' + e.scrollHeight + '>' + e.clientHeight); });
+    return o; }"""
+# Cajas reales (getBoundingClientRect) de etiquetas de valor, de objetivo y de categoría; pares que se cortan.
+OVERLAPS = """() => { const sel = 'svg text[data-o="labels"], svg text[data-o="targetLabel"], svg text[data-o="catLabels"]';
+    const t = Array.from(document.querySelectorAll(sel)).filter(x => x.textContent).map(x => ({ s: x.textContent, o: x.getAttribute('data-o'), r: x.getBoundingClientRect() }));
+    const bars = Array.from(document.querySelectorAll('rect[data-bar-index]')).map(x => ({ s: 'bar' + x.getAttribute('data-bar-index'), r: x.getBoundingClientRect() }));
+    const cut = (a, b, m) => a.left + m < b.right && a.right - m > b.left && a.top + m < b.bottom && a.bottom - m > b.top;
+    const out = [];
+    for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) if (cut(t[i].r, t[j].r, 0.5)) out.push(t[i].s + ' / ' + t[j].s);
+    // Etiquetas de objetivo y las de valor que van fuera de su barra no pueden pisar barras.
+    t.filter(x => x.o === 'targetLabel').forEach(x => bars.forEach(b => { if (cut(x.r, b.r, 0.5)) out.push(x.s + ' sobre ' + b.s); }));
+    return out; }"""
+
+
 def dv(rows, objects=None, fx=None):
     cat = {"source": {"displayName": "Line", "queryName": "P.Line", "roles": {"category": True}}, "values": [r[0] for r in rows]}
     if fx:
@@ -298,6 +331,39 @@ async def main():
             st = await pg.evaluate("() => { const w = document.querySelector('.tcviz-wm'); return w ? w.style.display : 'none'; }")
             check("editando sin nada Pro encendido: sin marca", st == "none", st)
             await pg.close()
+
+        print("Caso de Tino: 530×500, Pro con tabla, 13 categorías, subtotal y dos objetivos, Boardroom")
+        for nombre, extra in (("09_tino_530", {}), ("09b_tino_530_aurora", {"style": {"template": "aurora"}})):
+            o = {"style": {"template": "boardroom"}, "tableSettings": {"show": True}}
+            o.update(extra)
+            pg = await page(b, dv_tino(o), W=530, H=500, name=nombre)
+            sc = await pg.evaluate(SCROLLS)
+            check(f"{nombre}: sin barras de desplazamiento", sc == [], str(sc))
+            ov = await pg.evaluate(OVERLAPS)
+            check(f"{nombre}: sin etiquetas solapadas ni objetivos sobre barras", ov == [], str(ov[:6]))
+            st = await pg.evaluate("""() => { const w = document.querySelector('.wf-data-table'); const host = document.getElementById('host').getBoundingClientRect();
+                if (!w) return null; const r = w.getBoundingClientRect();
+                const tds = Array.from(w.querySelectorAll('td, th'));
+                const cortadas = tds.filter((c, i) => i % 1 === 0 && c.textContent && c.cellIndex > 0 && c.scrollWidth > c.clientWidth + 1).map(c => c.textContent);
+                const nombres = Array.from(w.querySelectorAll('tr td:first-child')).map(c => c.clientWidth);
+                const svgs = Array.from(document.querySelectorAll('svg')).map(s => s.getBoundingClientRect().right);
+                return { dentro: r.right <= host.right + 0.5 && r.bottom <= host.bottom + 0.5, cortadas, nombreMin: Math.min(...nombres), filas: w.querySelectorAll('tr').length,
+                         solapeGrafico: Math.max(...svgs) > r.left + 0.5 }; }""")
+            check(f"{nombre}: la tabla entra en el visual, con sus 13 filas", bool(st) and st["dentro"] and st["filas"] == 14, str(st))
+            check(f"{nombre}: ninguna cifra de la tabla cortada y nombres visibles (≥ 40 px)", bool(st) and not st["cortadas"] and st["nombreMin"] >= 40, str(st))
+            check(f"{nombre}: el gráfico no se mete bajo la tabla", bool(st) and not st["solapeGrafico"], str(st))
+            n = await pg.evaluate("() => document.querySelectorAll('rect[data-bar-index]').length")
+            check(f"{nombre}: las 13 barras dibujadas", n == 13, str(n))
+            await pg.close()
+        pg = await page(b, dv_tino({"style": {"template": "boardroom"}, "tableSettings": {"show": True}}), W=1000, H=560, name="09c_tino_1000")
+        sc = await pg.evaluate(SCROLLS)
+        ov = await pg.evaluate(OVERLAPS)
+        check("mismo caso a 1000×560: sin scroll ni solapes", sc == [] and ov == [], str(sc) + str(ov[:4]))
+        await pg.close()
+        pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=300, H=300)
+        sb = await pg.evaluate("() => getComputedStyle(document.getElementById('host')).getPropertyValue('--wf-sb-thumb').trim()")
+        check("Boardroom: barras de desplazamiento con el color del estilo (no blancas)", sb.upper().startswith("#") and sb.upper() != "#FFFFFF", sb)
+        await pg.close()
 
         print("Pantalla de inicio")
         pg = await page(b, None, name="07_inicio")

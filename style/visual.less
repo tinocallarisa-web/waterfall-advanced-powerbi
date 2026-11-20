@@ -2,6 +2,16 @@
 // 1.3: marca de agua "Pro preview" común a la cartera (copia de utillaje/comun, no se edita aquí).
 @import (less) "comun/watermark.less";
 
+// 1.3: si queda algún scroll, barras finas con los colores del estilo (--wf-sb-*, las pone visual.ts), nunca blancas.
+.wf, .wf * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--wf-sb-thumb, rgba(128, 128, 128, 0.45)) var(--wf-sb-track, transparent);
+}
+.wf ::-webkit-scrollbar { width: 6px; height: 6px; }
+.wf ::-webkit-scrollbar-track { background: var(--wf-sb-track, transparent); }
+.wf ::-webkit-scrollbar-thumb { background: var(--wf-sb-thumb, rgba(128, 128, 128, 0.45)); border-radius: 3px; }
+.wf ::-webkit-scrollbar-corner { background: transparent; }
+
 .wf {
     font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
 
