@@ -97,6 +97,9 @@ export class WaterfallRenderer {
         this.hcFg = highContrast ? contrastForeground : "";
         this.hcBg = highContrast ? opts.contrastBackground : "";
         this.minText = Math.min(24, Math.max(6, Number(opts.minTextSize) || 6));
+        // 1.3: en un visual pequeño el texto del gráfico encoge con él, como ya hacía la tabla (60 % como mínimo y nunca
+        // por debajo de 8 px ni del tamaño mínimo de Accesibilidad). A partir de unos 760×440 se usa el tamaño elegido.
+        this.scale = Math.min(1, Math.max(0.6, Math.min(opts.width / 760, opts.height / 440)));
         this.font = opts.fontFamily || "Segoe UI, sans-serif";
         this.ink = opts.ink;
         this.focus = { color: highContrast ? contrastForeground : opts.focusColor, width: opts.focusWidth };
@@ -294,7 +297,15 @@ export class WaterfallRenderer {
         // cuatro letras caben, se muestra una de cada k. El nombre completo sigue en la descripción emergente.
         const catFsV = ls.categoryFontSize.value;
         const charW = this.fz(catFsV) * 0.60;
-        const catEvery = rotDeg ? 1 : Math.max(1, Math.ceil(4.5 * charW / (barW + gap)));
+        // Rotadas: la distancia entre dos etiquetas vecinas es el paso por el seno del ángulo; si es menor que una línea
+        // de texto se pisan, y se muestra una de cada k. Y se recortan a lo que cabe en el margen inferior.
+        const sinR = Math.abs(Math.sin(rotDeg * Math.PI / 180));
+        const catEvery = rotDeg
+            ? Math.max(1, Math.ceil(this.fz(catFsV) * 1.15 / ((barW + gap) * sinR)))
+            : Math.max(1, Math.ceil(4.5 * charW / (barW + gap)));
+        const rotFit = rotDeg
+            ? Math.max(3, Math.floor((PAD_BOTTOM - this.legendBottom - (catTitle ? 16 : 0) - 14) / sinR / charW))
+            : 0;
         const catChars = Math.floor((catEvery * (barW + gap) - 2) / charW);
 
         this.renderYAxis(yScale, minY, maxY, plotW, fmt, ls.categoryLabelColor.value.value);
@@ -428,7 +439,7 @@ export class WaterfallRenderer {
                 const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
                 const fsL = ls.fontSize.value;
                 // Para chocar se usa un ancho más ajustado (0,55 em) que el de reservar márgenes (0,60 em).
-                const tw = this.textWidth(label, fsL) * 0.92, th = this.fz(fsL);
+                const tw = this.measure(label, fsL, "500") + 2, th = this.fz(fsL);
                 const color = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
                 const inside = highContrast ? (this.hcBg || "#FFFFFF") : (this.luminance(baseFill) > 0.55 ? "#1B1B1B" : "#FFFFFF");
                 const nearTarget = ch.showTarget.value && bar.target != null && bar.barType === "total" &&
@@ -463,9 +474,9 @@ export class WaterfallRenderer {
             // Rotada, la etiqueta ya no compite por el ancho de la barra.
             const fitsWidth = rot !== 0 ||
                 this.textWidth(bar.label, ls.categoryFontSize.value) <= barW + gap;
-            if ((!(isLicensed && ls.hideOverlapping.value) || fitsWidth) && (rot !== 0 || i % catEvery === 0)) {
+            if ((!(isLicensed && ls.hideOverlapping.value) || fitsWidth) && i % catEvery === 0) {
                 const anchor = rot ? "end" : "middle";
-                const cap = rot ? maxChars : (maxChars > 0 ? Math.min(maxChars, catChars - 1) : catChars - 1);
+                const cap = rot ? (maxChars > 0 ? Math.min(maxChars, rotFit) : rotFit) : (maxChars > 0 ? Math.min(maxChars, catChars - 1) : catChars - 1);
                 this.truncate(bar.label, rot ? cap : Math.max(1, cap)).split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
                         line, ls.categoryFontSize.value, catColor,
@@ -1001,7 +1012,7 @@ export class WaterfallRenderer {
 
     /** Caja de un texto centrado en cx con la línea base en by. */
     private boxAt(cx: number, by: number, w: number, h: number): { x0: number; y0: number; x1: number; y1: number } {
-        return { x0: cx - w / 2, y0: by - h * 0.85, x1: cx + w / 2, y1: by + h * 0.2 };
+        return { x0: cx - w / 2, y0: by - h * 1.0, x1: cx + w / 2, y1: by + h * 0.35 };   // la caja que ocupa el texto en pantalla (~1,35 em)
     }
 
     /** ¿La caja cabe en el lienzo sin tocar ninguna ocupada? ownBar: la barra que se puede pisar (dentro de ella). */
@@ -1033,7 +1044,11 @@ export class WaterfallRenderer {
     private focus = { color: "#005A9E", width: 2 };
 
     /** Tamaño de texto con el mínimo de la tarjeta Accesibilidad (1.3). */
-    private fz(px: number): number { return Math.max(this.minText, Number(px) || this.minText); }
+    private scale = 1;
+    private fz(px: number): number {
+        const v = Number(px) || this.minText;
+        return Math.max(this.minText, Math.min(v, Math.max(8, Math.round(v * this.scale * 2) / 2)));
+    }
 
     /** Foco de teclado en una barra: color y grosor de la tarjeta Accesibilidad (1.3). */
     private focusRing(rect: SVGRectElement): void {
@@ -1081,6 +1096,15 @@ export class WaterfallRenderer {
      * reflow por etiqueta, y con veinte barras eso se nota. 0.55em por caracter
      * es una aproximacion conservadora para Segoe UI.
      */
+    /** Ancho real del texto en el lienzo (para colocar etiquetas sin solapes); si el navegador no lo da, la estimación. */
+    private measure(label: string, fs: number, weight = "400"): number {
+        const t = this.text(-9999, -9999, label, fs, "#000", "start", weight);
+        let w = 0;
+        try { w = t.getComputedTextLength(); } catch { w = 0; }
+        t.remove();
+        return w > 0 ? w : this.textWidth(label, fs) * 0.92;
+    }
+
     private textWidth(label: string, fs: number): number {
         // 0.60em por caracter. Segoe UI ronda 0.55 de media, pero la media no
         // sirve aqui: basta con que una etiqueta la pase para que toque el borde.

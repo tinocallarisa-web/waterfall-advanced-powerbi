@@ -75,12 +75,13 @@ SCROLLS = """() => { const o = []; document.querySelectorAll('#host *').forEach(
     return o; }"""
 # Cajas reales (getBoundingClientRect) de etiquetas de valor, de objetivo y de categoría; pares que se cortan.
 OVERLAPS = """() => { const sel = 'svg text[data-o="labels"], svg text[data-o="targetLabel"], svg text[data-o="catLabels"]';
-    const t = Array.from(document.querySelectorAll(sel)).filter(x => x.textContent).map(x => ({ s: x.textContent, o: x.getAttribute('data-o'), r: x.getBoundingClientRect() }));
+    const t = Array.from(document.querySelectorAll(sel)).filter(x => x.textContent).map(x => ({ s: x.textContent, o: x.getAttribute('data-o'), rot: !!x.getAttribute('transform'), r: x.getBoundingClientRect() }));
     const bars = Array.from(document.querySelectorAll('rect[data-bar-index]')).map(x => ({ s: 'bar' + x.getAttribute('data-bar-index'), r: x.getBoundingClientRect() }));
     const cut = (a, b, m) => a.left + m < b.right && a.right - m > b.left && a.top + m < b.bottom && a.bottom - m > b.top;
     const out = [];
-    for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) if (cut(t[i].r, t[j].r, 0.5)) out.push(t[i].s + ' / ' + t[j].s);
-    // Etiquetas de objetivo y las de valor que van fuera de su barra no pueden pisar barras.
+    for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) if (!(t[i].o === 'catLabels' && t[j].o === 'catLabels' && t[i].rot) && cut(t[i].r, t[j].r, 0.5)) out.push(t[i].s + ' / ' + t[j].s);
+    // Dos nombres de categoría rotados (caja alta) no se comparan por su rectángulo: se cruzan aunque las letras no; eso
+    // lo cubre la regla de una de cada k. Etiquetas de objetivo y las de valor que van fuera de su barra no pueden pisar barras.
     t.filter(x => x.o === 'targetLabel').forEach(x => bars.forEach(b => { if (cut(x.r, b.r, 0.5)) out.push(x.s + ' sobre ' + b.s); }));
     return out; }"""
 
@@ -369,6 +370,20 @@ async def main():
             check(f"rotadas {ang}°: 13 nombres enteros, sin '…'", len(cl) == 13 and not any(c["t"].endswith("…") for c in cl), str([c["t"] for c in cl][:5]))
             check(f"rotadas {ang}°: ninguna etiqueta se sale del lienzo", not any(c["fuera"] for c in cl), str([c for c in cl if c["fuera"]][:3]))
             await pg.close()
+        pg = await page(b, dv_tino({"style": {"template": "boardroom"}, "tableSettings": {"show": True},
+                                    "labelSettings": {"labelRotation": "-30"}}), W=470, H=380, name="09e_tino_470_rot")
+        r = await pg.evaluate("""() => { const svg = document.querySelector('svg'); const sb = svg.getBoundingClientRect();
+            const cats = Array.from(svg.querySelectorAll('[data-o=catLabels]'));
+            const fs = cats.map(t => +t.getAttribute('font-size'));
+            const leg = Array.from(svg.querySelectorAll('[data-o=legend]')).map(t => t.getBoundingClientRect().right);
+            const fuera = cats.filter(t => { const q = t.getBoundingClientRect(); return q.bottom > sb.bottom + 0.5 || q.left < sb.left - 0.5; }).length;
+            return { n: cats.length, fsMax: Math.max(...fs), legFuera: leg.filter(x => x > sb.right + 0.5).length, fuera }; }""")
+        check("470×380 rotadas: el texto del gráfico encoge (≤ 9 px)", r["fsMax"] <= 9, str(r))
+        check("470×380 rotadas: menos nombres que barras (no se pisan) y ninguno fuera", 0 < r["n"] < 13 and r["fuera"] == 0, str(r))
+        check("470×380: la leyenda entra entera", r["legFuera"] == 0, str(r))
+        sc = await pg.evaluate(SCROLLS); ov = await pg.evaluate(OVERLAPS)
+        check("470×380: sin scroll ni solapes", sc == [] and ov == [], str(sc) + str(ov[:4]))
+        await pg.close()
         pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=300, H=300)
         sb = await pg.evaluate("() => getComputedStyle(document.getElementById('host')).getPropertyValue('--wf-sb-thumb').trim()")
         check("Boardroom: barras de desplazamiento con el color del estilo (no blancas)", sb.upper().startswith("#") and sb.upper() != "#FFFFFF", sb)
