@@ -5,6 +5,45 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.0.0] — unreleased
+
+### Added
+
+- **Styles of the TCViz collection**: Boardroom, Ledger, Editorial, Signal, Aurora and Terrace — the same styles as
+  the other TCViz visuals, so a page reads as one report. Each one sets the increase, decrease and total colours, the
+  text, the axes, the summary cards, the data table and the visual's background (dark in Boardroom and Aurora). All
+  free. A colour you set yourself still wins over the style, and choosing a style clears the saved settings it defines,
+  as choosing a template did in 1.2 (the fx rule of the Increase colour included).
+- **Accessibility** card: high contrast (automatic, following Windows, or always on — black on white), keyboard focus
+  colour and width, and a minimum text size for the whole chart, the summary cards and the data table.
+- **Flag unusual changes (!)** in the Chart card: the "!" marker on outlying changes can now be turned off. It is on by
+  default, so saved reports look the same.
+- **Summary cards → Hide when the bridge is not a comparison** (on by default): the cards read the bridge as the same
+  figure at two moments (sales 2025 → sales 2026). They now hide on their own when there is no opening and closing
+  total, or when every change goes the same way — a P&L from revenue to EBITDA, where a "−77 % variance" between
+  revenue and EBITDA means nothing and one of the "biggest change" cards was empty. Turn it off to always show them.
+
+### Changed
+
+- **Report theme replaces Classic** as the first and default option: increases and decreases take the report theme's
+  good/bad sentiment colours, totals its first data colour, and labels and axis its text colours; where the theme
+  does not provide a colour, the colours of earlier versions are kept. Reports saved without a template or colours
+  follow the report theme from this version on.
+- The 1.2 templates (Modern, Soft, One colour, Dark background) are no longer offered, but reports that use them keep
+  drawing exactly as before.
+- **Value axis from zero**: when every running total and total is zero or above, the axis starts at 0 instead of
+  dropping below it to leave a margin. With negative values the margin stays.
+- The "Pro preview" watermark is now the one shared by all TCViz visuals.
+
+### Fixed
+
+- **Conditional formatting (fx)** on the Increase colour is now declared the standard way, so tools that read the
+  package (such as OKviz) detect it. It works as before: a fixed colour is stored for the whole visual.
+- High contrast now also applies to category labels, value labels drawn in a custom colour, the summary cards, the
+  data table, gridlines and the outlier marker.
+
+---
+
 ## [1.2.0.0] — 2026-10-22
 
 ### Fixed
