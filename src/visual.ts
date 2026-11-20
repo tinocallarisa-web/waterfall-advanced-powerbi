@@ -6,6 +6,7 @@ import {
     SubSelectableObjectNameAttribute, SubSelectableTypeAttribute,
 } from "powerbi-visuals-utils-onobjectutils";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions       = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -15,15 +16,21 @@ import ISelectionManager         = powerbi.extensibility.ISelectionManager;
 import ILocalizationManager      = powerbi.extensibility.ILocalizationManager;
 import VisualUpdateType          = powerbi.VisualUpdateType;
 
-import { VisualFormattingSettingsModel, TEMPLATES, monoTemplate }  from "./settings";
+import {
+    VisualFormattingSettingsModel, TEMPLATES, monoTemplate, STYLE_TOKENS, STYLE_ITEMS, StyleTokens,
+    reportThemeTemplate, REPORT_THEME_PROPS, mixHex,
+} from "./settings";
 import { mapDataView, sortByImpact, applyTopN, WaterfallBar }  from "./dataMapper";
-import { computeBars, computeSummary, ComputedBar, WaterfallSummary } from "./waterfallEngine";
+import { computeBars, computeSummary, cardsMakeSense, ComputedBar, WaterfallSummary } from "./waterfallEngine";
 import { WaterfallRenderer, ClickEventData }         from "./renderer";
 import { NumberFormatter }                           from "./formatter";
 import { getLicenseState, LicenseState, LicenseNotifier, FREE_STATE } from "./licenseManager";
 import { LicenseOverlay }                            from "./licenseOverlay";
 import { STRINGS }                                   from "./strings";
 import { LANDING_ICON }                              from "./landingIcon";
+import { createProWatermark, renderProWatermark }    from "./comun/watermark";
+
+type Template = Record<string, Record<string, string | number | boolean>>;
 
 /**
  * Sello de compilacion. Vacio en produccion; build-test.js lo rellena con la
@@ -71,6 +78,8 @@ export class Visual implements IVisual {
     /** Última plantilla vista: al cambiarla editando se aplica de verdad (aplicarPlantilla). */
     private tplVisto: string | null = null;
     private fmt: NumberFormatter | null = null;
+    /** Marca de agua "Pro preview": la pieza común de la cartera (src/comun/watermark.ts), desde la 1.3. */
+    private wm: HTMLDivElement;
 
     constructor(options: VisualConstructorOptions) {
         this.host         = options.host;
@@ -87,6 +96,7 @@ export class Visual implements IVisual {
         this.formattingSettings    = new VisualFormattingSettingsModel();
         this.selectionManager      = this.host.createSelectionManager();
         this.renderer              = new WaterfallRenderer(this.container, this.localization);
+        this.wm                    = createProWatermark(this.container);
 
         // Bookmarks. Power BI llama aqui cuando un marcador -o el panel de
         // seleccion, o un boton de "borrar filtros"- restaura una seleccion desde
@@ -148,6 +158,24 @@ export class Visual implements IVisual {
         return this.t(key, fallback).replace(/\{(\d+)\}/g, (_m, i) => args[Number(i)] ?? "");
     }
 
+    /**
+     * Alto contraste (1.3): el de Windows (siempre) o forzado desde la tarjeta Accesibilidad ("On"). Forzado sin el tema
+     * de Windows, negro sobre blanco. sel = color de selección y foco.
+     */
+    private hc(): { on: boolean; sys: boolean; fg: string; bg: string; sel: string } {
+        const p: any = this.host?.colorPalette;
+        const sys = !!p?.isHighContrast;
+        const on = sys || String((this.formattingSettings?.accessibility?.highContrast?.value as any)?.value) === "on";
+        return { on, sys, fg: sys ? (p?.foreground?.value || "#FFFFFF") : "#000000", bg: sys ? (p?.background?.value || "#000000") : "#FFFFFF",
+            sel: sys ? (p?.foregroundSelected?.value || p?.foreground?.value || "#FFFFFF") : "#000000" };
+    }
+
+    /** Tamaño de texto con el mínimo de la tarjeta Accesibilidad (1.3). */
+    private fsz(px: number): number {
+        const min = Math.min(24, Math.max(6, Number(this.formattingSettings?.accessibility?.minTextSize?.value) || 6));
+        return Math.max(min, Number(px) || min);
+    }
+
     private interactionsAllowed(): boolean {
         const h = this.host as any;
         return (h?.hostCapabilities?.allowInteractions ?? h?.allowInteractions) !== false;
@@ -189,6 +217,7 @@ export class Visual implements IVisual {
         this.container.style.setProperty("--wf-focus", pal?.isHighContrast ? (pal.foregroundSelected?.value || pal.foreground?.value || "#FFFF00") : "#005A9E");
 
         if (!options.dataViews?.[0]) {
+            this.container.style.background = "";
             // Un dibujo pendiente pintaría el gráfico anterior encima de la pantalla de inicio.
             this.closePending();
             this.lastOptions = options;
@@ -202,6 +231,11 @@ export class Visual implements IVisual {
             VisualFormattingSettingsModel,
             options.dataViews[0]
         );
+        // Foco de teclado (Accesibilidad, 1.3); en alto contraste, el color de selección del tema.
+        const acc = this.formattingSettings.accessibility;
+        const hcU = this.hc();
+        this.container.style.setProperty("--wf-focus", hcU.on ? hcU.sel : (acc.focusColor.value?.value || "#005A9E"));
+        this.container.style.setProperty("--wf-focus-w", Math.min(6, Math.max(1, Number(acc.focusWidth.value) || 2)) + "px");
 
         const type         = options.type;
         const isData       = (type & VisualUpdateType.Data)   !== 0;
@@ -305,6 +339,13 @@ export class Visual implements IVisual {
         const width  = Math.max(100, vp.width  - 16);
         const height = Math.max(60,  vp.height - 8);
 
+        // Estilo de la colección (1.3): fondo del visual con el del estilo, también en los claros (como Dynamic Matrix);
+        // nada con el tema del informe ni con las plantillas de la 1.2. El alto contraste manda sobre el estilo.
+        const hc = this.hc();
+        const tk: StyleTokens | null = !hc.on ? STYLE_TOKENS[tpl] ?? null : null;
+        this.container.style.background = tk ? (tk.grad || tk.bg) : (hc.on && !hc.sys ? hc.bg : "");
+        const acc = settings.accessibility;
+
         const cats = dataView.categorical?.categories ?? [];
         const catCol = cats.find(c => c.source?.roles?.["category"]);
         const measureCol = (dataView.categorical?.values ? Array.from(dataView.categorical.values) : [])
@@ -327,12 +368,19 @@ export class Visual implements IVisual {
             proDensity:    on("density"),
             fmt:           this.fmt,
             t:             (k, f) => this.t(k, f),
-            darkBackground: tpl === "dark",
+            darkBackground: tpl === "dark" || !!tk?.dark,
             measureName:   measureCol?.source?.displayName ?? "",
             categoryName:  catCol?.source?.displayName ?? "",
-            highContrast: this.host.colorPalette.isHighContrast,
-            contrastForeground: this.host.colorPalette.foreground.value,
-            contrastBackground: this.host.colorPalette.background.value,
+            highContrast:  hc.on,
+            contrastForeground: hc.fg,
+            contrastBackground: hc.bg,
+            cardsAllowed:  !settings.cardSettings.autoHide.value || cardsMakeSense(computed, summary),
+            ink:           tk ? { grid: tk.grid, line: tk.axis, connector: mixHex(tk.bg, tk.axis, 0.55) }
+                              : { grid: "#e8e8e6", line: "#888780", connector: "#bbb" },
+            fontFamily:    tk?.font ?? "",
+            minTextSize:   Number(acc.minTextSize.value) || 6,
+            focusColor:    acc.focusColor.value?.value || "#005A9E",
+            focusWidth:    Number(acc.focusWidth.value) || 2,
             width,
             height,
             onBarClick:    (data) => this.handleBarClick(data),
@@ -359,7 +407,12 @@ export class Visual implements IVisual {
                 `grouped:${driversInData}`);
         }
 
-        this.renderWatermark(preview && touched.length > 0 ? touched.map(x => x.label) : []);
+        // Marca de agua común (1.3). El renderer vacía el contenedor en cada dibujo: se vuelve a colgar al final.
+        this.container.appendChild(this.wm);
+        renderProWatermark(this.wm, preview && touched.length > 0 ? {
+            width: vp.width, height: vp.height, title: this.t("UI_ProPreview", "Pro preview"),
+            features: touched.map(x => x.label), highContrast: hc.on ? { foreground: hc.fg, background: hc.bg } : null
+        } : null);
         this.renderGuide(vp, preview);
         this.renderBuildMarker();
         this.markSubSelectables();
@@ -368,8 +421,24 @@ export class Visual implements IVisual {
 
     // ── Plantillas ───────────────────────────────────────────────────────────
 
+    /**
+     * Lo que pone cada plantilla. "classic" es Report theme desde la 1.3: los colores y la tinta del tema del informe
+     * (sentimiento bueno/malo, primer color de datos, primer plano); lo que el host no dé, los de siempre.
+     */
+    private templateFor(tpl: string, objs: any): Template | undefined {
+        if (tpl === "classic") {
+            const pal: any = this.host.colorPalette;
+            let total: string | undefined;
+            try { total = pal?.getColor?.("wf-total")?.value; } catch { total = undefined; }
+            return reportThemeTemplate({ positive: pal?.positive?.value, negative: pal?.negative?.value, total,
+                foreground: pal?.foreground?.value, secondary: pal?.foregroundNeutralSecondary?.value });
+        }
+        if (tpl === "mono") return monoTemplate(objs?.style?.baseColor?.solid?.color ?? "#2B6CB0");
+        return TEMPLATES[tpl];
+    }
+
     private applyTemplateDefaults(tpl: string, objs: any): void {
-        const tp = tpl === "mono" ? monoTemplate(objs?.style?.baseColor?.solid?.color ?? "#2B6CB0") : TEMPLATES[tpl];
+        const tp = this.templateFor(tpl, objs);
         if (!tp) return;
         Object.keys(tp).forEach(obj => {
             const card: any = (this.formattingSettings.cards as any[]).find(c => c.name === obj);
@@ -386,15 +455,19 @@ export class Visual implements IVisual {
 
     /** Al ELEGIR una plantilla se borran los ajustes guardados que ella define, para que se vea. */
     private aplicarPlantilla(nombre: string): void {
-        const tp = TEMPLATES[nombre] ?? {};
-        const remove: any[] = Object.keys(tp).map(obj => ({
+        // Report theme borra todo lo que PUEDE definir, aunque este tema no lo dé: vuelve a los colores del tema.
+        const props: Record<string, string[]> = nombre === "classic" ? REPORT_THEME_PROPS
+            : Object.keys(TEMPLATES[nombre] ?? {}).reduce((acc: Record<string, string[]>, obj) => {
+                acc[obj] = Object.keys(TEMPLATES[nombre][obj]); return acc; }, {});
+        const remove: any[] = Object.keys(props).map(obj => ({
             objectName: obj, selector: null as any,
-            properties: Object.keys(tp[obj]).reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
+            properties: props[obj].reduce((acc: any, p) => { acc[p] = null; return acc; }, {})
         }));
         // El color de subida admite fx y hasta 1.1 el color FIJO se guardaba con el selector comodín, barra a barra:
         // ese valor pisa a todas las barras y la plantilla no se vería. Se borra también.
-        if (tp.colorSettings?.positiveColor !== undefined) {
-            remove.push({ objectName: "colorSettings", selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] } as any,
+        if (props.colorSettings?.includes("positiveColor")) {
+            remove.push({ objectName: "colorSettings",
+                selector: dataViewWildcard.createDataViewWildcardSelector(dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals) as any,
                 properties: { positiveColor: null } });
         }
         if (remove.length) this.host.persistProperties({ remove });
@@ -402,31 +475,6 @@ export class Visual implements IVisual {
 
     private persistir(objectName: string, properties: any): void {
         this.host.persistProperties({ merge: [{ objectName, selector: null as any, properties }] });
-    }
-
-    // ── Vista previa Pro: marca de agua ──────────────────────────────────────
-
-    /** "Pro preview" y debajo lo que la ha encendido. Con DOM y textContent, nunca innerHTML. */
-    private renderWatermark(labels: string[]): void {
-        this.container.querySelectorAll(".wf-watermark").forEach(n => n.remove());
-        if (!labels.length) return;
-        const capa = document.createElement("div");
-        capa.className = "wf-watermark";
-        capa.setAttribute("aria-hidden", "true");
-        capa.style.cssText = "position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;" +
-            "gap:4px;pointer-events:none;z-index:35;opacity:0.72;transform:rotate(-20deg);font-family:'Segoe UI',sans-serif";
-        const w = this.container.clientWidth || 300, h = this.container.clientHeight || 200;
-        const fs = Math.round(Math.max(20, Math.min(72, w / 8, h / 3.5)));
-        const linea = (texto: string, px: number) => {
-            const el = document.createElement("div");
-            el.textContent = texto;
-            el.style.cssText = `font-size:${px}px;font-weight:700;letter-spacing:0.06em;color:#FFFFFF;text-align:center;` +
-                "text-shadow:0 0 3px #1B2A41,0 0 3px #1B2A41,0 0 3px #1B2A41";
-            capa.appendChild(el);
-        };
-        linea(this.t("UI_ProPreview", "Pro preview"), fs);
-        linea(labels.join(" · "), Math.round(fs * 0.34));
-        this.container.appendChild(capa);
     }
 
     // ── Guía (consejos de configuración, solo editando) ──────────────────────
@@ -441,15 +489,16 @@ export class Visual implements IVisual {
         const s = this.formattingSettings;
         if (!this.editing || this.formatMode || !s.style.guide.value || !this.interactionsAllowed()) return;
         if (!vp || vp.width < 340 || vp.height < 200) return;
-        const pal: any = this.host.colorPalette;
-        const hc = !!pal?.isHighContrast;
-        const azul = hc ? (pal.foregroundSelected?.value || "#FFFF00") : "#2B6CB0";
-        const fg = hc ? (pal.foreground?.value || "#FFF") : "";
+        const H = this.hc();
+        const hc = H.on;
+        const azul = hc ? H.sel : "#2B6CB0";
+        const fg = hc ? H.fg : "";
         const g = document.createElement("div");
         g.className = "wf-guide";
+        g.style.fontSize = this.fsz(11.5) + "px";
         g.setAttribute("role", "region");
         g.setAttribute("aria-label", this.t("Guide_Title", "Setup tips"));
-        if (hc) Object.assign(g.style, { background: pal.background?.value || "#000", color: fg, borderColor: azul });
+        if (hc) Object.assign(g.style, { background: H.bg, color: fg, borderColor: azul });
         g.onclick = e => e.stopPropagation();
         g.onkeydown = e => e.stopPropagation();
         const fila = (titulo: string) => {
@@ -469,14 +518,15 @@ export class Visual implements IVisual {
             b.textContent = texto;
             b.setAttribute("aria-pressed", String(on));
             b.style.borderColor = azul;
-            if (on) { b.style.background = azul; b.style.color = hc ? (pal.background?.value || "#000") : "#FFFFFF"; } else b.style.color = azul;
+            if (on) { b.style.background = azul; b.style.color = hc ? H.bg : "#FFFFFF"; } else b.style.color = azul;
             b.addEventListener("click", accion);
             f.appendChild(b);
         };
         const f1 = fila(this.t("Guide_TryStyle", "Try a style:"));
         const actual = String((s.style.template.value as any)?.value ?? "classic");
-        ([["classic", "Classic"], ["modern", "Modern"], ["soft", "Soft"], ["mono", "One colour"], ["dark", "Dark background"]] as [string, string][])
-            .forEach(([v, d]) => boton(f1, this.t("Enum_" + v, d), v === actual, () => this.persistir("style", { template: v })));
+        // 1.3: Report theme y los seis estilos de la colección (los mismos del desplegable).
+        STYLE_ITEMS.forEach((it: any) => boton(f1, this.t(it.displayNameKey, it.displayName), it.value === actual,
+            () => this.persistir("style", { template: it.value })));
         const objs: any = this.lastOptions?.dataViews?.[0]?.metadata?.objects ?? {};
         const f2 = fila(this.license.isLicensed ? this.t("Guide_ProOn", "Pro:") : this.t("Guide_TryPro", "Try Pro:"));
         const tabla = objs?.tableSettings?.show === true;

@@ -39,6 +39,16 @@ interface RenderOptions {
     highContrast:  boolean;
     contrastForeground: string;
     contrastBackground: string;
+    /** 1.3: el puente compara dos momentos (cardsMakeSense) o el autor pidió las tarjetas siempre. */
+    cardsAllowed:  boolean;
+    /** 1.3: tintas del lienzo (estilo de la colección o tema): cuadrícula, línea del cero y conectores. */
+    ink:           { grid: string; line: string; connector: string };
+    /** 1.3: tipo de letra del estilo (Ledger y Editorial, Georgia). */
+    fontFamily:    string;
+    /** 1.3, tarjeta Accesibilidad: tamaño mínimo de texto, color y grosor del foco de teclado. */
+    minTextSize:   number;
+    focusColor:    string;
+    focusWidth:    number;
     width:         number;
     height:        number;
     onBarClick:    (data: ClickEventData) => void;
@@ -80,6 +90,12 @@ export class WaterfallRenderer {
                 onBarClick, onBarHover, onBarLeave } = opts;
         this.tr = opts.t;
         this.darkBg = !!opts.darkBackground;
+        this.hcFg = highContrast ? contrastForeground : "";
+        this.hcBg = highContrast ? opts.contrastBackground : "";
+        this.minText = Math.min(24, Math.max(6, Number(opts.minTextSize) || 6));
+        this.font = opts.fontFamily || "Segoe UI, sans-serif";
+        this.ink = opts.ink;
+        this.focus = { color: highContrast ? contrastForeground : opts.focusColor, width: opts.focusWidth };
         if (bars.length === 0) { this.renderEmpty(); return; }
 
         const fmt = opts.fmt;
@@ -124,7 +140,8 @@ export class WaterfallRenderer {
         // de Chart para no romper informes guardados: si cualquiera de los dos
         // esta apagado, las tarjetas no se pintan.
         // En un mosaico pequeño las tarjetas se comerían el gráfico: se ocultan solas.
-        const showCards  = ch.showVarianceCards.value && settings.cardSettings.show.value && height >= 220 && width >= 280;
+        // 1.3: y cuando el puente no es una comparación (cardsAllowed, ver cardsMakeSense) se ocultan también.
+        const showCards  = ch.showVarianceCards.value && settings.cardSettings.show.value && opts.cardsAllowed && height >= 220 && width >= 280;
         const horizontal = ch.orientation.value.value === "horizontal";
 
         // Tabla de datos (Pro). Reserva su parte antes de calcular el lienzo: si
@@ -265,13 +282,13 @@ export class WaterfallRenderer {
         }
 
         const zeroY = yScale(0);
-        this.line(this.PAD_LEFT, zeroY, this.PAD_LEFT + plotW, zeroY, "#888780", 0.8);
+        this.line(this.PAD_LEFT, zeroY, this.PAD_LEFT + plotW, zeroY, this.ink.line, 0.8);
 
         if (ch.showConnectors.value) {
             bars.forEach((bar, i) => {
                 if (i === 0) return;
                 const connY = yScale(bars[i - 1].running);
-                this.line(xOf(i - 1) + barW, connY, xOf(i), connY, "#bbb", 0.6, "4 3");
+                this.line(xOf(i - 1) + barW, connY, xOf(i), connY, this.ink.connector, 0.6, "4 3");
             });
         }
 
@@ -307,8 +324,7 @@ export class WaterfallRenderer {
             rect.setAttribute("role", "img");
             rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value, bar.formatString)}`);
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
-            rect.addEventListener("focus", () => rect.setAttribute("stroke", highContrast ? contrastForeground : "#252423"));
-            rect.addEventListener("blur", () => rect.removeAttribute("stroke"));
+            this.focusRing(rect);
 
             rect.addEventListener("mouseenter", () => rect.setAttribute("opacity", "0.72"));
             rect.addEventListener("mouseleave", () => {
@@ -330,17 +346,17 @@ export class WaterfallRenderer {
             });
             this.svg.appendChild(rect);
 
-            if (summary.anomalies.find(a => a.label === bar.label)) {
+            if (ch.showAnomalies.value && summary.anomalies.find(a => a.label === bar.label)) {
                 const acx = x + barW - 7;
                 const acy = yTop + 7;
                 const dot = this.el("circle") as SVGCircleElement;
                 dot.setAttribute("cx", String(acx)); dot.setAttribute("cy", String(acy));
-                dot.setAttribute("r", "5"); dot.setAttribute("fill", "#E24B4A");
-                dot.setAttribute("stroke", "#fff"); dot.setAttribute("stroke-width", "1");
+                dot.setAttribute("r", "5"); dot.setAttribute("fill", this.hcFg || "#E24B4A");
+                dot.setAttribute("stroke", this.hcBg || "#fff"); dot.setAttribute("stroke-width", "1");
                 this.svg.appendChild(dot);
                 const warn = this.el("text") as SVGTextElement;
                 warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + 2.5));
-                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", "#fff");
+                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", this.hcBg || "#fff");
                 warn.setAttribute("text-anchor", "middle"); warn.setAttribute("font-weight", "700");
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
@@ -370,7 +386,7 @@ export class WaterfallRenderer {
                 if (ch.showTarget.value && bar.target != null && bar.barType === "total" &&
                     Math.abs(yScale(bar.target) - yTop) < fsL + 12 && bh > fsL + 8) {
                     ly = yTop + fsL + 3;
-                    labelColor = highContrast ? contrastForeground : "#FFFFFF";
+                    labelColor = highContrast ? (this.hcBg || "#FFFFFF") : "#FFFFFF";
                 }
                 const lt = this.text(x + barW / 2, ly, label, fsL, labelColor, "middle", "500");
                 lt.setAttribute("data-o", "labels");
@@ -462,13 +478,13 @@ export class WaterfallRenderer {
         }
 
         const zeroX = xScale(0);
-        this.line(zeroX, this.PAD_TOP, zeroX, this.PAD_TOP + plotH, "#888780", 0.8);
+        this.line(zeroX, this.PAD_TOP, zeroX, this.PAD_TOP + plotH, this.ink.line, 0.8);
 
         if (ch.showConnectors.value) {
             bars.forEach((bar, i) => {
                 if (i === 0) return;
                 const connX = xScale(bars[i - 1].running);
-                this.line(connX, yOf(i - 1) + barH, connX, yOf(i), "#bbb", 0.6, "4 3");
+                this.line(connX, yOf(i - 1) + barH, connX, yOf(i), this.ink.connector, 0.6, "4 3");
             });
         }
 
@@ -505,8 +521,7 @@ export class WaterfallRenderer {
             rect.setAttribute("role", "img");
             rect.setAttribute("aria-label", `${bar.label}: ${fmt.format(bar.value, bar.formatString)}`);
             rect.style.cursor = "pointer"; rect.style.transition = "opacity 0.15s";
-            rect.addEventListener("focus", () => rect.setAttribute("stroke", highContrast ? contrastForeground : "#252423"));
-            rect.addEventListener("blur", () => rect.removeAttribute("stroke"));
+            this.focusRing(rect);
 
             rect.addEventListener("mouseenter", () => rect.setAttribute("opacity", "0.72"));
             rect.addEventListener("mouseleave", () => {
@@ -528,17 +543,17 @@ export class WaterfallRenderer {
             });
             this.svg.appendChild(rect);
 
-            if (summary.anomalies.find(a => a.label === bar.label)) {
+            if (ch.showAnomalies.value && summary.anomalies.find(a => a.label === bar.label)) {
                 const acx = bx + bw - 7;
                 const acy = y + 7;
                 const dot = this.el("circle") as SVGCircleElement;
                 dot.setAttribute("cx", String(acx)); dot.setAttribute("cy", String(acy));
-                dot.setAttribute("r", "5"); dot.setAttribute("fill", "#E24B4A");
-                dot.setAttribute("stroke", "#fff"); dot.setAttribute("stroke-width", "1");
+                dot.setAttribute("r", "5"); dot.setAttribute("fill", this.hcFg || "#E24B4A");
+                dot.setAttribute("stroke", this.hcBg || "#fff"); dot.setAttribute("stroke-width", "1");
                 this.svg.appendChild(dot);
                 const warn = this.el("text") as SVGTextElement;
                 warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + 2.5));
-                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", "#fff");
+                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", this.hcBg || "#fff");
                 warn.setAttribute("text-anchor", "middle"); warn.setAttribute("font-weight", "700");
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
@@ -592,7 +607,7 @@ export class WaterfallRenderer {
         for (let t = 0; t <= 5; t++) {
             const v = minY + (maxY - minY) * (t / 5);
             const y = yScale(v);
-            if (va.gridlines) this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, "#e8e8e6", 0.5);
+            if (va.gridlines) this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, this.ink.grid, 0.5);
             if (va.show) this.text(this.PAD_LEFT - 5, y + 3, fmt.formatAxis(v, range), va.fontSize, va.color, "end").setAttribute("data-o", "axis");
         }
     }
@@ -604,7 +619,7 @@ export class WaterfallRenderer {
         for (let t = 0; t <= 5; t++) {
             const v = minV + (maxV - minV) * (t / 5);
             const x = xScale(v);
-            if (va.gridlines) this.line(x, this.PAD_TOP, x, this.PAD_TOP + chartH, "#e8e8e6", 0.5);
+            if (va.gridlines) this.line(x, this.PAD_TOP, x, this.PAD_TOP + chartH, this.ink.grid, 0.5);
             if (va.show) this.text(x, this.PAD_TOP + chartH + 14, fmt.formatAxis(v, range), va.fontSize, va.color, "middle").setAttribute("data-o", "axis");
         }
     }
@@ -648,14 +663,14 @@ export class WaterfallRenderer {
             colors: Record<string, string>, toTheRight: boolean,
             w: number, h: number, textColor: string): void {
 
-        const fs = ts.fontSize.value;
+        const fs = this.fz(ts.fontSize.value);
 
         // Fondo propio para que la tabla se lea como un bloque aparte y no
         // flotando sobre el grafico. En automatico va un tinte neutro que
         // funciona sobre fondo claro y oscuro, porque el visual hereda el tema
         // del informe y no sabemos cual es.
-        const bg = ts.backgroundAuto.value
-            ? "rgba(128,128,128,0.10)" : ts.backgroundColor.value.value;
+        const bg = this.hcBg || (ts.backgroundAuto.value
+            ? "rgba(128,128,128,0.10)" : ts.backgroundColor.value.value);
         // El separador va del lado por el que la tabla toca el grafico.
         const border = ts.showBorder.value
             ? (toTheRight ? "border-left:1px solid rgba(128,128,128,0.35);"
@@ -672,7 +687,7 @@ export class WaterfallRenderer {
 
         const table = document.createElement("table");
         table.style.cssText =
-            `border-collapse:collapse;width:100%;font:${fs}px Segoe UI,sans-serif;color:${textColor}`;
+            `border-collapse:collapse;width:100%;font-size:${fs}px;font-family:${this.font};color:${textColor}`;
 
         const num = (el: HTMLElement) => {
             el.style.textAlign = "right";
@@ -745,13 +760,13 @@ export class WaterfallRenderer {
                                 fmt: NumberFormatter, ls: VisualFormattingSettingsModel["labelSettings"],
                                 cs: VisualFormattingSettingsModel["colorSettings"],
                                 cd?: VisualFormattingSettingsModel["cardSettings"]): void {
-        const textColor = cd && !cd.textColorAuto.value
-            ? cd.textColor.value.value : ls.categoryLabelColor.value.value;
-        const cardBg = cd && !cd.backgroundAuto.value
+        const textColor = this.hcFg || (cd && !cd.textColorAuto.value
+            ? cd.textColor.value.value : ls.categoryLabelColor.value.value);
+        const cardBg = this.hcBg || (cd && !cd.backgroundAuto.value
             ? cd.backgroundColor.value.value
-            : "rgba(128,128,128,0.15)";
-        const labelFs = cd ? cd.labelFontSize.value : 9;
-        const valueFs = cd ? cd.valueFontSize.value : 13;
+            : "rgba(128,128,128,0.15)");
+        const labelFs = this.fz(cd ? cd.labelFontSize.value : 9);
+        const valueFs = this.fz(cd ? cd.valueFontSize.value : 13);
         const g = (key: string) => {
             const fallbacks: Record<string, string> = {
                 initialTotal: "Initial total", finalTotal: "Final total",
@@ -784,7 +799,8 @@ export class WaterfallRenderer {
 
         cards.forEach(c => {
             const card = document.createElement("div");
-            card.style.cssText = `flex:1;min-width:88px;background:${cardBg};border-radius:6px;padding:6px 10px;box-sizing:border-box`;
+            card.style.cssText = `flex:1;min-width:88px;background:${cardBg};border-radius:6px;padding:6px 10px;box-sizing:border-box;font-family:${this.font}` +
+                (this.hcFg ? `;border:1px solid ${this.hcFg}` : "");
             const lbl = document.createElement("div");
             lbl.style.cssText = `font-size:${labelFs}px;color:${textColor};opacity:0.75;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px`;
             lbl.textContent = c.label;
@@ -792,7 +808,7 @@ export class WaterfallRenderer {
             val.style.cssText = `font-size:${valueFs}px;font-weight:600;color:${textColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
             val.textContent = c.value;
             const sub = document.createElement("div");
-            sub.style.cssText = `font-size:10px;color:${c.subColor};margin-top:1px`;
+            sub.style.cssText = `font-size:${this.fz(10)}px;color:${c.subColor};margin-top:1px`;
             sub.textContent = c.sub;
             card.appendChild(lbl); card.appendChild(val); card.appendChild(sub);
             row.appendChild(card);
@@ -869,13 +885,32 @@ export class WaterfallRenderer {
     private late: (() => void)[] = [];
 
     private darkBg = false;
+    /** Alto contraste (Windows o forzado en Accesibilidad): todo el texto y las líneas en primer plano. */
+    private hcFg = "";
+    private hcBg = "";
+    private minText = 6;
+    private font = "Segoe UI, sans-serif";
+    private ink = { grid: "#e8e8e6", line: "#888780", connector: "#bbb" };
+    private focus = { color: "#005A9E", width: 2 };
+
+    /** Tamaño de texto con el mínimo de la tarjeta Accesibilidad (1.3). */
+    private fz(px: number): number { return Math.max(this.minText, Number(px) || this.minText); }
+
+    /** Foco de teclado en una barra: color y grosor de la tarjeta Accesibilidad (1.3). */
+    private focusRing(rect: SVGRectElement): void {
+        rect.addEventListener("focus", () => {
+            rect.setAttribute("stroke", this.focus.color);
+            rect.setAttribute("stroke-width", String(Math.min(6, Math.max(1, this.focus.width || 2))));
+        });
+        rect.addEventListener("blur", () => { rect.removeAttribute("stroke"); rect.removeAttribute("stroke-width"); });
+    }
 
     /**
      * Halo detrás del texto para que se lea al cruzar una línea o una barra. Va del color del FONDO del informe, no del
      * texto: claro siempre, oscuro solo con la plantilla para fondo oscuro (un halo oscuro emborronaba sobre blanco).
      */
     private halo(t: SVGTextElement, _color: string): void {
-        t.setAttribute("stroke", this.darkBg ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.9)");
+        t.setAttribute("stroke", this.hcBg || (this.darkBg ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.9)"));
         t.setAttribute("stroke-width", "3");
         t.setAttribute("stroke-linejoin", "round");
         t.setAttribute("paint-order", "stroke");
@@ -886,7 +921,7 @@ export class WaterfallRenderer {
         const l = this.el("line") as SVGLineElement;
         l.setAttribute("x1", String(x1)); l.setAttribute("y1", String(y1));
         l.setAttribute("x2", String(x2)); l.setAttribute("y2", String(y2));
-        l.setAttribute("stroke", stroke); l.setAttribute("stroke-width", String(sw));
+        l.setAttribute("stroke", this.hcFg || stroke); l.setAttribute("stroke-width", String(sw));
         if (dash) l.setAttribute("stroke-dasharray", dash);
         this.svg.appendChild(l);
     }
@@ -911,16 +946,17 @@ export class WaterfallRenderer {
         // 0.60em por caracter. Segoe UI ronda 0.55 de media, pero la media no
         // sirve aqui: basta con que una etiqueta la pase para que toque el borde.
         // Quedarse corto se ve; sobrar 3px no lo nota nadie.
-        return label.length * fs * 0.60;
+        return label.length * this.fz(fs) * 0.60;
     }
 
     private text(x: number, y: number, content: string, fs: number,
                  fill: string, anchor = "middle", weight = "400", rotate = 0): SVGTextElement {
         const t = this.el("text") as SVGTextElement;
         t.setAttribute("x", String(x)); t.setAttribute("y", String(y));
-        t.setAttribute("font-size", String(fs)); t.setAttribute("fill", fill);
+        t.setAttribute("font-size", String(this.fz(fs))); // En alto contraste todo el texto va en primer plano, salvo el que se escribe a propósito en el fondo (dentro de una barra).
+        t.setAttribute("fill", this.hcFg && fill !== this.hcBg ? this.hcFg : fill);
         t.setAttribute("text-anchor", anchor); t.setAttribute("font-weight", weight);
-        t.setAttribute("font-family", "Segoe UI, sans-serif");
+        t.setAttribute("font-family", this.font);
         if (rotate) t.setAttribute("transform", `rotate(${rotate} ${x} ${y})`);
         t.textContent = content; this.svg.appendChild(t);
         return t;

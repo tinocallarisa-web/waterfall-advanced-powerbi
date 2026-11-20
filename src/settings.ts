@@ -1,5 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
 
 import FormattingSettingsCard  = formattingSettings.SimpleCard;
 import FormattingSettingsModel = formattingSettings.Model;
@@ -37,10 +38,12 @@ class ColorSettings extends formattingSettings.CompositeCard {
     // Con el selector puesto, Power BI resuelve la regla por categoria y devuelve
     // los colores en categorical.categories[0].objects[i]. El color FIJO se guarda a
     // nivel general gracias a altConstantValueSelector null (se pone en getFormattingModel).
+    // 1.3: el selector se crea con la función de dataviewutils y no con el literal equivalente
+    // ({data:[{dataViewWildcard:{matchingOption:0}}]}): es lo que OKviz detecta como formato condicional.
     positiveColor = new formattingSettings.ColorPicker({
         name: "positiveColor", displayName: "Increase color", displayNameKey: "positiveColor",
         value: { value: "#1D9E75" },
-        selector: { data: [{ dataViewWildcard: { matchingOption: 0 } }] } as any,
+        selector: dataViewWildcard.createDataViewWildcardSelector(dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals) as any,
         instanceKind: 3
     });
     negativeColor = new formattingSettings.ColorPicker({
@@ -235,6 +238,11 @@ class ChartSettings extends FormattingSettingsCard {
         name: "otherLabel", displayName: "\"Others\" bar label", displayNameKey: "otherLabel",
         placeholder: "Others", value: "Others"
     });
+    // 1.3: el aviso "!" de cambios atípicos (más de 2 desviaciones típicas) se puede apagar. En un P&L la barra mayor
+    // (el coste de ventas) salía siempre marcada. Encendido por defecto: los informes guardados se ven igual.
+    showAnomalies = new formattingSettings.ToggleSwitch({
+        name: "showAnomalies", displayName: "Flag unusual changes (!)", displayNameKey: "showAnomalies", value: true
+    });
     orientation = new formattingSettings.ItemDropdown({
         name: "orientation", displayName: "Orientation", displayNameKey: "orientation",
         items: [item("vertical", "Vertical", "Enum_vertical"), item("horizontal", "Horizontal", "Enum_horizontal")],
@@ -244,7 +252,7 @@ class ChartSettings extends FormattingSettingsCard {
     displayName = "Chart";
     displayNameKey = "card_chartSettings";
     slices      = [this.orientation, this.showConnectors, this.showSubtotals, this.showTarget, this.targetLabel, this.targetShowValue,
-        this.showVarianceCards, this.sortBars, this.invertColorSemantics, this.maxCategories, this.otherLabel];
+        this.showVarianceCards, this.showAnomalies, this.sortBars, this.invertColorSemantics, this.maxCategories, this.otherLabel];
 }
 
 // ─── Ejes (1.2) ───────────────────────────────────────────────────────────────
@@ -276,6 +284,12 @@ class CardSettings extends FormattingSettingsCard {
     show = new formattingSettings.ToggleSwitch({
         name: "show", displayName: "Show summary cards", displayNameKey: "cards_show", value: true
     });
+    // 1.3: las tarjetas se ocultan solas cuando el puente no compara dos momentos de la misma cifra (cardsMakeSense en
+    // waterfallEngine.ts): sin total de apertura y de cierre, o con todos los cambios en el mismo sentido (un P&L de
+    // ventas a EBITDA). Apagarlo las muestra siempre, como hasta la 1.2.
+    autoHide = new formattingSettings.ToggleSwitch({
+        name: "autoHide", displayName: "Hide when the bridge is not a comparison", displayNameKey: "cards_autoHide", value: true
+    });
     labelFontSize = new formattingSettings.NumUpDown({
         name: "labelFontSize", displayName: "Caption font size", displayNameKey: "labelFontSize", value: 9,
         options: rango(7, 16)
@@ -299,7 +313,7 @@ class CardSettings extends FormattingSettingsCard {
     name        = "cardSettings";
     displayName = "Summary Cards";
     displayNameKey = "card_cardSettings";
-    slices      = [this.show, this.labelFontSize, this.valueFontSize,
+    slices      = [this.show, this.autoHide, this.labelFontSize, this.valueFontSize,
         this.textColorAuto, this.textColor, this.backgroundAuto, this.backgroundColor];
 }
 
@@ -357,17 +371,24 @@ class IbcsSettings extends FormattingSettingsCard {
 
 // ─── Plantilla de estilo y consejos (1.2) ─────────────────────────────────────
 
+export const STYLE_ITEMS = [
+    item("classic", "Report theme", "Enum_reportTheme"),
+    item("boardroom", "Boardroom", "Enum_boardroom"),
+    item("ledger", "Ledger", "Enum_ledger"),
+    item("editorial", "Editorial", "Enum_editorial"),
+    item("signal", "Signal", "Enum_signal"),
+    item("aurora", "Aurora", "Enum_aurora"),
+    item("terrace", "Terrace", "Enum_terrace")
+];
+
 class StyleSettings extends FormattingSettingsCard {
     template = new formattingSettings.ItemDropdown({
         name: "template", displayName: "Template", displayNameKey: "style_template",
-        items: [
-            item("classic", "Classic", "Enum_classic"),
-            item("modern", "Modern", "Enum_modern"),
-            item("soft", "Soft", "Enum_soft"),
-            item("mono", "One colour", "Enum_mono"),
-            item("dark", "Dark background", "Enum_dark")
-        ],
-        value: item("classic", "Classic", "Enum_classic")
+        // 1.3: el tema del informe (valor interno "classic") y los seis estilos de la colección TCViz, todos gratis.
+        // Las plantillas de la 1.2 (modern, soft, mono, dark) ya no se ofrecen, pero un informe que las tenga
+        // guardadas se sigue dibujando igual: siguen en TEMPLATES y en la enumeración de capabilities.json.
+        items: STYLE_ITEMS,
+        value: STYLE_ITEMS[0]
     });
     // Solo con "One colour": de él salen el total (tal cual), las subidas (aclarado) y las bajadas (oscurecido).
     baseColor = new formattingSettings.ColorPicker({
@@ -380,6 +401,28 @@ class StyleSettings extends FormattingSettingsCard {
     displayName = "Style template";
     displayNameKey = "card_style";
     slices = [this.template, this.baseColor, this.guide];
+}
+
+// ─── Accesibilidad (1.3): la misma tarjeta que el resto de la cartera. Gratis. ─
+
+const HC_ITEMS = [item("auto", "Automatic (Windows setting)", "Enum_hc_auto"), item("on", "On", "Enum_hc_on")];
+class AccessibilitySettings extends FormattingSettingsCard {
+    highContrast = new formattingSettings.ItemDropdown({
+        name: "highContrast", displayName: "High contrast", displayNameKey: "Prop_accessibility_highContrast", items: HC_ITEMS, value: HC_ITEMS[0]
+    });
+    focusColor = new formattingSettings.ColorPicker({
+        name: "focusColor", displayName: "Focus color", displayNameKey: "Prop_accessibility_focusColor", value: { value: "#005A9E" }
+    });
+    focusWidth = new formattingSettings.NumUpDown({
+        name: "focusWidth", displayName: "Focus width", displayNameKey: "Prop_accessibility_focusWidth", value: 2, options: rango(1, 6)
+    });
+    minTextSize = new formattingSettings.NumUpDown({
+        name: "minTextSize", displayName: "Minimum text size", displayNameKey: "Prop_accessibility_minTextSize", value: 6, options: rango(6, 24)
+    });
+    name = "accessibility";
+    displayName = "Accessibility";
+    displayNameKey = "Obj_accessibility";
+    slices = [this.highContrast, this.focusColor, this.focusWidth, this.minTextSize];
 }
 
 // ─── Root model ───────────────────────────────────────────────────────────────
@@ -395,6 +438,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     cardSettings  = new CardSettings();
     tableSettings = new TableSettings();
     ibcs          = new IbcsSettings();
+    accessibility = new AccessibilitySettings();
     cards         = [
         this.style,
         this.chartSettings,
@@ -405,7 +449,8 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
         this.numberFormat,
         this.cardSettings,
         this.tableSettings,
-        this.ibcs
+        this.ibcs,
+        this.accessibility
     ];
 }
 
@@ -454,4 +499,76 @@ export const TEMPLATES: Record<string, Record<string, Record<string, string | nu
         cardSettings: { textColorAuto: false, textColor: "#F3F2F1", backgroundAuto: false, backgroundColor: "#2B2B2B" },
         tableSettings: { backgroundAuto: false, backgroundColor: "#2B2B2B" }
     }
+};
+
+// ─── Estilos de la colección TCViz (1.3) ──────────────────────────────────────
+
+/**
+ * Los seis estilos de la colección, con los mismos tokens que Bullet, Dynamic Matrix, Org Chart o Box & Whisker, para
+ * que una página en Boardroom se lea como un solo informe. up/down = subidas y bajadas; total = el color de los
+ * anclajes (apertura, subtotales y cierre), elegido entre los de la paleta del estilo para que no se confunda con
+ * up/down (en Editorial, Signal y Aurora el primer color de la serie ES el de subida o bajada).
+ */
+export const COLLECTION_STYLES = ["boardroom", "ledger", "editorial", "signal", "aurora", "terrace"];
+export interface StyleTokens { bg: string; text: string; axis: string; grid: string; up: string; down: string; total: string; dark: boolean; font?: string; grad?: string; }
+export const STYLE_TOKENS: Record<string, StyleTokens> = {
+    boardroom: { bg: "#16263D", text: "#F2F0E8", axis: "#9FB0C6", grid: "#2A3E5C", up: "#6FCF97", down: "#EB8A7B", total: "#C9A45C", dark: true },
+    ledger:    { bg: "#FBF8EF", text: "#231F16", axis: "#6E6652", grid: "#D9D2BE", up: "#2F6B3B", down: "#A32A2A", total: "#3A3528", dark: false, font: "Georgia, serif" },
+    editorial: { bg: "#FFFFFF", text: "#111111", axis: "#5F5F5F", grid: "#E2E2E2", up: "#111111", down: "#D7263D", total: "#5F5F5F", dark: false, font: "Georgia, serif" },
+    signal:    { bg: "#FFFFFF", text: "#14202B", axis: "#566472", grid: "#D9DEE4", up: "#1F7A4D", down: "#C0392B", total: "#14202B", dark: false },
+    aurora:    { bg: "#10395E", text: "#FFFFFF", axis: "#C5D3E3", grid: "#3A5C7E", up: "#7CE7D0", down: "#FF9DB0", total: "#9DB7FF", dark: true,
+                 grad: "linear-gradient(135deg, #1B1147, #10395E 50%, #0B5A5E)" },
+    terrace:   { bg: "#FBF5EC", text: "#3A2A1E", axis: "#7A6450", grid: "#E5D6C2", up: "#5E7128", down: "#B5372A", total: "#7A6450", dark: false },
+};
+
+/** Mezcla dos colores #RRGGBB (t = 0 → a, 1 → b). */
+export function mixHex(a: string, b: string, t: number): string {
+    const p = (h: string) => { const n = parseInt(h.replace("#", "").slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+    const x = p(a), y = p(b);
+    return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+/** Lo que pone un estilo de la colección donde el autor no ha fijado nada: barras, textos, ejes, tarjetas y tabla. */
+function styleTemplate(t: StyleTokens): Record<string, Record<string, string | number | boolean>> {
+    return {
+        colorSettings: { positiveColor: t.up, negativeColor: t.down, totalColor: t.total, targetColor: t.text, legendTextColor: t.axis,
+            ...(t.font ? { legendFontFamily: t.font } : {}) },
+        labelSettings: { valueLabelColor: t.text, categoryLabelColor: t.axis },
+        valueAxis: { color: t.axis },
+        cardSettings: { textColorAuto: false, textColor: t.text, backgroundAuto: false, backgroundColor: mixHex(t.bg, t.text, 0.08) },
+        tableSettings: { backgroundAuto: false, backgroundColor: mixHex(t.bg, t.text, 0.05) }
+    };
+}
+for (const k of COLLECTION_STYLES) TEMPLATES[k] = styleTemplate(STYLE_TOKENS[k]);
+
+/** Colores del tema del informe que lee "Report theme" (la paleta extendida del host). */
+export interface ThemeInk { positive?: string; negative?: string; total?: string; foreground?: string; secondary?: string; }
+
+/**
+ * "Report theme" (valor interno "classic", 1.3): subidas y bajadas con el sentimiento bueno/malo del tema
+ * (colorPalette.positive / negative) y los totales con el primer color de datos del tema; textos y ejes con su tinta.
+ * Lo que el host no da se queda en los colores de siempre (los de Classic hasta la 1.2).
+ */
+export function reportThemeTemplate(ink: ThemeInk): Record<string, Record<string, string | number | boolean>> {
+    const ok = (c?: string) => typeof c === "string" && /^#[0-9a-fA-F]{6}$/.test(c);
+    const col: Record<string, string> = {};
+    if (ok(ink.positive)) col.positiveColor = ink.positive;
+    if (ok(ink.negative)) col.negativeColor = ink.negative;
+    if (ok(ink.total)) col.totalColor = ink.total;
+    if (ok(ink.secondary)) col.legendTextColor = ink.secondary;
+    const out: Record<string, Record<string, string | number | boolean>> = {};
+    if (Object.keys(col).length) out.colorSettings = col;
+    const lbl: Record<string, string> = {};
+    if (ok(ink.foreground)) lbl.valueLabelColor = ink.foreground;
+    if (ok(ink.secondary)) lbl.categoryLabelColor = ink.secondary;
+    if (Object.keys(lbl).length) out.labelSettings = lbl;
+    if (ok(ink.secondary)) out.valueAxis = { color: ink.secondary };
+    return out;
+}
+
+/** Propiedades que puede definir "Report theme": las que se borran al elegirlo (aunque el tema no las dé todas). */
+export const REPORT_THEME_PROPS: Record<string, string[]> = {
+    colorSettings: ["positiveColor", "negativeColor", "totalColor", "legendTextColor"],
+    labelSettings: ["valueLabelColor", "categoryLabelColor"],
+    valueAxis: ["color"]
 };

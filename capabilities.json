@@ -571,6 +571,13 @@
             "bool": true
           },
           "displayNameKey": "targetShowValue"
+        },
+        "showAnomalies": {
+          "displayName": "Flag unusual changes (!)",
+          "displayNameKey": "showAnomalies",
+          "type": {
+            "bool": true
+          }
         }
       },
       "displayNameKey": "card_chartSettings"
@@ -634,6 +641,13 @@
             }
           },
           "displayNameKey": "backgroundColor"
+        },
+        "autoHide": {
+          "displayName": "Hide when the bridge is not a comparison",
+          "displayNameKey": "cards_autoHide",
+          "type": {
+            "bool": true
+          }
         }
       },
       "displayNameKey": "card_cardSettings"
@@ -815,8 +829,8 @@
             "enumeration": [
               {
                 "value": "classic",
-                "displayName": "Classic",
-                "displayNameKey": "Enum_classic"
+                "displayName": "Report theme",
+                "displayNameKey": "Enum_reportTheme"
               },
               {
                 "value": "modern",
@@ -837,6 +851,36 @@
                 "value": "dark",
                 "displayName": "Dark background",
                 "displayNameKey": "Enum_dark"
+              },
+              {
+                "value": "boardroom",
+                "displayName": "Boardroom",
+                "displayNameKey": "Enum_boardroom"
+              },
+              {
+                "value": "ledger",
+                "displayName": "Ledger",
+                "displayNameKey": "Enum_ledger"
+              },
+              {
+                "value": "editorial",
+                "displayName": "Editorial",
+                "displayNameKey": "Enum_editorial"
+              },
+              {
+                "value": "signal",
+                "displayName": "Signal",
+                "displayNameKey": "Enum_signal"
+              },
+              {
+                "value": "aurora",
+                "displayName": "Aurora",
+                "displayNameKey": "Enum_aurora"
+              },
+              {
+                "value": "terrace",
+                "displayName": "Terrace",
+                "displayNameKey": "Enum_terrace"
               }
             ]
           },
@@ -871,6 +915,55 @@
             "formatting": {
               "formatString": true
             }
+          }
+        }
+      }
+    },
+    "accessibility": {
+      "displayName": "Accessibility",
+      "displayNameKey": "Obj_accessibility",
+      "properties": {
+        "highContrast": {
+          "displayName": "High contrast",
+          "displayNameKey": "Prop_accessibility_highContrast",
+          "type": {
+            "enumeration": [
+              {
+                "value": "auto",
+                "displayName": "Automatic (Windows setting)",
+                "displayNameKey": "Enum_hc_auto"
+              },
+              {
+                "value": "on",
+                "displayName": "On",
+                "displayNameKey": "Enum_hc_on"
+              }
+            ]
+          }
+        },
+        "focusColor": {
+          "displayName": "Focus color",
+          "displayNameKey": "Prop_accessibility_focusColor",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "focusWidth": {
+          "displayName": "Focus width",
+          "displayNameKey": "Prop_accessibility_focusWidth",
+          "type": {
+            "numeric": true
+          }
+        },
+        "minTextSize": {
+          "displayName": "Minimum text size",
+          "displayNameKey": "Prop_accessibility_minTextSize",
+          "type": {
+            "numeric": true
           }
         }
       }
