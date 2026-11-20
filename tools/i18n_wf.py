@@ -220,4 +220,14 @@ P.update({
         "每行：total、subtotal 或 delta。其他值视为 delta。将第一行和最后一行标为 total。按“第一个”聚合，而非求和。",
         "행별 total, subtotal 또는 delta. 그 외는 delta. 첫 행과 마지막 행은 total로 표시. 합계가 아닌 '첫 번째'로 집계.",
         "Por fila: total, subtotal o delta. Lo demás cuenta como delta. Marca la primera y la última fila como total. Agrega como Primero, no Suma."],
+    # 1.3: tarjeta Accesibilidad (mismas traducciones que Dynamic Matrix), aviso de anomalías y tarjetas automáticas
+    "Accessibility": ["Acessibilidade", "Accessibilité", "Barrierefreiheit", "Accessibilità", "Toegankelijkheid", "Ułatwienia dostępu", "アクセシビリティ", "辅助功能", "접근성", "Accesibilidad"],
+    "Automatic (Windows setting)": ["Automático (configuração do Windows)", "Automatique (paramètre Windows)", "Automatisch (Windows-Einstellung)", "Automatico (impostazione di Windows)", "Automatisch (Windows-instelling)", "Automatycznie (ustawienie systemu Windows)", "自動 (Windows の設定)", "自动 (Windows 设置)", "자동(Windows 설정)", "Automático (ajuste de Windows)"],
+    "Focus color": ["Cor do foco", "Couleur du focus", "Fokusfarbe", "Colore del focus", "Kleur focus", "Kolor fokusu", "フォーカスの色", "焦点颜色", "포커스 색", "Color del foco"],
+    "Focus width": ["Largura do foco", "Épaisseur du focus", "Fokusbreite", "Spessore del focus", "Breedte focus", "Grubość fokusu", "フォーカスの幅", "焦点宽度", "포커스 두께", "Grosor del foco"],
+    "High contrast": ["Alto contraste", "Contraste élevé", "Hoher Kontrast", "Contrasto elevato", "Hoog contrast", "Wysoki kontrast", "ハイ コントラスト", "高对比度", "고대비", "Alto contraste"],
+    "Minimum text size": ["Tamanho mínimo do texto", "Taille de texte minimale", "Minimale Textgröße", "Dimensione minima del testo", "Minimale tekstgrootte", "Minimalny rozmiar tekstu", "最小のテキスト サイズ", "最小文本大小", "최소 텍스트 크기", "Tamaño mínimo del texto"],
+    "On": ["Ativado", "Activé", "Ein", "Attivato", "Aan", "Włączone", "オン", "开", "켜기", "Activado"],
+    "Flag unusual changes (!)": ["Sinalizar variações atípicas (!)", "Signaler les variations inhabituelles (!)", "Ungewöhnliche Veränderungen markieren (!)", "Segnala variazioni insolite (!)", "Ongebruikelijke wijzigingen markeren (!)", "Oznaczaj nietypowe zmiany (!)", "異常な変化を示す (!)", "标记异常变化 (!)", "비정상적인 변화 표시(!)", "Marcar cambios atípicos (!)"],
+    "Hide when the bridge is not a comparison": ["Ocultar quando a ponte não é uma comparação", "Masquer si le pont n'est pas une comparaison", "Ausblenden, wenn die Brücke kein Vergleich ist", "Nascondi se il ponte non è un confronto", "Verbergen als de brug geen vergelijking is", "Ukryj, gdy most nie jest porównaniem", "ブリッジが比較でない場合は非表示", "桥图不是比较时隐藏", "브리지가 비교가 아니면 숨기기", "Ocultar si el puente no es una comparación"],
 })
