@@ -167,6 +167,15 @@ async def main():
         check("la barra de consejos ofrece Report theme y los seis estilos", n == 7, str(n))
         await pg.close()
 
+        pg = await page(b, dv(PERIODO, {"style": {"template": "aurora"}}), name="02b_guia_aurora")
+        st = await pg.evaluate("() => { const g = document.querySelector('.wf-guide'); const cs = getComputedStyle(g); return { bg: cs.backgroundColor, c: cs.color }; }")
+        check("Aurora: barra de consejos oscura con texto claro", st["bg"] != "rgb(255, 255, 255)" and st["c"] == "rgb(255, 255, 255)", str(st))
+        await pg.close()
+        pg = await page(b, dv(PERIODO, {"style": {"template": "boardroom"}}), sys_hc=True)
+        st = await pg.evaluate("() => { const g = document.querySelector('.wf-guide'); const cs = getComputedStyle(g); return { bg: cs.backgroundColor, c: cs.color }; }")
+        check("alto contraste: barra de consejos con los colores del tema", st["bg"] == "rgb(0, 0, 0)" and st["c"] == "rgb(255, 255, 0)", str(st))
+        await pg.close()
+
         print("Accesibilidad")
         acc = {"accessibility": {"highContrast": "on", "minTextSize": 14, "focusColor": {"solid": {"color": "#D00000"}}, "focusWidth": 5}}
         pg = await page(b, dv(PERIODO, {**acc, "style": {"template": "boardroom"}}), name="03_alto_contraste")
@@ -207,6 +216,29 @@ async def main():
         check("con acumulados negativos: el eje baja de 0 con margen", bool(ax) and ax[0][:1] in ("−", "-"), str(ax))
         await pg.close()
 
+        print("Marcas del eje: redondas y sin repetir")
+        import re
+        def num(t):
+            m = re.match(r"^([−-]?)([\d.,]+)([kM]?)$", t.replace(" ", ""))
+            if not m: return None
+            v = float(m.group(2).replace(",", "")) * {"": 1, "k": 1e3, "M": 1e6}[m.group(3)]
+            return -v if m.group(1) else v
+        casos = [("periodo", dv(PERIODO), "v"), ("pyg", dv(PYG), "v"), ("negativo", dv(NEGATIVO), "v"),
+                 ("periodo-h", dv(PERIODO, {"chartSettings": {"orientation": "horizontal"}}), "h"),
+                 ("pyg-h", dv(PYG, {"chartSettings": {"orientation": "horizontal"}}), "h"),
+                 ("cerca", dv([("A", 950.0), ("B", 60.0), ("C", -40.0), ("D", 0.0)]), "v"),
+                 ("millones", dv([("A", 2.4e6), ("B", 3.1e5), ("C", -1.2e5), ("D", 0.0)]), "v")]
+        for nombre, data, o in casos:
+            pg = await page(b, data, name="08_eje_" + nombre if nombre in ("periodo", "periodo-h") else None)
+            ax = await pg.evaluate(AXIS)
+            await pg.close()
+            vals = [num(t) for t in ax]
+            ok_num = all(v is not None for v in vals)
+            pasos = sorted({round(vals[i + 1] - vals[i], 6) for i in range(len(vals) - 1)}) if ok_num and len(vals) > 1 else []
+            redondo = len(pasos) == 1 and any(abs(pasos[0] / (m * 10 ** e) - 1) < 1e-6 for m in (1, 2, 2.5, 5) for e in range(-2, 9))
+            check(f"eje {nombre}: sin etiquetas repetidas", len(ax) >= 2 and len(set(ax)) == len(ax), str(ax))
+            check(f"eje {nombre}: paso redondo (1-2-2,5-5 × 10^n) y regular", redondo, f"{ax} pasos {pasos}")
+
         print("Aviso de anomalías")
         pg = await page(b, dv(PYG))
         n_on = await pg.evaluate(DOTS)
@@ -216,6 +248,11 @@ async def main():
         await pg.close()
         check("encendido por defecto: el coste de ventas sale marcado", n_on >= 1, str(n_on))
         check("apagado: sin marcas", n_off == 0, str(n_off))
+        pg = await page(b, dv(PYG, {"accessibility": {"minTextSize": 14}}), name="05b_anomalia_min14")
+        st = await pg.evaluate("""() => { const t = Array.from(document.querySelectorAll('svg text')).find(x => x.textContent === '!');
+            const c = document.querySelector('svg circle'); return t ? { fs: parseFloat(t.getAttribute('font-size')), r: parseFloat(c.getAttribute('r')) } : null; }""")
+        check("el '!' respeta el tamaño mínimo (14) y el círculo crece con él", bool(st) and st["fs"] >= 14 and st["r"] * 2 > st["fs"], str(st))
+        await pg.close()
 
         print("Tarjetas de resumen")
         pg = await page(b, dv(PERIODO))

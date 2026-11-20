@@ -491,11 +491,17 @@ export class Visual implements IVisual {
         if (!vp || vp.width < 340 || vp.height < 200) return;
         const H = this.hc();
         const hc = H.on;
-        const azul = hc ? H.sel : "#2B6CB0";
-        const fg = hc ? H.fg : "";
+        // 1.3: con un estilo oscuro de la colección la barra toma sus tokens (fondo, tinta y acento); en alto contraste,
+        // los colores del tema. Con los estilos claros y el tema del informe, la barra blanca de siempre.
+        const tk: StyleTokens | null = !hc ? STYLE_TOKENS[String((s.style.template.value as any)?.value ?? "classic")] ?? null : null;
+        const oscuro = !!tk?.dark;
+        const azul = hc ? H.sel : oscuro ? tk.total : "#2B6CB0";
+        const fg = hc ? H.fg : oscuro ? tk.text : "";
         const g = document.createElement("div");
         g.className = "wf-guide";
         g.style.fontSize = this.fsz(11.5) + "px";
+        if (oscuro) Object.assign(g.style, { background: mixHex(tk.bg, tk.text, 0.06), color: fg, borderColor: azul,
+            boxShadow: "0 4px 14px rgba(0, 0, 0, 0.45)" });
         g.setAttribute("role", "region");
         g.setAttribute("aria-label", this.t("Guide_Title", "Setup tips"));
         if (hc) Object.assign(g.style, { background: H.bg, color: fg, borderColor: azul });
@@ -518,7 +524,7 @@ export class Visual implements IVisual {
             b.textContent = texto;
             b.setAttribute("aria-pressed", String(on));
             b.style.borderColor = azul;
-            if (on) { b.style.background = azul; b.style.color = hc ? H.bg : "#FFFFFF"; } else b.style.color = azul;
+            if (on) { b.style.background = azul; b.style.color = hc ? H.bg : oscuro ? tk.bg : "#FFFFFF"; } else b.style.color = azul;
             b.addEventListener("click", accion);
             f.appendChild(b);
         };
@@ -544,7 +550,7 @@ export class Visual implements IVisual {
         x.textContent = "✕";
         x.title = this.t("Guide_Close", "Hide tips (Format → Style template)");
         x.setAttribute("aria-label", x.title);
-        if (hc) x.style.color = fg;
+        if (hc || oscuro) x.style.color = fg;
         x.addEventListener("click", () => this.persistir("style", { guide: false }));
         g.appendChild(x);
         this.container.appendChild(g);

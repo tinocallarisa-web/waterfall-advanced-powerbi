@@ -79,16 +79,46 @@ export class NumberFormatter {
         return sign + withSymbol;
     }
 
-    /** Formatea para el eje (auto-escala). En modo modelo, unidades automáticas sobre la cadena de la medida. */
-    formatAxis(v: number, range = Math.abs(v)): string {
+    /**
+     * Etiquetas de las marcas del eje (1.3), todas con la misma unidad y los decimales justos para que dos marcas nunca
+     * se repitan (antes "1k" salía dos veces: 950 y 1.100 redondeaban igual). Unidad: la mayor (M, k) con la que el
+     * paso se escribe con un decimal como mucho; si no, sin unidad (0, 250, 500, 750, 1.000). En modo modelo, la cadena
+     * de la medida con unidades automáticas, subiendo la precisión hasta que no se repitan; si no lo logra, la propia.
+     */
+    formatAxisTicks(ticks: number[], step: number): string[] {
+        const range = Math.max(...ticks.map(Math.abs), 0);
+        const unico = (l: string[]) => new Set(l).size === l.length;
         if (this.model) {
-            try { return this.fmt(this.columnFormat, range).format(v); } catch { /* cae al formato propio */ }
+            for (let p = -1; p <= 4; p++) {
+                try {
+                    const f = valueFormatter.create({ format: this.columnFormat || "#,0.##", value: range, cultureSelector: this.locale,
+                        ...(p >= 0 ? { precision: p } : {}) } as any);
+                    const l = ticks.map(v => f.format(v));
+                    if (unico(l)) return l;
+                } catch { break; }
+            }
         }
-        const abs  = Math.abs(v);
-        const sign = v < 0 ? "−" : "";
-        if      (abs >= 1_000_000) return sign + (abs / 1_000_000).toFixed(1) + "M";
-        else if (abs >= 1_000)     return sign + (abs / 1_000).toFixed(0) + "k";
-        return Math.round(v).toString();
+        const dec = (x: number): number => {
+            for (let d = 0; d <= 3; d++) if (Math.abs(Math.round(x * Math.pow(10, d)) - x * Math.pow(10, d)) < 1e-6) return d;
+            return 3;
+        };
+        const unidades: [number, string][] = this.scale === "M" ? [[1e6, "M"]] : this.scale === "k" ? [[1e3, "k"]]
+            : this.scale === "none" ? [[1, ""]] : [[1e6, "M"], [1e3, "k"], [1, ""]];
+        let [u, suf] = unidades[unidades.length - 1];
+        if (unidades.length > 1) {
+            const ok = unidades.find(([uu]) => uu <= Math.max(range, 1) && dec(step / uu) <= 1);
+            if (ok) [u, suf] = ok;
+        }
+        const d = Math.min(3, dec(step / u));
+        return ticks.map(v => {
+            if (v === 0) return "0";
+            const abs = Math.abs(v) / u;
+            const num = suf === "" && this.sepMiles
+                ? abs.toLocaleString(this.locale || undefined, { minimumFractionDigits: d, maximumFractionDigits: d })
+                : abs.toLocaleString(this.locale || undefined, { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false });
+            const conSuf = num + suf;
+            return (v < 0 ? "−" : "") + (this.symbol ? (this.prefix ? this.symbol + conSuf : conSuf + this.symbol) : conSuf);
+        });
     }
 
     /** Formatea variación con signo explícito */

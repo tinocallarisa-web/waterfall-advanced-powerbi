@@ -1,5 +1,5 @@
 import powerbi from "powerbi-visuals-api";
-import { ComputedBar, WaterfallSummary, computeYDomain } from "./waterfallEngine";
+import { ComputedBar, WaterfallSummary, computeYDomain, niceTicks } from "./waterfallEngine";
 import { VisualFormattingSettingsModel } from "./settings";
 import { NumberFormatter } from "./formatter";
 
@@ -347,16 +347,18 @@ export class WaterfallRenderer {
             this.svg.appendChild(rect);
 
             if (ch.showAnomalies.value && summary.anomalies.find(a => a.label === bar.label)) {
-                const acx = x + barW - 7;
-                const acy = yTop + 7;
+                const rA = Math.max(5, this.fz(7) * 0.72) + 2;
+                const acx = x + barW - rA;
+                const acy = yTop + rA;
                 const dot = this.el("circle") as SVGCircleElement;
                 dot.setAttribute("cx", String(acx)); dot.setAttribute("cy", String(acy));
-                dot.setAttribute("r", "5"); dot.setAttribute("fill", this.hcFg || "#E24B4A");
+                dot.setAttribute("r", String(Math.max(5, this.fz(7) * 0.72))); dot.setAttribute("fill", this.hcFg || "#E24B4A");
                 dot.setAttribute("stroke", this.hcBg || "#fff"); dot.setAttribute("stroke-width", "1");
                 this.svg.appendChild(dot);
                 const warn = this.el("text") as SVGTextElement;
-                warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + 2.5));
-                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", this.hcBg || "#fff");
+                // 1.3: el "!" respeta el tamaño mínimo de texto de Accesibilidad (y el círculo crece con él).
+                warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + this.fz(7) * 0.36));
+                warn.setAttribute("font-size", String(this.fz(7))); warn.setAttribute("fill", this.hcBg || "#fff");
                 warn.setAttribute("text-anchor", "middle"); warn.setAttribute("font-weight", "700");
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
@@ -544,16 +546,18 @@ export class WaterfallRenderer {
             this.svg.appendChild(rect);
 
             if (ch.showAnomalies.value && summary.anomalies.find(a => a.label === bar.label)) {
-                const acx = bx + bw - 7;
-                const acy = y + 7;
+                const rA = Math.max(5, this.fz(7) * 0.72) + 2;
+                const acx = bx + bw - rA;
+                const acy = y + rA;
                 const dot = this.el("circle") as SVGCircleElement;
                 dot.setAttribute("cx", String(acx)); dot.setAttribute("cy", String(acy));
-                dot.setAttribute("r", "5"); dot.setAttribute("fill", this.hcFg || "#E24B4A");
+                dot.setAttribute("r", String(Math.max(5, this.fz(7) * 0.72))); dot.setAttribute("fill", this.hcFg || "#E24B4A");
                 dot.setAttribute("stroke", this.hcBg || "#fff"); dot.setAttribute("stroke-width", "1");
                 this.svg.appendChild(dot);
                 const warn = this.el("text") as SVGTextElement;
-                warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + 2.5));
-                warn.setAttribute("font-size", "7"); warn.setAttribute("fill", this.hcBg || "#fff");
+                // 1.3: el "!" respeta el tamaño mínimo de texto de Accesibilidad (y el círculo crece con él).
+                warn.setAttribute("x", String(acx)); warn.setAttribute("y", String(acy + this.fz(7) * 0.36));
+                warn.setAttribute("font-size", String(this.fz(7))); warn.setAttribute("fill", this.hcBg || "#fff");
                 warn.setAttribute("text-anchor", "middle"); warn.setAttribute("font-weight", "700");
                 warn.textContent = "!"; this.svg.appendChild(warn);
             }
@@ -603,25 +607,29 @@ export class WaterfallRenderer {
     private renderYAxis(yScale: (v: number) => number, minY: number, maxY: number,
                         chartW: number, fmt: NumberFormatter, _tickColor: string): void {
         const va = this.vaSettings;
-        const range = Math.max(Math.abs(minY), Math.abs(maxY));
-        for (let t = 0; t <= 5; t++) {
-            const v = minY + (maxY - minY) * (t / 5);
+        // 1.3: marcas redondas (1-2-2,5-5 × 10^n), tantas como quepan con aire, y sin etiquetas repetidas.
+        const plotH = Math.abs(yScale(minY) - yScale(maxY));
+        const { ticks, step } = niceTicks(minY, maxY, Math.max(2, Math.min(6, Math.floor(plotH / (this.fz(va.fontSize) * 3.2)))));
+        const labels = fmt.formatAxisTicks(ticks, step);
+        ticks.forEach((v, i) => {
             const y = yScale(v);
             if (va.gridlines) this.line(this.PAD_LEFT, y, this.PAD_LEFT + chartW, y, this.ink.grid, 0.5);
-            if (va.show) this.text(this.PAD_LEFT - 5, y + 3, fmt.formatAxis(v, range), va.fontSize, va.color, "end").setAttribute("data-o", "axis");
-        }
+            if (va.show) this.text(this.PAD_LEFT - 5, y + 3, labels[i], va.fontSize, va.color, "end").setAttribute("data-o", "axis");
+        });
     }
 
     private renderXAxis(xScale: (v: number) => number, minV: number, maxV: number,
                         chartH: number, fmt: NumberFormatter, _padLeft: number, _tickColor: string): void {
         const va = this.vaSettings;
-        const range = Math.max(Math.abs(minV), Math.abs(maxV));
-        for (let t = 0; t <= 5; t++) {
-            const v = minV + (maxV - minV) * (t / 5);
+        // 1.3: marcas redondas y sin repetir; en horizontal, según el ancho que ocupa cada etiqueta.
+        const plotW = Math.abs(xScale(maxV) - xScale(minV));
+        const { ticks, step } = niceTicks(minV, maxV, Math.max(2, Math.min(6, Math.floor(plotW / (this.fz(va.fontSize) * 7)))));
+        const labels = fmt.formatAxisTicks(ticks, step);
+        ticks.forEach((v, i) => {
             const x = xScale(v);
             if (va.gridlines) this.line(x, this.PAD_TOP, x, this.PAD_TOP + chartH, this.ink.grid, 0.5);
-            if (va.show) this.text(x, this.PAD_TOP + chartH + 14, fmt.formatAxis(v, range), va.fontSize, va.color, "middle").setAttribute("data-o", "axis");
-        }
+            if (va.show) this.text(x, this.PAD_TOP + chartH + 14, labels[i], va.fontSize, va.color, "middle").setAttribute("data-o", "axis");
+        });
     }
 
     private renderLegend(colors: Record<string, string>, textColor: string, fs = 9, baseY = 16, family = ""): void {

@@ -171,3 +171,29 @@ export function cardsMakeSense(computed: ComputedBar[], summary: WaterfallSummar
     const deltas = computed.filter(b => b.barType === "delta" && b.value !== 0);
     return deltas.some(b => b.value > 0) && deltas.some(b => b.value < 0);
 }
+
+/**
+ * Marcas "bonitas" del eje de valores (1.3): pasos de 1, 2, 2,5 o 5 × 10^n, solo las que caen dentro del dominio.
+ * Hasta la 1.2 el eje partía el dominio en cinco trozos iguales y salían 258 / 515 / 773. Como en Bullet 1.6.
+ * target = número aproximado de marcas; siempre al menos dos.
+ */
+export function niceTicks(min: number, max: number, target = 5): { ticks: number[]; step: number } {
+    if (!(max > min)) return { ticks: [min], step: 1 };
+    const pick = (raw: number): number => {
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+        const n = raw / mag;
+        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+    };
+    const build = (step: number): number[] => {
+        const out: number[] = [];
+        const eps = step * 1e-9;
+        for (let k = Math.ceil((min - eps) / step); k * step <= max + eps && out.length < 50; k++)
+            out.push(parseFloat((k * step).toPrecision(12)));
+        return out;
+    };
+    let step = pick((max - min) / Math.max(1, target));
+    let ticks = build(step);
+    // Con un eje corto el redondeo puede dejar una sola marca: se baja al paso bonito anterior.
+    for (let i = 0; i < 6 && ticks.length < 2; i++) { step = pick(step / 2.01); ticks = build(step); }
+    return { ticks, step };
+}
