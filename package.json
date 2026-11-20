@@ -1,6 +1,6 @@
 {
   "name": "powerbi-waterfall-advanced",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "SEE LICENSE IN LICENSE",
   "description": "Advanced Waterfall Chart for Power BI — subtotals, drill-through, targets, AI narratives",
   "scripts": {
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "powerbi-visuals-api": "~5.11.1",
+    "powerbi-visuals-utils-dataviewutils": "^6.1.0",
     "powerbi-visuals-utils-formattingmodel": "^7.1.0",
     "powerbi-visuals-utils-formattingutils": "^6.1.2",
     "powerbi-visuals-utils-onobjectutils": "^6.0.3"
