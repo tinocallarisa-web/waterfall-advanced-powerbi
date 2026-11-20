@@ -139,11 +139,35 @@ export function computeSummary(computed: ComputedBar[]): WaterfallSummary {
 
 /**
  * Dominio Y para el eje, con márgenes para etiquetas y barras negativas.
+ *
+ * 1.3: si todos los acumulados y totales son >= 0, el eje empieza en 0. Hasta la 1.2 el margen de abajo (8 % del
+ * rango) se aplicaba siempre y un P&L todo en positivo bajaba el eje a -1,7 M sin ningún valor negativo. Con algún
+ * negativo se mantiene el margen de siempre.
  */
 export function computeYDomain(computed: ComputedBar[]): [number, number] {
     const allY  = computed.flatMap(b => [b.base, b.top]);
     const minV  = Math.min(...allY);
     const maxV  = Math.max(...allY);
     const range = maxV - minV || Math.abs(maxV) || 1; // evita range=0
-    return [minV - range * 0.08, maxV + range * 0.15];
+    return [minV >= 0 ? 0 : minV - range * 0.08, maxV + range * 0.15];
+}
+
+/**
+ * ¿Tienen sentido las tarjetas de resumen (total inicial y final, variación %, mayor subida y mayor bajada)? (1.3)
+ *
+ * Las tarjetas leen el puente como la comparación de UNA MISMA cifra entre dos momentos (ventas 2025 → ventas 2026).
+ * No la hay, y se ocultan, cuando:
+ *   1. falta el total de apertura o el de cierre (menos de dos barras "total"), o la apertura es 0: sin las dos
+ *      cifras, el total final repite el inicial y la variación sale 0 % o infinita;
+ *   2. todos los cambios van en el mismo sentido (solo bajadas o solo subidas): es una descomposición, no una
+ *      comparación — el P&L de ventas a EBITDA (solo costes) o una suma desde cero. Ahí la "variación" de -77 % entre
+ *      ventas y EBITDA no significa nada y una de las dos tarjetas de mayor cambio sale vacía ("—").
+ * Un puente de periodos con cambios en los dos sentidos las conserva. El autor puede mostrarlas siempre apagando
+ * Tarjetas de resumen → Ocultar si el puente no es una comparación.
+ */
+export function cardsMakeSense(computed: ComputedBar[], summary: WaterfallSummary): boolean {
+    const totals = computed.filter(b => b.barType === "total");
+    if (totals.length < 2 || !summary.initialValue) return false;
+    const deltas = computed.filter(b => b.barType === "delta" && b.value !== 0);
+    return deltas.some(b => b.value > 0) && deltas.some(b => b.value < 0);
 }
