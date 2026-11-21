@@ -1,5 +1,5 @@
 ================================================================================
-YOUTUBE TAGS — Waterfall Advanced v1.2.0.0
+YOUTUBE TAGS — Waterfall Advanced v1.3.0.0
 ================================================================================
 
 YouTube caps the tag field at 500 characters INCLUDING the commas. Paste the block
