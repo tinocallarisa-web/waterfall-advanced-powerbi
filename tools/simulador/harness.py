@@ -6,6 +6,7 @@ detectable, marca de agua común y eventos de render 1:1. Stub de host como el d
     node scripts/build-test.js        && rm -rf .tmp/sim     && cp -r .tmp/drop .tmp/sim
     node scripts/build-test.js --free && rm -rf .tmp/simfree && cp -r .tmp/drop .tmp/simfree
     python tools/simulador/harness.py
+    python tools/simulador/harness.py ficha      (capturas de la ficha; build sin sello: build-test.js --no-marker → .tmp/simficha)
 
 .tmp/sim es la build Pro forzada (_test); .tmp/simfree, la Free real (_testfree): sin licenseManager en el stub la
 licencia resuelve a Free y, editando, lo Pro encendido se dibuja con la marca de agua.
@@ -132,10 +133,67 @@ CARDS = "() => !!document.querySelector('[data-o=\"cards\"]')"
 DOTS = "() => document.querySelectorAll('svg circle').length"
 
 
+# Ficha de AppSource (1.3): Begudes Nord (ficticia), ejercicio oct-sep, de C:/tcviz/datos/demo_rtm/csv_en (fact_sales y
+# fact_pnl). EBITDA FY2025 → FY2026: precio, volumen y mix de los clientes que compran los dos años, altas y bajas de
+# clientes, descuentos y costes; el presupuesto de EBITDA (6,0 M) es del ejemplo. Euros redondeados a miles.
+FICHA_BRIDGE = [("EBITDA FY25", 4488000.0, "total", None), ("Price", 1135000.0, "delta", None), ("Volume", 1431000.0, "delta", None),
+                ("Mix", -649000.0, "delta", None), ("New outlets", 751000.0, "delta", None), ("Churn", -512000.0, "delta", None),
+                ("Promotions", 202000.0, "delta", None), ("Discounts", -215000.0, "delta", None), ("Subtotal", 0.0, "subtotal", None),
+                ("COGS", -649000.0, "delta", None), ("Logistics", -65000.0, "delta", None), ("Distributor", -98000.0, "delta", None),
+                ("Trade mktg", -39000.0, "delta", None), ("EBITDA FY26", 0.0, "total", 6000000.0)]
+# El mismo puente resumido (9 barras) para la cuadrícula de estilos, donde cada visual sale pequeño.
+FICHA_CORTO = [("EBITDA FY25", 4488000.0, "total", None), ("Price", 1135000.0, "delta", None), ("Volume", 1431000.0, "delta", None),
+               ("Mix", -649000.0, "delta", None), ("Net outlets", 239000.0, "delta", None), ("Discounts", -13000.0, "delta", None),
+               ("COGS", -649000.0, "delta", None), ("Other costs", -202000.0, "delta", None), ("EBITDA FY26", 0.0, "total", 6000000.0)]
+FICHA_PYG = [("Gross sales", 26703000.0, "total"), ("Discounts", -3029000.0, "delta"), ("Net sales", 0.0, "subtotal"),
+             ("Product cost", -11724000.0, "delta"), ("Gross margin", 0.0, "subtotal"), ("Logistics", -1001000.0, "delta"),
+             ("Distributors", -1402000.0, "delta"), ("Trade marketing", -426000.0, "delta"), ("Contribution", 0.0, "subtotal"),
+             ("Sales force", -1361000.0, "delta"), ("General overhead", -1980000.0, "delta"), ("EBITDA", 0.0, "total")]
+EUR = {"numberFormat": {"currencySymbol": "€", "scaleMode": "auto", "decimals": 1}, "chartSettings": {"targetLabel": "Budget"}}
+
+
+def dv_ficha(rows, objects=None):
+    cat = {"source": {"displayName": "Step", "queryName": "B.Step", "roles": {"category": True}}, "values": [r[0] for r in rows]}
+    val = {"source": {"displayName": "Amount", "queryName": "Sum(B.Amount)", "roles": {"measure": True}, "isMeasure": True, "format": "#,0"}, "values": [r[1] for r in rows]}
+    typ = {"source": {"displayName": "Bar type", "queryName": "Min(B.Type)", "roles": {"barType": True}}, "values": [r[2] for r in rows]}
+    cols, vals = [cat["source"], val["source"], typ["source"]], [val, typ]
+    if any(len(r) > 3 and r[3] is not None for r in rows):
+        tgt = {"source": {"displayName": "Budget", "queryName": "Sum(B.Budget)", "roles": {"target": True}, "isMeasure": True}, "values": [r[3] if len(r) > 3 else None for r in rows]}
+        cols.append(tgt["source"]); vals.append(tgt)
+    o = {"style": {"guide": False}}
+    for k, v in {**EUR, **(objects or {})}.items():
+        o[k] = {**o.get(k, {}), **v}
+    return {"metadata": {"columns": cols, "objects": o}, "categorical": {"categories": [cat], "values": vals}}
+
+
+async def ficha(b):
+    """Capturas para la ficha 1.3 (tools/gen_infographic.py), con la build Pro forzada sin sello (.tmp/simficha)."""
+    drop = "simficha" if os.path.exists(os.path.join(ROOT, ".tmp", "simficha", "visual.js")) else "sim"
+    if drop == "sim":
+        print("  aviso: sin .tmp/simficha (build-test.js --no-marker); el sello de compilación saldrá en las capturas")
+
+    async def shot(name, data, W, H, **kw):
+        pg = await page(b, data, W=W, H=H, name=name, drop=drop, wait=900, **kw)
+        sc = await pg.evaluate(SCROLLS); ov = await pg.evaluate(OVERLAPS)
+        check(f"{name}: sin scroll ni solapes", sc == [] and ov == [], str(sc) + str(ov[:4]))
+        await pg.close()
+    tabla = {"tableSettings": {"show": True, "showShare": True}}
+    await shot("70_hero", dv_ficha(FICHA_BRIDGE, {**tabla, "style": {"template": "boardroom", "guide": False}}), 1180, 700)
+    await shot("70_central", dv_ficha(FICHA_BRIDGE, {**tabla}), 1300, 460)
+    for k in ("report", "boardroom", "ledger", "editorial", "signal", "aurora", "terrace"):
+        st = {"style": {"template": "classic" if k == "report" else k, "guide": False}}
+        await shot("71_style_" + k, dv_ficha(FICHA_CORTO, st), 640, 380)
+    await shot("72_pyg", dv_ficha(FICHA_PYG, {"style": {"template": "ledger", "guide": False}, "chartSettings": {"orientation": "horizontal"}}), 900, 600)
+    await shot("73_a11y", dv_ficha(FICHA_BRIDGE, {"accessibility": {"highContrast": "on", "minTextSize": 14}}), 1000, 620)
+    await shot("73_small", dv_ficha(FICHA_BRIDGE, {"style": {"template": "signal", "guide": False}}), 560, 340)
+
+
 async def main():
     os.makedirs(OUT, exist_ok=True)
     async with async_playwright() as p:
         b = await p.chromium.launch()
+        if "ficha" in sys.argv:
+            await ficha(b); await b.close(); print(f"\n{len(FALLOS)} fallos"); return
 
         print("Estilos de la colección")
         pg = await page(b, dv(PERIODO, {"style": {"template": "boardroom"}}), name="01_boardroom")
