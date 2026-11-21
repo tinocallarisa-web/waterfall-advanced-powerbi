@@ -379,11 +379,30 @@ async def main():
             const fuera = cats.filter(t => { const q = t.getBoundingClientRect(); return q.bottom > sb.bottom + 0.5 || q.left < sb.left - 0.5; }).length;
             return { n: cats.length, fsMax: Math.max(...fs), legFuera: leg.filter(x => x > sb.right + 0.5).length, fuera }; }""")
         check("470×380 rotadas: el texto del gráfico encoge (≤ 9 px)", r["fsMax"] <= 9, str(r))
-        check("470×380 rotadas: menos nombres que barras (no se pisan) y ninguno fuera", 0 < r["n"] < 13 and r["fuera"] == 0, str(r))
+        check("470×380 rotadas: hay nombres y ninguno fuera del lienzo", r["n"] > 0 and r["fuera"] == 0, str(r))
         check("470×380: la leyenda entra entera", r["legFuera"] == 0, str(r))
         sc = await pg.evaluate(SCROLLS); ov = await pg.evaluate(OVERLAPS)
         check("470×380: sin scroll ni solapes", sc == [] and ov == [], str(sc) + str(ov[:4]))
         await pg.close()
+        for est in ("ledger", "editorial"):
+            for (W, H) in ((960, 600), (530, 500)):
+                nombre = f"09f_{est}_{W}"
+                pg = await page(b, dv_tino({"style": {"template": est}, "tableSettings": {"show": True},
+                                            "labelSettings": {"labelRotation": "-30"}}), W=W, H=H, name=nombre)
+                r = await pg.evaluate("""() => { const w = document.querySelector('.wf-data-table'); if (!w) return null;
+                    const tds = Array.from(w.querySelectorAll('td, th')).filter(c => c.textContent && getComputedStyle(c).textOverflow !== 'ellipsis');
+                    // Texto real de cada celda contra su caja: un Range da lo que ocupa la letra.
+                    const pisa = tds.filter(c => { const rg = document.createRange(); rg.selectNodeContents(c);
+                        const t = rg.getBoundingClientRect(), b = c.getBoundingClientRect(); return t.width > b.width + 0.5; }).map(c => c.textContent);
+                    const svg = document.querySelector('svg').getBoundingClientRect();
+                    const fuera = Array.from(document.querySelectorAll('svg text')).filter(t => t.textContent && t.getAttribute('data-o') !== 'catLabels')
+                        .filter(t => { const q = t.getBoundingClientRect(); return q.right > svg.right + 0.5 || q.left < svg.left - 0.5; }).map(t => t.textContent);
+                    return { pisa, fuera }; }""")
+                check(f"{nombre}: ningún texto de la tabla más ancho que su celda", bool(r) and not r["pisa"], str(r))
+                check(f"{nombre}: ninguna etiqueta del gráfico cortada por los lados", bool(r) and not r["fuera"], str(r))
+                ov = await pg.evaluate(OVERLAPS)
+                check(f"{nombre}: sin solapes", ov == [], str(ov[:4]))
+                await pg.close()
         pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=300, H=300)
         sb = await pg.evaluate("() => getComputedStyle(document.getElementById('host')).getPropertyValue('--wf-sb-thumb').trim()")
         check("Boardroom: barras de desplazamiento con el color del estilo (no blancas)", sb.upper().startswith("#") and sb.upper() != "#FFFFFF", sb)

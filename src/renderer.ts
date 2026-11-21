@@ -296,12 +296,12 @@ export class WaterfallRenderer {
         // Etiquetas de categoría que no caben en su paso (1.3, sin rotar): se recortan con "…" al ancho del paso y, si ni
         // cuatro letras caben, se muestra una de cada k. El nombre completo sigue en la descripción emergente.
         const catFsV = ls.categoryFontSize.value;
-        const charW = this.fz(catFsV) * 0.60;
+        const charW = this.textWidth("Abcdefghij", catFsV, "400") / 10;   // ancho medio real con la letra del estilo
         // Rotadas: la distancia entre dos etiquetas vecinas es el paso por el seno del ángulo; si es menor que una línea
         // de texto se pisan, y se muestra una de cada k. Y se recortan a lo que cabe en el margen inferior.
         const sinR = Math.abs(Math.sin(rotDeg * Math.PI / 180));
         const catEvery = rotDeg
-            ? Math.max(1, Math.ceil(this.fz(catFsV) * 1.15 / ((barW + gap) * sinR)))
+            ? Math.max(1, Math.ceil(this.fz(catFsV) * 1.6 / ((barW + gap) * sinR)))
             : Math.max(1, Math.ceil(4.5 * charW / (barW + gap)));
         const rotFit = rotDeg
             ? Math.max(3, Math.floor((PAD_BOTTOM - this.legendBottom - (catTitle ? 16 : 0) - 14) / sinR / charW))
@@ -418,7 +418,7 @@ export class WaterfallRenderer {
                 const short = ch.targetShowValue.value ? fmt.format(bar.target) : "";
                 const th = this.fz(9);
                 for (const tLabel of [full, short].filter(t => !!t)) {
-                    const tW = this.textWidth(tLabel, 9) * 0.92;
+                    const tW = this.textWidth(tLabel, 9);
                     const cxc = Math.min(Math.max(x + barW / 2, tW / 2 + 2), svgW - tW / 2 - 2);
                     const cands: [number, number][] = [[cxc, ty - 4], [cxc, ty + th + 2], [x + barW + 6 + tW / 2, ty + th / 2 - 1], [x - 6 - tW / 2, ty + th / 2 - 1]];
                     const ok = cands.find(([cx, by]) => this.isFree(this.boxAt(cx, by, tW, th), -2, svgW, svgH));
@@ -437,7 +437,10 @@ export class WaterfallRenderer {
             // sitios, se omite en vez de montarse ("+97.0k−143.0k"). La cifra sigue en la descripción emergente.
             if (ls.showLabels.value) this.queue.push({ p: anchorBar ? 0 : 2 + (1 - Math.abs(bar.value) / maxAbs), f: () => {
                 const label = this.buildLabel(bar, ls.labelMode.value.value as string, fmt);
-                const fsL = ls.fontSize.value;
+                // 1.3: la cifra se reduce hasta caber en el paso de su barra (mínimo 8 px) antes de darla por perdida; así no
+                // hace falta quitar decimales para verla en un visual estrecho.
+                let fsL = ls.fontSize.value;
+                while (this.fz(fsL) > Math.max(8, this.minText) && this.measure(label, fsL, "500") > barW + gap * 0.8) fsL -= 0.5;
                 // Para chocar se usa un ancho más ajustado (0,55 em) que el de reservar márgenes (0,60 em).
                 const tw = this.measure(label, fsL, "500") + 2, th = this.fz(fsL);
                 const color = ls.autoValueLabelColor.value ? baseFill : ls.valueLabelColor.value.value;
@@ -1105,12 +1108,22 @@ export class WaterfallRenderer {
         return w > 0 ? w : this.textWidth(label, fs) * 0.92;
     }
 
-    private textWidth(label: string, fs: number): number {
-        // 0.60em por caracter. Segoe UI ronda 0.55 de media, pero la media no
-        // sirve aqui: basta con que una etiqueta la pase para que toque el borde.
-        // Quedarse corto se ve; sobrar 3px no lo nota nadie.
-        return label.length * this.fz(fs) * 0.60;
+    private textWidth(label: string, fs: number, weight = "600"): number {
+        // 1.3: se mide con la letra real del estilo (Georgia en Ledger y Editorial es bastante más ancha que Segoe UI)
+        // y en negrita, que es lo más ancho que se pinta, con un 6 % de margen. Si el lienzo no mide, 0,60 em por
+        // carácter, que basta para Segoe UI.
+        const px = this.fz(fs);
+        try {
+            const c = WaterfallRenderer.ctx || (WaterfallRenderer.ctx = document.createElement("canvas").getContext("2d"));
+            if (c) {
+                c.font = `${weight} ${px}px ${this.font}`;
+                const w = c.measureText(label).width;
+                if (w > 0) return w * 1.06;
+            }
+        } catch { /* sin lienzo: estimación */ }
+        return label.length * px * 0.60;
     }
+    private static ctx: CanvasRenderingContext2D | null = null;
 
     private text(x: number, y: number, content: string, fs: number,
                  fill: string, anchor = "middle", weight = "400", rotate = 0): SVGTextElement {
