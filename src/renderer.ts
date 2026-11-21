@@ -100,6 +100,7 @@ export class WaterfallRenderer {
         // 1.3: en un visual pequeño el texto del gráfico encoge con él, como ya hacía la tabla (60 % como mínimo y nunca
         // por debajo de 8 px ni del tamaño mínimo de Accesibilidad). A partir de unos 760×440 se usa el tamaño elegido.
         this.scale = Math.min(1, Math.max(0.6, Math.min(opts.width / 760, opts.height / 440)));
+        this.viewW = opts.width;
         this.font = opts.fontFamily || "Segoe UI, sans-serif";
         this.ink = opts.ink;
         this.focus = { color: highContrast ? contrastForeground : opts.focusColor, width: opts.focusWidth };
@@ -159,7 +160,10 @@ export class WaterfallRenderer {
         const tablePct  = showTable ? Math.min(60, Math.max(20, ts.widthPct.value)) / 100 : 0;
         const tableRight = showTable && ts.position.value.value === "right";
 
-        const bodyH  = showCards ? height - this.CARD_H : height;
+        // 1.3: el alto de las tarjetas sale de su letra (con un texto mínimo grande no caben en los 76 px de siempre).
+        const cdS = settings.cardSettings;
+        const cardH = Math.max(this.CARD_H, Math.ceil((this.fz(cdS ? cdS.labelFontSize.value : 9) + this.fz(cdS ? cdS.valueFontSize.value : 13) + this.fz(10)) * 1.3 + 2 + 1 + 12 + 6 + 4));
+        const bodyH  = showCards ? height - cardH : height;
         // 1.3: la tabla se planifica antes que el gráfico: columnas que caben (se quitan primero % apertura y Acumulado),
         // fuente que cabe a lo alto, y a la derecha ocupa solo el ancho que necesita, hasta el % elegido. El gráfico se
         // queda el resto (con el hueco de 8 px entre los dos): nada sale del visual ni saca scroll.
@@ -480,7 +484,9 @@ export class WaterfallRenderer {
             if ((!(isLicensed && ls.hideOverlapping.value) || fitsWidth) && i % catEvery === 0) {
                 const anchor = rot ? "end" : "middle";
                 const cap = rot ? (maxChars > 0 ? Math.min(maxChars, rotFit) : rotFit) : (maxChars > 0 ? Math.min(maxChars, catChars - 1) : catChars - 1);
-                this.truncate(bar.label, rot ? cap : Math.max(1, cap)).split(/\\n|\n/).forEach((line, li) => {
+                const shown = rot ? this.truncate(bar.label, cap)
+                    : this.truncateW(this.truncate(bar.label, Math.max(1, cap)), catEvery * (barW + gap) - 6, ls.categoryFontSize.value);
+                shown.split(/\\n|\n/).forEach((line, li) => {
                     this.text(x + barW / 2, this.PAD_TOP + chartH + 16 + li * 15,
                         line, ls.categoryFontSize.value, catColor,
                         anchor, "400", rot).setAttribute("data-o", "catLabels");
@@ -907,7 +913,7 @@ export class WaterfallRenderer {
         };
 
         const row = document.createElement("div");
-        row.style.cssText = "display:flex;gap:6px;padding:6px 0 0;flex-wrap:wrap;box-sizing:border-box";
+        row.style.cssText = "display:flex;gap:6px;padding:6px 0 0;flex-wrap:nowrap;overflow:hidden;box-sizing:border-box";
         row.setAttribute("data-o", "cards");
 
         const varPct = (summary.totalDeltaRel >= 0 ? "+" : "") + summary.totalDeltaRel.toFixed(1) + "%";
@@ -927,12 +933,15 @@ export class WaterfallRenderer {
               sub: summary.biggestLoss ? fmt.formatDelta(summary.biggestLoss.value) : "", subColor: colors.neg }
         ];
 
-        cards.forEach(c => {
+        // 1.3: una sola fila (el alto reservado es de una). En un visual estrecho se quitan las últimas tarjetas
+        // (mayor bajada, mayor subida…) en vez de partirlas en dos filas y cortar la de abajo.
+        const fit = Math.max(1, Math.floor((this.viewW + 6) / (88 + 6)));
+        cards.slice(0, fit).forEach(c => {
             const card = document.createElement("div");
             card.style.cssText = `flex:1;min-width:88px;background:${cardBg};border-radius:6px;padding:6px 10px;box-sizing:border-box;font-family:${this.font}` +
                 (this.hcFg ? `;border:1px solid ${this.hcFg}` : "");
             const lbl = document.createElement("div");
-            lbl.style.cssText = `font-size:${labelFs}px;color:${textColor};opacity:0.75;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px`;
+            lbl.style.cssText = `font-size:${labelFs}px;color:${textColor};opacity:0.75;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
             lbl.textContent = c.label;
             const val = document.createElement("div");
             val.style.cssText = `font-size:${valueFs}px;font-weight:600;color:${textColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
@@ -1048,6 +1057,7 @@ export class WaterfallRenderer {
 
     /** Tamaño de texto con el mínimo de la tarjeta Accesibilidad (1.3). */
     private scale = 1;
+    private viewW = 800;
     private fz(px: number): number {
         const v = Number(px) || this.minText;
         return Math.max(this.minText, Math.min(v, Math.max(8, Math.round(v * this.scale * 2) / 2)));
@@ -1087,6 +1097,14 @@ export class WaterfallRenderer {
      * Recorta una etiqueta a n caracteres, cortando por palabra cuando puede.
      * Cortar a mitad de palabra ahorra pixeles y cuesta comprension.
      */
+    /** Recorta con "…" hasta que el ancho real (letra del estilo) quepa en maxW. */
+    private truncateW(label: string, maxW: number, fs: number): string {
+        if (this.textWidth(label, fs, "400") <= maxW) return label;
+        let t = label.replace(/…$/, "");
+        while (t.length > 1 && this.textWidth(t + "…", fs, "400") > maxW) t = t.slice(0, -1);
+        return t.trimEnd() + "…";
+    }
+
     private truncate(label: string, maxChars: number): string {
         if (maxChars <= 0 || label.length <= maxChars) return label;
         const cut = label.slice(0, maxChars);

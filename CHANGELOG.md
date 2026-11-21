@@ -54,6 +54,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   would run into each other. The full name is always in the tooltip.
 - **Value axis ticks** fall on round numbers (1, 2, 2.5 or 5 times a power of ten), as many as fit with room to read
   them, and never repeat.
+- **Summary cards stay on one row**: in a narrow visual the last cards (biggest loss, then biggest gain…) are left
+  out instead of wrapping to a second row that was cut off, and the row grows taller when a large minimum text size
+  needs it.
 - Scroll bars, when there are any, are thin and take the colours of the style.
 - With a dark style, the setup tips bar takes the style's colours.
 

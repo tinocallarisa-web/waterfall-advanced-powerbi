@@ -461,6 +461,21 @@ async def main():
                 ov = await pg.evaluate(OVERLAPS)
                 check(f"{nombre}: sin solapes", ov == [], str(ov[:4]))
                 await pg.close()
+        pg = await page(b, dv_ficha(FICHA_BRIDGE, {"accessibility": {"highContrast": "on", "minTextSize": 14}}), W=820, H=560, name="09g_hc_min14_820")
+        ov = await pg.evaluate(OVERLAPS)
+        check("alto contraste + texto mínimo 14 a 820×560: nombres y cifras sin pisarse", ov == [], str(ov[:4]))
+        r = await pg.evaluate("""() => { const host = document.getElementById('host').getBoundingClientRect();
+            return Array.from(document.querySelectorAll('[data-o=cards] > div')).filter(c => { const q = c.getBoundingClientRect(); return q.bottom > host.bottom + 0.5 || c.scrollHeight > c.clientHeight + 1; }).length; }""")
+        check("alto contraste + texto mínimo 14: tarjetas enteras dentro del visual", r == 0, str(r))
+        await pg.close()
+        for (W, H) in ((460, 300), (380, 260)):
+            pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=W, H=H, name=f"09h_tarjetas_{W}")
+            r = await pg.evaluate("""() => { const row = document.querySelector('[data-o=cards]'); if (!row) return { sin: true };
+                const host = document.getElementById('host').getBoundingClientRect();
+                const cs = Array.from(row.children).map(c => c.getBoundingClientRect());
+                return { n: cs.length, filas: new Set(cs.map(c => Math.round(c.top))).size, fuera: cs.filter(c => c.bottom > host.bottom + 0.5 || c.right > host.right + 0.5).length }; }""")
+            check(f"tarjetas a {W}×{H}: una fila y ninguna cortada", r.get("sin") or (r["filas"] == 1 and r["fuera"] == 0), str(r))
+            await pg.close()
         pg = await page(b, dv_tino({"style": {"template": "boardroom"}}), W=300, H=300)
         sb = await pg.evaluate("() => getComputedStyle(document.getElementById('host')).getPropertyValue('--wf-sb-thumb').trim()")
         check("Boardroom: barras de desplazamiento con el color del estilo (no blancas)", sb.upper().startswith("#") and sb.upper() != "#FFFFFF", sb)

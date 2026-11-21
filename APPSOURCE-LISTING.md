@@ -112,9 +112,11 @@ URL canónica `https://www.youtube.com/watch?v=<id>`. Vídeo vigente (grabado co
 ## Imágenes
 
 - Logo 300×300: `assets/icon_300x300.png` (icono nuevo de la serie)
-- Capturas: `assets/Screenshot_1.png`, `assets/Screeshot_2.png` (1.2, Tino 23-10) y `assets/waterfall-infographic.png` (fuente `docs/infographic.html`).
-  **Pendiente 1.3:** muestran las plantillas de la 1.2; conviene rehacerlas con un estilo de la colección (caso Begudes
-  Nord + tema TCViz) y revisar la infografía.
+- Infografía: `assets/infographic.png` (fuente `docs/infographic.html`, `tools/gen_infographic.py`).
+- Capturas 1.3 (Begudes Nord, 1366×768, dibujadas por el visual): `assets/Screenshot_1.png` (bridge Boardroom con
+  tabla y tarjetas), `Screenshot_2.png` (los seis estilos), `Screenshot_3.png` (P&L horizontal, Ledger),
+  `Screenshot_4.png` (accesibilidad y visual pequeño). Las de la 1.2 (`Screeshot_2.png`, `waterfall-infographic.png`)
+  ya no se usan.
 
 ## URLs
 
