@@ -34,6 +34,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Value axis from zero**: when every running total and total is zero or above, the axis starts at 0 instead of
   dropping below it to leave a margin. With negative values the margin stays.
 - The "Pro preview" watermark is now the one shared by all TCViz visuals.
+- **Every bar fits the width of the visual**, with no scroll bar: the bars and the gaps between them narrow as needed.
+  A scroll bar appears only when even 8-pixel bars would not fit.
+- **Value labels never overlap.** They are placed in order of importance — totals and subtotals first, then the
+  targets, then the changes from largest to smallest — above, inside or below their bar. A label that finds no free
+  place is left out instead of being drawn on top of another; its figure is still in the data table and the tooltip.
+- **A figure shrinks to fit the width of its bar** (down to 8 px) before it is left out, so a narrow visual keeps its
+  numbers without removing decimals.
+- **The target label looks for a free place** — above, below or beside its line — and, if there is none, is shortened
+  to the figure alone. The line itself is always drawn.
+- **Text shrinks with the visual.** In a small visual every text of the chart — value and category labels, axes,
+  legend, summary cards and data table — gets smaller with it, down to 60 % of the size you chose, never below 8 px
+  and never below the minimum text size of the Accessibility card. From roughly 760 × 440 px up, your sizes are used
+  as they are.
+- **The data table adapts to its space**: when it does not fit, it drops the "% of opening" column first, then the
+  running total, and reduces its font, before it cuts anything.
+- **Category names that do not fit** under their bar are shortened with "…", and when not even a few letters fit,
+  only one name in every few is shown. With an angle (Pro), only one label in every few is drawn when tilted labels
+  would run into each other. The full name is always in the tooltip.
+- **Value axis ticks** fall on round numbers (1, 2, 2.5 or 5 times a power of ten), as many as fit with room to read
+  them, and never repeat.
+- Scroll bars, when there are any, are thin and take the colours of the style.
+- With a dark style, the setup tips bar takes the style's colours.
 
 ### Fixed
 
@@ -41,6 +63,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   package (such as OKviz) detect it. It works as before: a fixed colour is stored for the whole visual.
 - High contrast now also applies to category labels, value labels drawn in a custom colour, the summary cards, the
   data table, gridlines and the outlier marker.
+- **Tilted category labels with no character limit** came out as a single letter and "…" ("V…"). They now keep as
+  much of the name as fits below the chart.
+- **Text widths are measured with the style's real font.** Ledger and Editorial use Georgia, which is wider than
+  Segoe UI; labels were laid out as if it were narrower and could run into each other. Nothing overlaps now.
+- The "!" marker respects the minimum text size of the Accessibility card, and grows with it.
 
 ---
 

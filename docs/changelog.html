@@ -23,11 +23,44 @@
 </head>
 <body>
   <h1>Changelog — Waterfall Advanced</h1>
-  <p class="meta">Current version <strong>1.2.0.0</strong> &nbsp;|&nbsp;
+  <p class="meta">Current version <strong>1.3.0.0</strong> &nbsp;|&nbsp;
     <a href="support.html">Support</a> &nbsp;|&nbsp;
     <a href="https://marketplace.microsoft.com/en-us/product/tino_callarisa.waterfall-advanced" target="_blank" rel="noopener">AppSource</a></p>
 
   <p>All notable changes to this project are documented here. Format follows <a href="https://keepachangelog.com/en/1.0.0/" target="_blank" rel="noopener">Keep a Changelog</a>.</p>
+  <h2 id="v1.3.0.0">1.3.0.0 <span class="date">unreleased</span></h2>
+  <h3 class="kind kind-added">Added</h3>
+  <ul>
+  <li><strong>Styles of the TCViz collection</strong>: Boardroom, Ledger, Editorial, Signal, Aurora and Terrace — the same styles as the other TCViz visuals, so a page reads as one report. Each one sets the increase, decrease and total colours, the text, the axes, the summary cards, the data table and the visual's background (dark in Boardroom and Aurora). All free. A colour you set yourself still wins over the style, and choosing a style clears the saved settings it defines, as choosing a template did in 1.2 (the fx rule of the Increase colour included).</li>
+  <li><strong>Accessibility</strong> card: high contrast (automatic, following Windows, or always on — black on white), keyboard focus colour and width, and a minimum text size for the whole chart, the summary cards and the data table.</li>
+  <li><strong>Flag unusual changes (!)</strong> in the Chart card: the "!" marker on outlying changes can now be turned off. It is on by default, so saved reports look the same.</li>
+  <li><strong>Summary cards → Hide when the bridge is not a comparison</strong> (on by default): the cards read the bridge as the same figure at two moments (sales 2025 → sales 2026). They now hide on their own when there is no opening and closing total, or when every change goes the same way — a P&amp;L from revenue to EBITDA, where a "−77 % variance" between revenue and EBITDA means nothing and one of the "biggest change" cards was empty. Turn it off to always show them.</li>
+  </ul>
+  <h3 class="kind kind-changed">Changed</h3>
+  <ul>
+  <li><strong>Report theme replaces Classic</strong> as the first and default option: increases and decreases take the report theme's good/bad sentiment colours, totals its first data colour, and labels and axis its text colours; where the theme does not provide a colour, the colours of earlier versions are kept. Reports saved without a template or colours follow the report theme from this version on.</li>
+  <li>The 1.2 templates (Modern, Soft, One colour, Dark background) are no longer offered, but reports that use them keep drawing exactly as before.</li>
+  <li><strong>Value axis from zero</strong>: when every running total and total is zero or above, the axis starts at 0 instead of dropping below it to leave a margin. With negative values the margin stays.</li>
+  <li>The "Pro preview" watermark is now the one shared by all TCViz visuals.</li>
+  <li><strong>Every bar fits the width of the visual</strong>, with no scroll bar: the bars and the gaps between them narrow as needed. A scroll bar appears only when even 8-pixel bars would not fit.</li>
+  <li><strong>Value labels never overlap.</strong> They are placed in order of importance — totals and subtotals first, then the targets, then the changes from largest to smallest — above, inside or below their bar. A label that finds no free place is left out instead of being drawn on top of another; its figure is still in the data table and the tooltip.</li>
+  <li><strong>A figure shrinks to fit the width of its bar</strong> (down to 8 px) before it is left out, so a narrow visual keeps its numbers without removing decimals.</li>
+  <li><strong>The target label looks for a free place</strong> — above, below or beside its line — and, if there is none, is shortened to the figure alone. The line itself is always drawn.</li>
+  <li><strong>Text shrinks with the visual.</strong> In a small visual every text of the chart — value and category labels, axes, legend, summary cards and data table — gets smaller with it, down to 60 % of the size you chose, never below 8 px and never below the minimum text size of the Accessibility card. From roughly 760 × 440 px up, your sizes are used as they are.</li>
+  <li><strong>The data table adapts to its space</strong>: when it does not fit, it drops the "% of opening" column first, then the running total, and reduces its font, before it cuts anything.</li>
+  <li><strong>Category names that do not fit</strong> under their bar are shortened with "…", and when not even a few letters fit, only one name in every few is shown. With an angle (Pro), only one label in every few is drawn when tilted labels would run into each other. The full name is always in the tooltip.</li>
+  <li><strong>Value axis ticks</strong> fall on round numbers (1, 2, 2.5 or 5 times a power of ten), as many as fit with room to read them, and never repeat.</li>
+  <li>Scroll bars, when there are any, are thin and take the colours of the style.</li>
+  <li>With a dark style, the setup tips bar takes the style's colours.</li>
+  </ul>
+  <h3 class="kind kind-fixed">Fixed</h3>
+  <ul>
+  <li><strong>Conditional formatting (fx)</strong> on the Increase colour is now declared the standard way, so tools that read the package (such as OKviz) detect it. It works as before: a fixed colour is stored for the whole visual.</li>
+  <li>High contrast now also applies to category labels, value labels drawn in a custom colour, the summary cards, the data table, gridlines and the outlier marker.</li>
+  <li><strong>Tilted category labels with no character limit</strong> came out as a single letter and "…" ("V…"). They now keep as much of the name as fits below the chart.</li>
+  <li><strong>Text widths are measured with the style's real font.</strong> Ledger and Editorial use Georgia, which is wider than Segoe UI; labels were laid out as if it were narrower and could run into each other. Nothing overlaps now.</li>
+  <li>The "!" marker respects the minimum text size of the Accessibility card, and grows with it.</li>
+  </ul>
   <h2 id="v1.2.0.0">1.2.0.0 <span class="date">2026-10-22</span></h2>
   <h3 class="kind kind-fixed">Fixed</h3>
   <ul>
