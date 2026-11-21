@@ -1,80 +1,126 @@
-# Certification notes — Waterfall Advanced 1.2.0.0
+# Certification notes — Waterfall Advanced 1.3.0.0
 
-Short version to paste: `docs/CERTIFICATION-NOTES-SHORT.txt`.
+Short version to paste: `docs/CERTIFICATION-NOTES-SHORT.txt` (2.491 characters counting CRLF; limit 2.500). The
+Partner Center field is emptied on every resubmission: paste it again.
 
 ```
-Waterfall Advanced 1.2.0.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
+Waterfall Advanced 1.3.0.0 - GUID WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc
 Repo, branch certification: https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/tree/certification
-Docs: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html (+privacy, terms, changelog)
+Support: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html
+Privacy: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/privacy.html
+Changelog: https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/changelog.html
 Video: https://www.youtube.com/watch?v=GOym3Akbiaw
 
 WHY THIS SUBMISSION
-Replaces 1.1.3.0. Same objects/properties (saved reports unchanged); new ones added.
-Fix: rendering events were raised also from repaints (licence, click, bookmark). Now
-one renderingStarted and one Finished/Failed per update(); repaints raise none.
-New: style templates, Pro preview, model format strings, axis and legend settings,
-on-object formatting, start screen, 12 languages. API 5.11.1.
+Replaces 1.2.0.0. No property removed or renamed. New: Report theme + 6 styles,
+Accessibility card, "!" toggle, summary cards auto-hide, axis from 0, chart fits
+small visuals (no scroll, no label overlap, text scales down), fx declared with the
+standard wildcard selector. Render events as in 1.2. API 5.11.1, npm audit 0.
 
 PRO PREVIEW
-Without a licence, IN EDIT MODE ONLY, the Pro settings turned on (data table, IBCS,
-label density) render under a "Pro preview" watermark. Intentional. Reading view,
-before the licence resolves and where licences cannot be read (Publish to Web,
-embed, export): free result, no watermark.
+Without a licence, IN EDIT MODE ONLY, Pro settings turned on (data table, IBCS,
+label density) render under a "Pro preview" watermark. Intentional. Reading view
+and where licences cannot be read: free result, no watermark.
 
 TESTING - FREE (no plan)
-1. Sample .pbix: Category, Value, Bar type, Target. Bridge with totals and subtotal.
-More than 12 drivers: smallest grouped in "Others", note says how many; Power BI
-licence notice, Upgrade bar ~10 s later.
-2. Edit mode: tips bar at the bottom. "Try Pro > Data table": table under watermark.
-Reading view: no table. Turn it off: notices clear.
-3. Format > Style template > Modern: colours change. Format mode: click a bar.
-4. Click a bar: cross-filter (Ctrl adds). Bookmarks restore it. Right-click menu.
+1. Sample .pbix: bridge with totals and subtotal; click a bar, the table filters.
+Over 12 drivers: smallest grouped in "Others", note says how many, licence notice,
+Upgrade bar ~10 s later.
+2. Format > Style template > Boardroom, Ledger, Report theme: look changes.
+3. Shrink the visual: bars fit, no scroll, labels never overlap, text smaller.
+Accessibility > Minimum text size 12: no text below 12.
+4. Accessibility > High contrast > On: black on white. Tab to a bar: focus ring.
+5. Chart > Flag unusual changes off: "!" disappears.
+6. Bridge whose changes all go one way: summary cards hide; toggle off: they show.
+7. Edit mode, "Try Pro > Data table": table under watermark. Reading view: none.
+8. Click: cross-filter (Ctrl adds), bookmarks, right-click menu.
 allowInteractions false: no selection.
 
 TESTING - PRO (plan "pro")
-All drivers individually; data table, IBCS, label angle: no watermark, no notice.
+All drivers; data table, IBCS, label angle: no watermark, no notice.
 
 PERSISTPROPERTIES
-Only on a click in the tips bar (template, Try Pro, close) and once when the template
-is changed in the format pane (clears the settings it defines). Never in the
-selection callback.
+Only on a tips-bar click (style, Try Pro, close) and once when the style changes in
+the format pane. Never in the selection callback.
 
 PRIVACY
-No network, telemetry, cookies or storage. privileges: []. No innerHTML in src/.
-Start-screen links open only on click via host.launchUrl.
+No network, telemetry, cookies or storage. privileges: []. Links open only on click
+via host.launchUrl.
 
 LICENSING
 IVisualLicenseManager only. Pro if Service ID ends in ".pro", state Active or
-Warning. Never blocks render; failure = Free. No licensing UI of its own.
+Warning. Never blocks render; failure = Free. Full notes: CERTIFICATION-NOTES.md
 ```
 
-## Rendering events (the fix in 1.2)
+## Rendering events
+
+Unchanged from 1.2: `update()` raises `renderingStarted` immediately and debounces the drawing 300 ms; the debounced
+callback draws and raises `renderingFinished` (or `renderingFailed`). A superseded pending update is closed with
+`renderingFinished`. Repaints from the licence resolving, a bar click, a style change or `registerOnSelectCallback`
+call `draw()`, which raises nothing.
+
+## Capabilities changes in 1.3
+
+New object `accessibility` (`highContrast`, `focusColor`, `focusWidth`, `minTextSize`); new properties
+`chartSettings.showAnomalies` (default on) and `cardSettings.autoHide` (default on). `style.template` keeps its
+internal values: `classic` is now shown as "Report theme"; `boardroom`, `ledger`, `editorial`, `signal`, `aurora` and
+`terrace` are added. The 1.2 values (`modern`, `soft`, `mono`, `dark`) stay declared in `capabilities.json`, so saved
+values remain valid and draw as before, but the format pane (formatting model) no longer offers them. No property removed or renamed.
+
+## Conditional formatting (fx)
+
+`colorSettings.positiveColor` keeps `instanceKind` ConstantOrRule and `altConstantValueSelector: null` (fixed colour at
+visual level, as in 1.2). The selector is now built with `dataViewWildcard.createDataViewWildcardSelector(InstancesAndTotals)`
+from `powerbi-visuals-utils-dataviewutils` instead of a literal object — the same matching option as before, declared
+the standard way so tools that read the package detect fx. Choosing a style still removes a value stored with that
+selector by versions before 1.2.
+
+## Layout changes worth knowing when testing
+
+- Bars fit the width (gap 15 % of each step, 2–10 px); horizontal scroll only if bars would be under 8 px.
+- Text scale = min(1, max(0.6, min(width / 760, height / 440))), never below 8 px nor below `minTextSize`.
+- Value labels are placed by priority (totals/subtotals, target, changes by size) against a list of occupied boxes;
+  a label with no free place is omitted, not overlapped. Its figure stays in the tooltip and data table.
+- Text widths are measured with a canvas in the style's font (Georgia in Ledger and Editorial).
+- Shared pieces of the portfolio: `src/comun/watermark.ts` (Pro preview watermark, `textContent` only, no innerHTML)
+  and `src/comun/paleta.ts`.
+
+## Build
+
+powerbi-visuals-tools 7.2.1, API 5.11.1, TypeScript 5.9, ESLint 10 + eslint-plugin-powerbi-visuals (recommended).
+New dependency `powerbi-visuals-utils-dataviewutils` ^6.1.0. `npm audit`: 0 (commit 595c723).
+
+---
+
+# History (notes of the previous versions)
+
+## Notes — 1.2.0.0
+
+### Rendering events (the fix in 1.2)
 
 `update()` raises `renderingStarted` immediately and debounces the drawing 300 ms; the debounced callback draws and
 raises `renderingFinished` (or `renderingFailed`). A superseded pending update is closed with `renderingFinished`.
 Repaints from the licence resolving, a bar click or `registerOnSelectCallback` call `draw()`, which raises nothing.
 Until 1.1.3 those repaints went through the same method that raised `renderingFinished`.
 
-## Capabilities changes in 1.2
+### Capabilities changes in 1.2
 
 New objects `valueAxis`, `categoryAxis`, `style` and `general.formatString` (dynamic measure formats); new properties
 `colorSettings.showLegend/legendPosition/legendFontFamily`, `numberFormat.source`. `displayNameKey` on every
 property. `supportsOnObjectFormatting` and `enablePointerEventsFormatMode`. No property removed or renamed.
 
-## Fixed colour and fx
+### Fixed colour and fx
 
 `colorSettings.positiveColor` offers fx (instanceKind ConstantOrRule, wildcard selector). The descriptor now carries
 `altConstantValueSelector: null`, so a fixed colour is stored at visual level; choosing a template also removes a
 value stored with the wildcard selector by earlier versions.
 
-## Build
+### Build
 
 powerbi-visuals-tools 7.2.1, API 5.11.1, TypeScript 5.9, ESLint 10 + eslint-plugin-powerbi-visuals (recommended),
 clean. `npm audit --omit=dev`: 0.
 
----
 
-# History (notes of the previous version)
 
 ## Notes — previous version
 
