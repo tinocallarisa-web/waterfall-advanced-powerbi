@@ -1,6 +1,7 @@
 ================================================================================
-YOUTUBE — Waterfall Advanced v1.2.0.0
-Video (current): https://www.youtube.com/watch?v=GOym3Akbiaw
+YOUTUBE — Waterfall Advanced v1.3.0.0
+Video (current, recorded with 1.2): https://www.youtube.com/watch?v=GOym3Akbiaw
+If a 1.3 video is recorded, replace the id in every file of the repo and in Partner Center.
 ================================================================================
 
 IMPORTANT — the chapter timestamps below are PLACEHOLDERS (all 0:00). Watch the
@@ -15,7 +16,7 @@ chapters: the viewer clicks and lands mid-sentence.
 TITLE
 --------------------------------------------------------------------------------
 
-Waterfall Advanced 1.2 for Power BI — P&L bridges with totals, subtotals and drivers
+Waterfall Advanced 1.3 for Power BI — P&L bridges with totals, subtotals and drivers
 
 
 --------------------------------------------------------------------------------
@@ -36,26 +37,28 @@ CHAPTERS
 0:00 The problem with the built-in waterfall
 0:00 Totals, subtotals and drivers — bar types from your model
 0:00 Intermediate checkpoints: Net Revenue, Gross Profit, EBITDA
-0:00 Target line and anomaly marker
+0:00 Target line and the "!" for unusual changes
 0:00 Summary cards: initial, final, variance, biggest gain and loss
-0:00 Style templates: Classic, Modern, Soft, One colour, Dark background
+0:00 Report theme and the six collection styles
+0:00 Small visuals: every bar fits, no overlapping labels
+0:00 Accessibility card
 0:00 Model format, axes and legend
 0:00 On-object formatting
 0:00 The data table (Pro)
 0:00 IBCS monochrome mode (Pro)
 0:00 Free vs Pro, Pro preview and the "Others" grouping
 
-NEW IN 1.2
-• Five style templates — Classic, Modern, Soft, One colour (with a base colour
-  you pick) and Dark background
-• Model format: the measure's own format string, dynamic format strings included
-• Value axis (gridlines, font, colour, title), category axis title and a legend
-  you can move to the top or bottom
-• On-object formatting: click bars, labels, axis, legend, cards or table
-• Value labels and the target line drawn above the bars, with a halo
-• Pro preview: try the data table, IBCS and label density on your own data while
-  you edit
-• 12 languages, a start screen and setup tips
+NEW IN 1.3
+• Report theme by default: the bridge takes the good/bad colours of your theme
+• Six styles shared by the TCViz collection — Boardroom, Ledger, Editorial,
+  Signal, Aurora and Terrace — so a page reads as one report
+• Accessibility card: high contrast (automatic or always on), keyboard focus
+  colour and width, minimum text size
+• The "!" for unusual changes can be turned off
+• Summary cards hide on their own when the bridge is not a comparison
+• Value axis from zero, with round ticks
+• Built for small tiles: every bar fits without a scroll bar, value labels never
+  overlap, and all the text shrinks with the visual
 
 WHAT IT DOES
 • Totals, subtotals and drivers as distinct bar types, driven by a column in your
@@ -65,7 +68,9 @@ WHAT IT DOES
 • Horizontal or vertical, because line-item names read better down the side
 • Hierarchical drilldown
 • A target line on the total bars, with its own label and figure
-• Drivers beyond two standard deviations from the mean marked automatically
+• Drivers beyond two standard deviations from the mean marked with a "!"
+• Model format: the measure's own format string, dynamic format strings included
+• Value axis, axis titles, legend and on-object formatting
 • Summary cards: initial, final, variance %, biggest gain, biggest loss
 • Conditional formatting on bar colour through the native fx dialog, or a hex
   colour per row calculated in your model
@@ -73,7 +78,8 @@ WHAT IT DOES
 READABLE ON PURPOSE
 A colour-blind safe palette and hatched decreases, both in the free version. With
 the hatch on, a rise and a fall differ by pattern as well as colour, so the chart
-still reads printed in black and white.
+still reads printed in black and white. The Accessibility card adds high
+contrast, focus settings and a minimum text size.
 
 IN THE REPORT
 Cross-filtering with multi-select, cross-highlighting, bookmarks, report page
@@ -111,8 +117,8 @@ SHORT VERSION (for Shorts, LinkedIn or an embed caption — under 500 characters
 Power BI's waterfall shows category movement. It does not draw a bridge. Waterfall
 Advanced lets you mark each row as a total, a subtotal or a driver, so a P&L walk
 gets its opening anchor, its checkpoints — Gross Profit, EBITDA — and a closing
-total. New in 1.2: style templates, model format, axes, legend and on-object
-formatting. Free up to twelve drivers; Pro adds every driver, a data table and
+total. New in 1.3: report theme and six collection styles, an Accessibility card,
+and a chart that fits small tiles without overlapping labels. Free up to twelve drivers; Pro adds every driver, a data table and
 IBCS mode.
 
 
@@ -120,11 +126,11 @@ IBCS mode.
 FIVE ALTERNATIVE TITLES
 --------------------------------------------------------------------------------
 
-1. Build a real P&L bridge in Power BI — Waterfall Advanced 1.2
+1. Build a real P&L bridge in Power BI — Waterfall Advanced 1.3
 2. Power BI's waterfall can't do subtotals. This one can.
 3. EBITDA bridge in Power BI, with checkpoints and a data table
 4. Waterfall Advanced for Power BI — totals, subtotals and drivers
-5. Five looks for your P&L bridge in Power BI — Waterfall Advanced 1.2
+5. Seven looks for your P&L bridge in Power BI — Waterfall Advanced 1.3
 
 
 --------------------------------------------------------------------------------

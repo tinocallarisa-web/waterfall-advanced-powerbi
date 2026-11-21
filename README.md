@@ -1,6 +1,6 @@
 # Waterfall Advanced — custom visual de Power BI
 
-**de [TCViz](https://tcviz.com)** · versión **1.2.0.0**
+**de [TCViz](https://tcviz.com)** · versión **1.3.0.0**
 
 Gráfico de cascada para puentes financieros: total inicial, drivers, subtotales de control
 (Margen bruto, EBITDA) y total final. Cada fila se marca como `total`, `subtotal` o `delta`
@@ -27,14 +27,20 @@ y el visual dibuja el puente.
 
 - **Free**: puente completo con hasta 12 drivers (el resto, los menores, en "Others"; el
   puente sigue cuadrando y una nota dice cuántos se agruparon), subtotales, objetivo,
-  tarjetas resumen, marca de anomalías, conectores, orden por impacto, paleta para
-  daltónicos, rayado de bajadas, fx en el color de subida, vertical/horizontal.
-  Nuevo en 1.2: 5 plantillas (Classic, Modern, Soft, One colour con color base, Dark
-  background), formato del modelo (incluidas cadenas dinámicas), ejes, leyenda,
-  formato sobre el objeto, barra de consejos, pantalla de inicio y 12 idiomas.
+  tarjetas resumen, marca "!" de cambios inusuales, conectores, orden por impacto, paleta
+  para daltónicos, rayado de bajadas, fx en el color de subida, vertical/horizontal,
+  formato del modelo (incluidas cadenas dinámicas), ejes, leyenda, formato sobre el
+  objeto, barra de consejos, pantalla de inicio y 12 idiomas.
+  Nuevo en 1.3: Report theme (por defecto) y los seis estilos de la colección (Boardroom,
+  Ledger, Editorial, Signal, Aurora, Terrace); tarjeta Accesibilidad (alto contraste
+  automático o siempre, color y grosor del foco, tamaño mínimo de texto); interruptor del
+  "!"; tarjetas resumen que se ocultan si el puente no es una comparación; eje desde 0;
+  todas las barras caben sin scroll, etiquetas sin solapes y texto que encoge en visuales
+  pequeños (hasta el 60 %, nunca por debajo de 8 px). Las plantillas de la 1.2 ya no se
+  ofrecen, pero los informes que las usan se ven igual.
 - **Pro**: todos los drivers sin agrupar, tabla de datos, modo IBCS y densidad de
   etiquetas (ángulo, truncado, ocultar las que no caben).
-- **Vista previa Pro** (1.2): sin licencia y solo editando, lo Pro que se activa se dibuja
+- **Vista previa Pro** (desde 1.2): sin licencia y solo editando, lo Pro que se activa se dibuja
   con marca de agua "Pro preview"; en lectura se ve el gráfico gratuito, y donde no se lee
   la licencia (Publish to Web, embed, exportación) el resultado gratuito sin marca. La
   agrupación de más de 12 drivers no se previsualiza.
