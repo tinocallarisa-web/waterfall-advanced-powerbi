@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Support — Waterfall Advanced | TCViz</title>
-  <meta name="description" content="Waterfall Advanced for Power BI: P&amp;L and variance bridges with totals, subtotals and drivers. Field wells, Free and Pro, Pro preview, style templates, model format, axes, legend, on-object formatting, troubleshooting and FAQ." />
+  <meta name="description" content="Waterfall Advanced for Power BI: P&amp;L and variance bridges with totals, subtotals and drivers. Field wells, Free and Pro, Pro preview, report theme and collection styles, accessibility, small visuals, model format, axes, legend, on-object formatting, tips and hints, troubleshooting and FAQ." />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #333; line-height: 1.7; }
     h1   { color: #0078D4; margin-bottom: 4px; }
@@ -37,17 +37,19 @@
   <h1>Support — Waterfall Advanced</h1>
   <p><strong>Publisher:</strong> TCViz &nbsp;|&nbsp;
      <strong>Email:</strong> <a href="mailto:support@tcviz.com">support@tcviz.com</a> &nbsp;|&nbsp;
-     <strong>Version:</strong> 1.2.0.0 &nbsp;|&nbsp;
+     <strong>Version:</strong> 1.3.0.0 &nbsp;|&nbsp;
      <strong>Price:</strong> free, with an optional Pro plan &nbsp;|&nbsp;
-     <span class="muted">docs updated 22 Oct 2026</span></p>
+     <span class="muted">docs updated 21 Nov 2026</span></p>
 
   <nav>
     <a href="#quick-start">Quick start</a>
     <a href="#fields">Fields</a>
     <a href="#bar-types">Bar types</a>
     <a href="#free-pro">Free and Pro</a>
-    <a href="#templates">Templates</a>
+    <a href="#templates">Styles</a>
+    <a href="#small">Small visuals</a>
     <a href="#format">Format pane</a>
+    <a href="#tips">Tips &amp; hints</a>
     <a href="#use-cases">Use cases</a>
     <a href="#troubleshooting">Troubleshooting</a>
     <a href="#faq">FAQ</a>
@@ -71,27 +73,29 @@
   </div>
   <p class="muted">Also on YouTube: <a href="https://www.youtube.com/watch?v=GOym3Akbiaw">https://www.youtube.com/watch?v=GOym3Akbiaw</a></p>
 
-  <h2 id="whats-new">What's new in 1.2.0.0</h2>
+  <h2 id="whats-new">What's new in 1.3.0.0</h2>
   <ul>
-    <li><strong>Pro preview</strong>: without a licence, while you edit, the data table, IBCS mode and the label density
-        settings you turn on are drawn working on your data under a “Pro preview” watermark. See <a href="#pro-preview">Pro preview</a>.</li>
-    <li><strong>Five style templates</strong>: Classic (the 1.1 look, and the default), Modern, Soft, One colour (with a base
-        colour you choose) and Dark background.</li>
-    <li><strong>Model format</strong>: values, labels, tooltips and the axis can use the measure's own format string, dynamic
-        format strings included, in the report's language. The custom format stays the default.</li>
-    <li><strong>Value axis</strong> (show, gridlines, font size, colour, title) and a <strong>category axis</strong> title.</li>
-    <li><strong>Legend</strong>: show or hide, top or bottom, font, size and colour — in the Legend group of the Colors card.</li>
-    <li><strong>On-object formatting</strong>: bars, value labels, category labels, value axis, legend, summary cards and data table.</li>
-    <li>Value labels and the target line are drawn <strong>above the bars, with a halo</strong>, so a neighbouring bar no longer covers them.</li>
-    <li><strong>Setup tips</strong> while editing (templates and “Try Pro”), a <strong>start screen</strong> with the steps,
-        <strong>12 languages</strong> and a new icon.</li>
-    <li>In small tiles the summary cards and the legend hide themselves instead of squeezing the chart.</li>
-    <li>Fixed: the chart now reports exactly one rendering start and one finish to Power BI per update.</li>
-    <li>Fixed: a fixed Increase colour saved by earlier versions could paint <em>every</em> bar. Choosing a template now clears it.
-        See the <a href="#faq">FAQ</a>.</li>
+    <li><strong>Report theme</strong> is the new default look: increases and decreases take the good/bad colours of your
+        report theme, totals its first data colour, labels and axis its text colours. See <a href="#templates">Styles</a>.</li>
+    <li><strong>Six styles of the TCViz collection</strong> — Boardroom, Ledger, Editorial, Signal, Aurora and Terrace — the same
+        as in the other TCViz visuals, so a page reads as one report. All free.</li>
+    <li><strong>Accessibility</strong> card: high contrast (automatic or always on), keyboard focus colour and width, and a
+        minimum text size. See <a href="#languages">Accessibility</a>.</li>
+    <li><strong>Flag unusual changes (!)</strong>: the “!” marker can now be turned off in the Chart card (on by default).</li>
+    <li><strong>Summary cards hide when the bridge is not a comparison</strong> — for example a P&amp;L from revenue to EBITDA,
+        where a variance % between the first and last bar means nothing. Turn it off to always show them.</li>
+    <li><strong>Value axis from zero</strong> when every running total and total is zero or above.</li>
+    <li><strong>Every bar fits the visual</strong> without a scroll bar, <strong>value labels never overlap</strong>, and in a
+        small visual <strong>all the text shrinks with it</strong>. See <a href="#small">Small and crowded visuals</a>.</li>
+    <li>Round value axis ticks, category names shortened with “…” when they do not fit, and a data table that drops columns
+        before cutting anything.</li>
+    <li>Fixed: tilted category labels with no character limit showed a single letter (“V…”); labels in Ledger and Editorial
+        (Georgia font) could run into each other.</li>
+    <li>High contrast now also covers category labels, the summary cards, the data table, gridlines and the “!” marker.</li>
   </ul>
-  <p>Reports made with earlier versions keep their look: Classic is the default template and Custom stays the default
-     number format. Full details in the <a href="changelog.html">changelog</a>.</p>
+  <p>Reports made with earlier versions keep working: the 1.2 templates (Modern, Soft, One colour, Dark background) are no
+     longer offered, but reports that use them draw exactly as before. Reports saved with no template and no colours of
+     their own now follow the report theme. Full details in the <a href="changelog.html">changelog</a>.</p>
 
   <!-- QUICK START -->
   <h2 id="quick-start">Quick start</h2>
@@ -102,10 +106,11 @@
     <li>Optional: drag a column holding <code>total</code>, <code>subtotal</code> or <code>delta</code> into
         <strong>Bar type</strong> and set it to aggregate as <em>First</em>, not Sum.</li>
     <li>Optional: drag a numeric field into <strong>Order</strong> to fix the sequence of the bridge.</li>
-    <li>In the Format pane, <strong>Style template</strong> changes the look in one click.</li>
+    <li>In the Format pane, <strong>Style template</strong> changes the look in one click: Report theme or one of the six
+        collection styles.</li>
   </ol>
   <p>With no fields, the visual shows a start screen with these steps and links to this guide, the product page and the
-     video; the links open only when you click them. While you edit, a tips bar at the bottom offers the templates and
+     video; the links open only when you click them. While you edit, a tips bar at the bottom offers the styles and
      “Try Pro” buttons; hide it with ✕ (it comes back from Format → Style template → Show setup tips). It never shows in
      reading view.</p>
 
@@ -143,11 +148,12 @@
   <div class="tbl-wrap"><table>
     <tr><th>Feature</th><th>Free</th><th>Pro</th></tr>
     <tr><td>Totals, subtotals, drivers, connectors, vertical and horizontal, drill-down</td><td>Yes</td><td>Yes</td></tr>
-    <tr><td>Target line with label, summary cards, anomaly marker</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Target line with label, summary cards (with auto-hide), “!” marker for unusual changes</td><td>Yes</td><td>Yes</td></tr>
     <tr><td>Sort by impact, invert colours, colour-blind safe palette, hatched decreases</td><td>Yes</td><td>Yes</td></tr>
     <tr><td>fx conditional formatting on Increase color, Colour (DAX) well</td><td>Yes</td><td>Yes</td></tr>
-    <tr><td>Style templates, model format, value and category axes, legend, on-object formatting</td><td>Yes</td><td>Yes</td></tr>
-    <tr><td>Cross-filtering, bookmarks, keyboard, high contrast, 12 languages</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Report theme and the six collection styles, model format, value and category axes, legend, on-object formatting</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Accessibility card (high contrast, focus, minimum text size), keyboard, cross-filtering, bookmarks, 12 languages</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Bars that fit the width, labels without overlaps, text that shrinks in small visuals</td><td>Yes</td><td>Yes</td></tr>
     <tr><td><strong>Individual drivers</strong></td><td>12, the smallest of the rest grouped into “Others”</td><td>All</td></tr>
     <tr><td><strong>Data table</strong> — right or bottom, with running total and % of opening columns</td><td>—</td><td>Yes</td></tr>
     <tr><td><strong>IBCS mode</strong> — monochrome notation</td><td>—</td><td>Yes</td></tr>
@@ -171,18 +177,54 @@
   <p>The setting you turned on is kept. Once the licence is active, the feature works everywhere and the watermark goes.</p>
 
   <!-- TEMPLATES -->
-  <h2 id="templates">Style templates</h2>
+  <h2 id="templates">Styles: Report theme and the TCViz collection</h2>
+  <p>Format → <strong>Style template</strong> → Template offers seven looks, all free:</p>
   <div class="tbl-wrap"><table>
-    <tr><th>Template</th><th>Look</th></tr>
-    <tr><td>Classic</td><td>The look of 1.1: green increases, red decreases, blue totals. The default.</td></tr>
-    <tr><td>Modern</td><td>Deeper green, red and blue, grey labels; total and subtotal labels take their bar colour.</td></tr>
-    <tr><td>Soft</td><td>Pale green, pink and blue, with dark value labels.</td></tr>
-    <tr><td>One colour</td><td>Built from a <strong>Base colour</strong> you choose: totals take it as is, increases a lighter shade, decreases a darker one.</td></tr>
-    <tr><td>Dark background</td><td>For reports with a dark background: brighter bars, light labels, dark summary cards and data table.</td></tr>
+    <tr><th>Style</th><th>Look</th></tr>
+    <tr><td>Report theme</td><td>The default. Increases and decreases take the good/bad sentiment colours of your report theme,
+        totals its first data colour, labels and axis its text colours. Where the theme gives no colour, the green, red and
+        blue of earlier versions are kept.</td></tr>
+    <tr><td>Boardroom</td><td>Dark navy background, light text, green and coral bars, gold totals.</td></tr>
+    <tr><td>Ledger</td><td>Warm paper background, Georgia font, dark green and dark red bars.</td></tr>
+    <tr><td>Editorial</td><td>White, Georgia font, black increases and a red accent for decreases.</td></tr>
+    <tr><td>Signal</td><td>White, sober green and red, dark totals.</td></tr>
+    <tr><td>Aurora</td><td>Dark gradient background (indigo to teal), mint and pink bars, light text.</td></tr>
+    <tr><td>Terrace</td><td>Warm cream background, olive and brick bars.</td></tr>
   </table></div>
-  <p>A template fills in only what you have not changed yourself. When you <em>pick</em> a template, the settings it defines
-     are reset so it looks as designed; anything else you changed stays. The colour-blind safe palette and IBCS mode, when on,
-     take precedence over the template colours.</p>
+  <p>The six collection styles are the same as in the other TCViz visuals, so a page that mixes several of them reads as one
+     report. Each one sets the increase, decrease and total colours, the text, the axes, the summary cards, the data table and
+     the visual's background.</p>
+  <p>A style fills in only what you have not changed yourself: a colour you set still wins. When you <em>pick</em> a style, the
+     settings it defines are reset so it looks as designed (the fx rule on Increase color included); anything else you changed
+     stays. The colour-blind safe palette and IBCS mode, when on, take precedence over the style colours, and high contrast
+     takes precedence over everything.</p>
+  <p class="muted">Reports made with the 1.2 templates (Modern, Soft, One colour, Dark background) keep drawing exactly as
+     before; those templates are just no longer offered for new choices.</p>
+
+  <!-- SMALL -->
+  <h2 id="small">Small and crowded visuals</h2>
+  <p>A waterfall on a dashboard tile has little room. Version 1.3 makes the chart fit rather than scroll or overlap:</p>
+  <ul>
+    <li><strong>Every bar fits the width.</strong> The bars and the gaps between them narrow as needed. A scroll bar appears only
+        when even 8-pixel bars would not fit; it is thin and takes the colours of the style.</li>
+    <li><strong>Text shrinks with the visual.</strong> Below roughly 760 × 440 px, value and category labels, axes, legend, summary
+        cards and data table get smaller with the visual, down to 60 % of the size you chose, never below 8 px and never below
+        the <em>Minimum text size</em> of the Accessibility card. Above that size your settings are used as they are.</li>
+    <li><strong>Value labels never overlap.</strong> They are placed in order of importance — totals and subtotals first, then the
+        targets, then the changes from largest to smallest — above, inside or below their bar. A figure first shrinks to fit the
+        width of its bar (down to 8 px); if it still finds no free place, it is left out rather than drawn over another. Its
+        figure is still in the tooltip and in the data table.</li>
+    <li><strong>The target label looks for a free place</strong> — above, below or beside its line — and is shortened to the figure
+        alone if needed. The line is always drawn.</li>
+    <li><strong>Category names</strong> that do not fit under their bar are shortened with “…”; when not even a few letters fit,
+        one name in every few is shown. With a tilted angle <span class="badge pro">Pro</span>, one label in every few is drawn
+        when tilted labels would touch. The full name is always in the tooltip.</li>
+    <li><strong>The data table</strong> <span class="badge pro">Pro</span> drops the “% of opening” column first, then the running
+        total, and reduces its font before it cuts anything.</li>
+    <li>In very small tiles (under about 280 × 220 px) the summary cards hide, and in very short ones the legend.</li>
+  </ul>
+  <p>All this is free. Widths are measured with the real font of the style, so Ledger and Editorial (Georgia) lay out
+     correctly too.</p>
 
   <!-- ON-OBJECT -->
   <h2 id="on-object">On-object formatting</h2>
@@ -193,10 +235,12 @@
   <!-- FORMAT -->
   <h2 id="format">Format pane reference</h2>
   <h3>Style template</h3>
-  <p>Template (Classic, Modern, Soft, One colour, Dark background) · Base colour (used by One colour) · Show setup tips.</p>
+  <p>Template (Report theme, Boardroom, Ledger, Editorial, Signal, Aurora, Terrace) · Show setup tips. (Base colour appears only
+     in reports that still use the 1.2 One colour template.)</p>
   <h3>Chart</h3>
   <p>Orientation (Vertical, Horizontal) · Connector lines · Show subtotals · Show target · Target label · Show target value ·
-     Summary cards · Sort by impact · Invert increase/decrease colors · Max drivers shown (0 = no limit) · “Others” bar label.</p>
+     Summary cards · Flag unusual changes (!) · Sort by impact · Invert increase/decrease colors · Max drivers shown (0 = no limit) ·
+     “Others” bar label.</p>
   <h3>Colors</h3>
   <p><em>Colors group:</em> Colour-blind safe palette · Hatch decreases · Increase color (with fx) · Decrease color ·
      Total / subtotal color · Target line color.<br />
@@ -214,13 +258,16 @@
   <p>Number format (Custom, Model format; Custom is the default) · Currency symbol (None, €, $, £, ¥) · Symbol position ·
      Scale (Auto, None, Thousands, Millions) · Decimals · Thousands separator. The custom settings apply when Number format is Custom.</p>
   <h3>Summary Cards</h3>
-  <p>Show summary cards · Caption font size · Value font size · Use the report theme text colour · Custom text colour ·
-     Use the report theme background · Custom background.</p>
+  <p>Show summary cards · Hide when the bridge is not a comparison (on by default) · Caption font size · Value font size ·
+     Use the report theme text colour · Custom text colour · Use the report theme background · Custom background.</p>
   <h3>Data Table <span class="badge pro">Pro</span></h3>
   <p>Show data table · Position (Right, Bottom) · Running total column · % of opening column · Use the report theme background ·
      Custom background · Separator line · Font size · Width / height %.</p>
   <h3>IBCS <span class="badge pro">Pro</span></h3>
   <p>IBCS mode: monochrome notation with the emphasis on the deviation.</p>
+  <h3>Accessibility</h3>
+  <p>High contrast (Automatic — follows the Windows setting —, On — black on white) · Focus color · Focus width (1–6 px) ·
+     Minimum text size (6–24 px, default 6; applies to the chart, the summary cards and the data table).</p>
 
   <h2 id="interaction">Cross-filtering, bookmarks and tooltips</h2>
   <ul>
@@ -233,17 +280,48 @@
   </ul>
 
   <h2 id="languages">Languages, number formats and accessibility</h2>
+  <p>The <strong>Accessibility</strong> card (free) gathers the settings below; the colour options stay in the Colors card.</p>
   <ul>
     <li>Format pane and texts in English, Spanish, Portuguese (Brazil and Portugal), French, German, Italian, Dutch,
         Polish, Japanese, Chinese (Simplified) and Korean, following the language of Power BI.</li>
     <li><strong>Model format</strong> uses the measure's format string, dynamic format strings included, in the report's
         language. <strong>Custom</strong> uses the currency symbol, scale, decimals and separator you set.</li>
-    <li><strong>Keyboard</strong>: <kbd>Tab</kbd> moves through the bars, the focused bar gets an outline, <kbd>Enter</kbd> or
-        <kbd>Space</kbd> selects it and <kbd>Ctrl</kbd> adds it to the selection.</li>
+    <li><strong>Keyboard</strong>: <kbd>Tab</kbd> moves through the bars, the focused bar gets an outline (its colour and width
+        are set in Accessibility → Focus color / Focus width), <kbd>Enter</kbd> or <kbd>Space</kbd> selects it and
+        <kbd>Ctrl</kbd> adds it to the selection.</li>
     <li><strong>Screen readers</strong>: each bar carries its category and formatted value.</li>
     <li><strong>Colour</strong>: the colour-blind safe palette and hatched decreases are free and can be combined, so a rise and
         a fall differ by pattern as well as hue.</li>
-    <li><strong>High contrast</strong>: the bars and texts take the colours of the Windows high-contrast theme.</li>
+    <li><strong>High contrast</strong>: <em>Automatic</em> follows the Windows high-contrast theme; <em>On</em> draws the chart
+        black on white whatever the system setting, for printing or projectors. It covers bars, value and category labels,
+        axes, gridlines, the “!” marker, the summary cards and the data table.</li>
+    <li><strong>Minimum text size</strong>: no text of the chart, the cards or the table is drawn smaller than this, even when
+        the visual is small.</li>
+  </ul>
+
+  <!-- TIPS -->
+  <h2 id="tips">Tips &amp; hints</h2>
+  <ul>
+    <li><strong>Set Bar type to First.</strong> It is the most common mistake: as Sum, nothing arrives and every bar becomes a driver.</li>
+    <li><strong>Choosing a style.</strong> Start with <em>Report theme</em> if the page already has a theme you like: the bridge
+        picks up its good/bad colours. Use a collection style when the page mixes several TCViz visuals, and pick the same
+        one in all of them. Boardroom and Aurora bring their own dark background; Ledger and Editorial switch to Georgia.</li>
+    <li><strong>Pick the style first, then fine-tune.</strong> Picking a style resets the colours it defines, including an fx rule
+        on Increase color. Colours you change afterwards stay yours.</li>
+    <li><strong>Small tiles.</strong> Let the visual shrink the text for you instead of lowering every font size by hand: your sizes
+        come back as soon as the tile is larger. If a figure disappears, it is in the tooltip; with Pro, the data table keeps every figure.</li>
+    <li><strong>Long names.</strong> Horizontal orientation is the free answer. In vertical, with Pro, −45° usually reads best;
+        −90° fits the most bars. Leave <em>Truncate category labels at</em> on 0 and the visual keeps as much of each name as fits.</li>
+    <li><strong>Summary cards.</strong> They make sense when the bridge compares the same figure at two moments (sales 2025 →
+        sales 2026). For a P&amp;L walk from revenue to EBITDA they hide on their own; turn off <em>Hide when the bridge is not
+        a comparison</em> only if you really want them.</li>
+    <li><strong>The “!” marker</strong> flags a change more than two standard deviations from the average change. If your bridge
+        has one large driver by design, turn off <em>Flag unusual changes (!)</em>.</li>
+    <li><strong>Accessibility.</strong> Set <em>Minimum text size</em> to 9 or 10 if the report is read on a projector or by
+        people with low vision; combine the colour-blind safe palette with hatched decreases so rises and falls differ by pattern.</li>
+    <li><strong>Number format from the model.</strong> If your measure already has a format string — currency, thousands,
+        a dynamic format per country — choose Number format → <em>Model format</em> and the chart uses it everywhere: labels,
+        tooltips, axis, cards and table.</li>
   </ul>
 
   <!-- USE CASES -->
@@ -286,8 +364,8 @@
   </details>
   <details>
     <summary>Every bar has the same colour, and changing Decrease or Total colour does nothing</summary>
-    <p>A fixed Increase colour saved by an earlier version was stored bar by bar and paints every bar. Pick any template in
-       Format → Style template (Classic keeps the original look): this clears the old value.</p>
+    <p>A fixed Increase colour saved by an earlier version was stored bar by bar and paints every bar. Pick any style in
+       Format → Style template (Report theme goes back to your theme's colours): this clears the old value.</p>
   </details>
   <details>
     <summary>I see “Pro preview” on the chart</summary>
@@ -297,7 +375,25 @@
   <details>
     <summary>The summary cards or the legend are missing</summary>
     <p>In small tiles they hide themselves so the chart keeps its space. Make the visual larger. For the cards, check that both
-       <em>Chart → Summary cards</em> and <em>Summary Cards → Show summary cards</em> are on.</p>
+       <em>Chart → Summary cards</em> and <em>Summary Cards → Show summary cards</em> are on. Since 1.3 the cards also hide when
+       the bridge is not a comparison — fewer than two totals, an opening figure of zero, or every change going the same way.
+       Turn off <em>Summary Cards → Hide when the bridge is not a comparison</em> to always show them.</p>
+  </details>
+  <details>
+    <summary>A value label is missing</summary>
+    <p>Since 1.3 labels never overlap: when a figure finds no free place above, inside or below its bar, even at a smaller
+       size, it is left out. Totals, subtotals and targets keep their labels first. The figure is in the tooltip, and in the
+       data table with Pro. Make the visual wider, use horizontal orientation, or lower the decimals.</p>
+  </details>
+  <details>
+    <summary>The text looks smaller than the size I set</summary>
+    <p>In a small visual all the text shrinks with it (to 60 % at most, never below 8 px). Make the visual larger and your sizes
+       come back, or raise <em>Accessibility → Minimum text size</em> to set a floor.</p>
+  </details>
+  <details>
+    <summary>Some category names are missing or end in “…”</summary>
+    <p>They do not fit under their bar, so they are shortened or only one in every few is shown. The full name is in the
+       tooltip. Switch to horizontal, lower the category font size, or, with Pro, tilt them.</p>
   </details>
   <details>
     <summary>The target line only appears on some bars</summary>
@@ -313,14 +409,14 @@
   <input id="faq-search" type="search" placeholder="Search the FAQ…" aria-label="Search the FAQ" />
   <div id="faq-list">
   <details>
-    <summary>Does choosing a style template keep my fx rule on the Increase colour?</summary>
-    <p>No. A template sets the bar colours, so choosing one also clears the fx rule on <em>Increase color</em> (and a fixed
-       colour that earlier versions stored bar by bar). Choose the template first, then add the rule again if you need it.</p>
+    <summary>Does choosing a style keep my fx rule on the Increase colour?</summary>
+    <p>No. A style sets the bar colours, so choosing one also clears the fx rule on <em>Increase color</em> (and a fixed
+       colour that earlier versions stored bar by bar). Choose the style first, then add the rule again if you need it.</p>
   </details>
   <details>
     <summary>Is it free? What does Pro add?</summary>
     <p>The bridge is complete without a licence, with up to 12 individual drivers, subtotals, target line, summary cards,
-       templates, axes, legend and languages. Pro shows every driver individually and adds the data table, IBCS mode and
+       styles, accessibility, axes, legend and languages. Pro shows every driver individually and adds the data table, IBCS mode and
        the label density settings.</p>
   </details>
   <details>
@@ -390,15 +486,20 @@
     <p>Yes. If a DAX dynamic format string changes the format per row (for example a currency per country), each bar uses its own.</p>
   </details>
   <details>
-    <summary>What do the style templates change, and how do I set the base colour?</summary>
-    <p>A template sets the bar, label, axis and legend colours (Dark background also the cards and table). Pick
-       <em>One colour</em> and set <strong>Base colour</strong> in the same card: totals take it, increases a lighter shade,
-       decreases a darker one. Anything you change afterwards stays yours.</p>
+    <summary>What do the styles change?</summary>
+    <p><em>Report theme</em> takes the increase, decrease and total colours, labels and axis from your report theme. The six
+       collection styles also set the summary cards, the data table and the visual's background, and Ledger and Editorial use
+       Georgia. Anything you change afterwards stays yours. See <a href="#templates">Styles</a>.</p>
   </details>
   <details>
-    <summary>My report has a dark background. Which template should I use?</summary>
-    <p><em>Dark background</em>: brighter bars, light labels and halos, and dark summary cards and data table so they do not
-       show as white boxes.</p>
+    <summary>My report has a dark background. Which style should I use?</summary>
+    <p><em>Boardroom</em> or <em>Aurora</em>: both paint their own dark background, with light labels and dark summary cards
+       and data table, so nothing shows as a white box. Reports that use the 1.2 <em>Dark background</em> template keep it.</p>
+  </details>
+  <details>
+    <summary>Where did Classic, Modern, Soft, One colour and Dark background go?</summary>
+    <p>They are no longer offered, but a report that uses one keeps drawing exactly as before. <em>Report theme</em> replaced
+       Classic as the default: where your theme gives no colour, it keeps Classic's green, red and blue.</p>
   </details>
   <details>
     <summary>Can I colour bars with conditional formatting (fx)?</summary>
@@ -408,8 +509,8 @@
   <details>
     <summary>Every bar took my Increase colour. Why, and how do I fix it?</summary>
     <p>Before 1.2 a fixed Increase colour was stored bar by bar, through the same route the fx rule uses, so it covered totals and
-       decreases too. In 1.2 fixed colours are stored for the whole visual. To clean an older report, pick a template
-       (Classic keeps the original look): choosing a template clears the old per-bar value.</p>
+       decreases too. Since 1.2 fixed colours are stored for the whole visual. To clean an older report, pick a style
+       (Report theme goes back to your theme's colours): choosing a style clears the old per-bar value.</p>
   </details>
   <details>
     <summary>How do I format the axes?</summary>
@@ -428,11 +529,14 @@
   </details>
   <details>
     <summary>What do the summary cards show?</summary>
-    <p>The initial and final figures, the variance %, the biggest gain and the biggest loss. They hide automatically in small tiles.</p>
+    <p>The initial and final figures, the variance %, the biggest gain and the biggest loss. They hide automatically in small
+       tiles and, since 1.3, when the bridge is not a comparison of the same figure at two moments (option <em>Hide when the
+       bridge is not a comparison</em>, on by default).</p>
   </details>
   <details>
     <summary>What is the red “!” on some bars?</summary>
-    <p>The anomaly marker: a driver whose value is more than two standard deviations from the mean of the drivers.</p>
+    <p>The marker for unusual changes: a driver whose value is more than two standard deviations from the mean of the drivers.
+       Turn it off with Chart → <em>Flag unusual changes (!)</em>.</p>
   </details>
   <details>
     <summary>Can I tilt or shorten long category labels?</summary>
@@ -442,7 +546,7 @@
   <details>
     <summary>What is IBCS mode? <span class="badge pro">Pro</span></summary>
     <p>A monochrome notation: increases, decreases and totals in shades of grey, so the reader focuses on the deviation. It
-       takes precedence over the template and palette colours.</p>
+       takes precedence over the style and palette colours.</p>
   </details>
   <details>
     <summary>What does the data table show? <span class="badge pro">Pro</span></summary>
@@ -475,13 +579,13 @@
     <p>Questions, licences, bugs or ideas: write to <a href="mailto:support@tcviz.com">support@tcviz.com</a>. A person answers —
        the developer of the visual, not a bot.</p>
     <p>Bug reports are also welcome on <a href="https://github.com/tinocallarisa-web/waterfall-advanced-powerbi/issues">GitHub Issues</a>.
-       Please include the visual version (1.2.0.0), Power BI Desktop or service, and a screenshot.</p>
+       Please include the visual version (1.3.0.0), Power BI Desktop or service, and a screenshot.</p>
     <p>Product page: <a href="https://tcviz.com/product/waterfall-pro/">tcviz.com/product/waterfall-pro</a> ·
        Version history: <a href="changelog.html">Changelog</a>.</p>
   </div>
 
   <footer>
-    Waterfall Advanced 1.2.0.0 by TCViz &nbsp;|&nbsp;
+    Waterfall Advanced 1.3.0.0 by TCViz &nbsp;|&nbsp;
     <a href="https://tcviz.com/product/waterfall-pro/">tcviz.com</a> &nbsp;|&nbsp;
     <a href="privacy.html">Privacy Policy</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms of Use</a>
